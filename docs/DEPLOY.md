@@ -31,12 +31,20 @@ npx supabase db push --include-seed
 - `link` asks for the database password from step 1.
 - `db push --include-seed` creates every table and security rule, then loads the 130-exercise library. Answer `Y` when it lists the migrations.
 
-**After every update that adds a migration** (files in `supabase/migrations/`), run this from the project folder **before** or right after Vercel redeploys, otherwise new pages error until the database catches up:
+**Database updates after this are automatic.** A GitHub Action (`.github/workflows/supabase-migrations.yml`) applies new migrations to this project whenever they're pushed. It needs three secrets, added once, all from a browser:
 
-```
-git pull
-npx supabase db push
-```
+1. **Supabase access token:** <https://supabase.com/dashboard/account/tokens> → **Generate new token** (name it `github-actions`) → copy it.
+2. **GitHub:** open the `baseball-tracker` repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**. Add:
+
+   | Name | Value |
+   | --- | --- |
+   | `SUPABASE_ACCESS_TOKEN` | the token from step 1 |
+   | `SUPABASE_PROJECT_ID` | Project ID from step 1.3 above |
+   | `SUPABASE_DB_PASSWORD` | the database password from step 1.2 (forgot it? Supabase → **Project Settings → Database → Reset database password**) |
+
+3. **Run it once now:** GitHub → **Actions** tab → **Deploy database migrations** → **Run workflow**. A green check means the database is up to date. After that it runs by itself.
+
+If a run fails, open it on the Actions tab; the log says which step failed. To run it by hand from a PC instead, use `git pull` then `npx supabase db push`.
 
 Leave off `--include-seed` from now on, although re-running it is harmless.
 
