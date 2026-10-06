@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
 export default async function DashboardPage() {
-  const { supabase, user, org } = await requireActiveOrg();
+  const { supabase, user, org, membership } = await requireActiveOrg();
+  // Players get the phone-first player app.
+  if (membership.role === "player") redirect("/player");
 
   const [exercises, members, programs] = await Promise.all([
     supabase.from("exercises").select("id", { count: "exact", head: true }),

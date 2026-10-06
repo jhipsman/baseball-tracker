@@ -15,6 +15,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "Diamond Program", template: "%s · Diamond Program" },
   description: "Build, assign, and track baseball training programs.",
+  appleWebApp: { capable: true, title: "Diamond", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {

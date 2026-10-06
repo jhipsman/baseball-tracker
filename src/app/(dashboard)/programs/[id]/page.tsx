@@ -61,6 +61,23 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
   ]);
 
   const names = new Map((exercises ?? []).map((e) => [e.id, e.name]));
+
+  // Workout logging progress per assignment.
+  const assignmentIds = (assignments ?? []).map((a) => a.id);
+  const { data: logs } = assignmentIds.length
+    ? await supabase
+        .from("workout_logs")
+        .select("program_assignment_id, status, date_completed")
+        .in("program_assignment_id", assignmentIds)
+    : { data: [] };
+  const totalDays = program.program_weeks.reduce((n, w) => n + w.program_days.length, 0);
+  const progress = new Map<string, { done: number; last: string | null }>();
+  for (const l of logs ?? []) {
+    const p = progress.get(l.program_assignment_id) ?? { done: 0, last: null };
+    if (l.status !== "skipped") p.done += 1;
+    if (!p.last || l.date_completed > p.last) p.last = l.date_completed;
+    progress.set(l.program_assignment_id, p);
+  }
   const activeIds = new Set(
     (assignments ?? []).filter((a) => a.status === "active").map((a) => a.player_id),
   );
@@ -233,6 +250,10 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
                       {a.player.full_name || a.player.email}
                     </span>
                     <span className="text-zinc-500">from {a.start_date}</span>
+                    <span className="text-zinc-500 tabular-nums">
+                      {progress.get(a.id)?.done ?? 0}/{totalDays} logged
+                      {progress.get(a.id)?.last ? ` · last ${progress.get(a.id)!.last}` : ""}
+                    </span>
                     <span
                       className={cn(
                         "rounded px-1.5 py-0.5 text-xs font-medium",

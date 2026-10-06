@@ -3,6 +3,61 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      exercise_logs: {
+        Row: {
+          exercise_id: string;
+          id: string;
+          notes: string | null;
+          program_exercise_id: string | null;
+          sets_completed: NonNullable<Json>;
+          sort_order: number;
+          video_url: string | null;
+          workout_log_id: string;
+        };
+        Insert: {
+          exercise_id: string;
+          id?: string;
+          notes?: string | null;
+          program_exercise_id?: string | null;
+          sets_completed?: NonNullable<Json>;
+          sort_order?: number;
+          video_url?: string | null;
+          workout_log_id: string;
+        };
+        Update: {
+          exercise_id?: string;
+          id?: string;
+          notes?: string | null;
+          program_exercise_id?: string | null;
+          sets_completed?: NonNullable<Json>;
+          sort_order?: number;
+          video_url?: string | null;
+          workout_log_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "exercise_logs_exercise_id_fkey";
+            columns: ["exercise_id"];
+            isOneToOne: false;
+            referencedRelation: "exercises";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "exercise_logs_program_exercise_id_fkey";
+            columns: ["program_exercise_id"];
+            isOneToOne: false;
+            referencedRelation: "program_exercises";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "exercise_logs_workout_log_id_fkey";
+            columns: ["workout_log_id"];
+            isOneToOne: false;
+            referencedRelation: "workout_logs";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       exercises: {
         Row: {
           category: Database["public"]["Enums"]["exercise_category"];
@@ -479,6 +534,73 @@ export type Database = {
           },
         ];
       };
+      workout_logs: {
+        Row: {
+          created_at: string;
+          date_completed: string;
+          day_name: string | null;
+          duration_minutes: number | null;
+          id: string;
+          notes: string | null;
+          overall_rpe: number | null;
+          player_id: string;
+          program_assignment_id: string;
+          program_day_id: string | null;
+          status: Database["public"]["Enums"]["workout_status"];
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          date_completed?: string;
+          day_name?: string | null;
+          duration_minutes?: number | null;
+          id?: string;
+          notes?: string | null;
+          overall_rpe?: number | null;
+          player_id: string;
+          program_assignment_id: string;
+          program_day_id?: string | null;
+          status: Database["public"]["Enums"]["workout_status"];
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          date_completed?: string;
+          day_name?: string | null;
+          duration_minutes?: number | null;
+          id?: string;
+          notes?: string | null;
+          overall_rpe?: number | null;
+          player_id?: string;
+          program_assignment_id?: string;
+          program_day_id?: string | null;
+          status?: Database["public"]["Enums"]["workout_status"];
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "workout_logs_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workout_logs_program_assignment_id_fkey";
+            columns: ["program_assignment_id"];
+            isOneToOne: false;
+            referencedRelation: "program_assignments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "workout_logs_program_day_id_fkey";
+            columns: ["program_day_id"];
+            isOneToOne: false;
+            referencedRelation: "program_days";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -529,6 +651,19 @@ export type Database = {
         }[];
       };
       save_program_structure: { Args: { p_program_id: string; p_weeks: Json }; Returns: string };
+      save_workout_log: {
+        Args: {
+          p_assignment_id: string;
+          p_date: string;
+          p_day_id: string;
+          p_duration_minutes: number;
+          p_exercises: Json;
+          p_notes: string;
+          p_overall_rpe: number;
+          p_status: Database["public"]["Enums"]["workout_status"];
+        };
+        Returns: string;
+      };
     };
     Enums: {
       assignment_status: "active" | "completed" | "paused";
@@ -551,6 +686,7 @@ export type Database = {
       season_phase: "off_season" | "pre_season" | "in_season" | "post_season";
       session_type:
         "strength" | "throwing" | "hitting" | "conditioning" | "recovery" | "practice" | "off";
+      workout_status: "completed" | "partial" | "skipped";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -690,6 +826,7 @@ export const Constants = {
         "practice",
         "off",
       ],
+      workout_status: ["completed", "partial", "skipped"],
     },
   },
 } as const;

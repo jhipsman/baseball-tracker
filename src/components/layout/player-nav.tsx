@@ -1,0 +1,68 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+const ITEMS = [
+  {
+    href: "/player",
+    label: "Today",
+    icon: "M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
+  },
+  {
+    href: "/player/history",
+    label: "History",
+    icon: "M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z",
+  },
+  {
+    href: "/player/profile",
+    label: "Profile",
+    icon: "M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM4 21a8 8 0 0 1 16 0",
+  },
+];
+
+export function PlayerNav() {
+  const pathname = usePathname();
+  return (
+    <nav
+      aria-label="Player"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+    >
+      <ul className="mx-auto flex max-w-md">
+        {ITEMS.map((item) => {
+          const active =
+            item.href === "/player"
+              ? pathname === "/player" || pathname.startsWith("/player/log")
+              : pathname.startsWith(item.href);
+          return (
+            <li key={item.href} className="flex-1">
+              <Link
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex h-16 flex-col items-center justify-center gap-0.5 text-xs font-medium",
+                  active ? "text-brand-700" : "text-zinc-500",
+                )}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={1.8}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden
+                >
+                  <path d={item.icon} />
+                </svg>
+                {item.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </nav>
+  );
+}

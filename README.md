@@ -29,6 +29,10 @@ Then browse to `http://<this-computer's-IP>:3000` from the other device. On Wind
 
 Common home/office address ranges are already allowed in `next.config.ts`. For anything else (e.g. a tunnel hostname), set `DEV_ALLOWED_ORIGINS=host1,host2` in `.env.local`.
 
+### Deploying (Vercel + hosted Supabase)
+
+Step-by-step guide: **[docs/DEPLOY.md](docs/DEPLOY.md)**.
+
 ### Using a hosted Supabase project
 
 ```bash
@@ -122,4 +126,20 @@ src/
 
 The state logic lives in `src/components/workout-builder/reducer.ts` and is covered by `reducer.test.ts`.
 
-See the project brief for the full roadmap. Phase 1 (foundation + workout builder) is complete.
+## Player app (Phase 2)
+
+Players land on `/player`, a phone-first app with bottom tabs:
+
+- **Today:** today's workout for each active program, the current week's days with done/partial/skipped status, and a nudge to catch up on a missed day.
+  - Weeks run in 7-day blocks from the assignment's start date.
+  - Days pinned to a weekday in the builder are scheduled on that weekday. Other days are done in order.
+  - "Today" uses the player's own time zone.
+- **Log a workout:** sets are prefilled from the prescription (reps) and from last time (weight), with a "Last time: 185×8, …" hint. Players tap ✓ per set and enter reps, weight and RPE, then add overall RPE, duration and notes. Finishing saves as *completed* or *partial*, or they can *Skip*. In-progress entries survive a page reload. Re-opening a logged day edits it.
+- **History** and **Profile** (name, team details, sign out).
+- **Install:** the app ships a web manifest and icons, so "Add to Home Screen" gives it an app icon.
+
+Coaches see each assignment's progress ("3/12 logged · last 2026-10-05") on the program page.
+
+Logs are stored in `workout_logs` and `exercise_logs` and saved atomically by `save_workout_log(...)`. Players can only write their own logs for days of programs assigned to them. Coaches can read logs in their org but not change them. Logs survive program edits, because a deleted day or exercise leaves the log intact.
+
+See the project brief for the full roadmap. Phases 1 and 2 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
