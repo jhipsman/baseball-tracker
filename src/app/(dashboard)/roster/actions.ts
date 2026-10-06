@@ -34,7 +34,7 @@ export async function inviteMember(_prev: FormState, formData: FormData): Promis
     return { error: error.message, values };
   }
 
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
   return { message: `Invitation created for ${email}. Copy the link below and send it to them.` };
 }
 
@@ -44,7 +44,7 @@ export async function revokeInvitation(formData: FormData) {
     .from("org_invitations")
     .delete()
     .eq("id", String(formData.get("id")));
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
 }
 
 export async function updateMember(formData: FormData) {
@@ -53,6 +53,7 @@ export async function updateMember(formData: FormData) {
   if (!isRole(role)) return;
 
   const position = String(formData.get("position") ?? "");
+  const status = String(formData.get("status") ?? "");
   const jersey = String(formData.get("jersey_number") ?? "").trim();
   const isPlayer = role === "player";
 
@@ -66,10 +67,11 @@ export async function updateMember(formData: FormData) {
           ? (position as Enums<"player_position">)
           : null,
       jersey_number: isPlayer && /^\d{1,2}$/.test(jersey) ? Number(jersey) : null,
+      ...(status === "active" || status === "injured" || status === "inactive" ? { status } : {}),
     })
     .eq("id", String(formData.get("id")))
     .eq("org_id", org.id);
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
 }
 
 export async function removeMember(formData: FormData) {
@@ -79,7 +81,7 @@ export async function removeMember(formData: FormData) {
     .delete()
     .eq("id", String(formData.get("id")))
     .eq("org_id", org.id);
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
 }
 
 export async function createGroup(_prev: FormState, formData: FormData): Promise<FormState> {
@@ -97,7 +99,7 @@ export async function createGroup(_prev: FormState, formData: FormData): Promise
     if (error.code === "23505") return { error: `There's already a group called "${name}".` };
     return { error: error.message };
   }
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
   return { message: `Created "${name}". Add players to it below.` };
 }
 
@@ -108,7 +110,7 @@ export async function deleteGroup(formData: FormData) {
     .delete()
     .eq("id", String(formData.get("id")))
     .eq("org_id", org.id);
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
 }
 
 /** Replace a group's members with the checked players. */
@@ -131,5 +133,5 @@ export async function setGroupMembers(formData: FormData) {
       .from("player_group_members")
       .insert(playerIds.map((profile_id) => ({ group_id: groupId, profile_id })));
   }
-  revalidatePath("/roster");
+  revalidatePath("/roster", "layout");
 }

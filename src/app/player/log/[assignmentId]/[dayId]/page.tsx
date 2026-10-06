@@ -65,6 +65,7 @@ export default async function LogWorkoutPage({
           .eq("player_id", user.id)
           .neq("status", "skipped")
           .order("date_completed", { ascending: false })
+          .order("created_at", { ascending: false })
           .limit(40)
       : Promise.resolve({ data: [] }),
   ]);

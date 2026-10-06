@@ -1,295 +1,238 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
-import { siteOrigin } from "@/lib/site";
-import { CopyButton } from "@/components/ui/copy-button";
-import { selectClass } from "@/components/ui/select";
-import { ORG_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
+import { playerToday } from "@/lib/player";
+import { addDays } from "@/lib/schedule";
+import { loadTeam } from "@/lib/team";
+import { complianceByPlayer, needsAttention, type Compliance } from "@/lib/compliance";
+import { latestByPlayer, loadAssessments } from "@/lib/assessments";
+import { formatMetric, METRIC_BY_KEY, ROSTER_METRICS } from "@/constants/metrics";
 import { cn } from "@/lib/utils";
-import { InviteForm } from "./invite-form";
-import { CreateGroupForm } from "./group-form";
-import {
-  deleteGroup,
-  removeMember,
-  revokeInvitation,
-  setGroupMembers,
-  updateMember,
-} from "./actions";
+import { RosterTabs } from "./tabs";
 
 export const metadata: Metadata = { title: "Roster" };
 
-export default async function RosterPage() {
-  const { supabase, org, membership, user, isStaff } = await requireActiveOrg();
-  const isAdmin = membership.role === "admin";
+export default async function RosterOverviewPage({ searchParams }: PageProps<"/roster">) {
+  const { supabase, org, isStaff } = await requireActiveOrg();
+  if (!isStaff) redirect("/roster/manage");
+  const { today } = await playerToday();
+  const params = await searchParams;
+  const groupId = typeof params.group === "string" ? params.group : "";
 
-  const [{ data: members, error }, invitations] = await Promise.all([
-    supabase
-      .from("org_memberships")
-      .select(
-        "id, role, status, position, jersey_number, profile_id, profile:profiles (full_name, email)",
-      )
-      .eq("org_id", org.id)
-      .order("role")
-      .order("created_at"),
-    isAdmin
-      ? supabase
-          .from("org_invitations")
-          .select("id, email, role, token, expires_at")
-          .eq("org_id", org.id)
-          .is("accepted_at", null)
-          .order("created_at", { ascending: false })
-      : Promise.resolve({ data: [] }),
+  const from28 = addDays(today, -27);
+  const from7 = addDays(today, -6);
+  const [team, assessments] = await Promise.all([
+    loadTeam(supabase, org.id, from28, today, today),
+    loadAssessments(supabase, org.id),
   ]);
-  if (error) throw error;
 
-  const { data: orgRow } = await supabase
-    .from("organizations")
-    .select("owner_id")
-    .eq("id", org.id)
-    .single();
-  const origin = await siteOrigin();
-  const { data: groups } = await supabase
-    .from("player_groups")
-    .select("id, name, player_group_members (profile_id)")
-    .eq("org_id", org.id)
-    .order("name");
-  const players = members.filter((m) => m.role === "player");
-  const nameOf = new Map(
-    members.map((m) => [m.profile_id, m.profile.full_name || m.profile.email]),
+  const group = team.groups.find((g) => g.id === groupId);
+  const players = group ? team.players.filter((p) => group.memberIds.includes(p.id)) : team.players;
+  const ids = new Set(players.map((p) => p.id));
+  const entries = team.entries.filter((e) => ids.has(e.playerId));
+
+  const c7 = complianceByPlayer(entries.filter((e) => e.date >= from7));
+  const c28 = complianceByPlayer(entries);
+  const latest = latestByPlayer(assessments);
+  const activePrograms = new Map<string, number>();
+  for (const a of team.assignments) {
+    if (a.status === "active" && ids.has(a.playerId)) {
+      activePrograms.set(a.playerId, (activePrograms.get(a.playerId) ?? 0) + 1);
+    }
+  }
+
+  const team7 = sum([...c7.values()]);
+  const attention = players.filter((p) => needsAttention(c7.get(p.id)));
+  const noProgram = players.filter((p) => !activePrograms.get(p.id));
+  // Needs-attention players first, then by name.
+  const rows = players.toSorted(
+    (a, b) =>
+      Number(needsAttention(c7.get(b.id))) - Number(needsAttention(c7.get(a.id))) ||
+      a.name.localeCompare(b.name),
   );
-  const pending = invitations.data ?? [];
 
   return (
-    <div className="max-w-5xl space-y-8">
+    <div className="max-w-7xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
         <p className="mt-1 text-sm text-zinc-600">
-          {members.length} member{members.length === 1 ? "" : "s"} in {org.name}
+          {players.length} player{players.length === 1 ? "" : "s"}
+          {group ? ` in ${group.name}` : ""}
         </p>
+        <RosterTabs active="overview" />
       </div>
 
-      {isAdmin ? (
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <h2 className="font-semibold">Invite someone</h2>
-          <p className="mt-1 mb-4 text-sm text-zinc-600">
-            They&apos;ll join once they sign in with this email and open the invite link. Pending
-            invitations also appear for them right after sign-up.
-          </p>
-          <InviteForm />
-
-          {pending.length > 0 ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-zinc-700">Pending invitations</h3>
-              <ul className="mt-2 divide-y divide-zinc-100">
-                {pending.map((inv) => {
-                  const expired = new Date(inv.expires_at) < new Date();
-                  return (
-                    <li key={inv.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                      <span className="min-w-0 flex-1 truncate">{inv.email}</span>
-                      <span className="text-zinc-500">{ROLE_LABELS[inv.role]}</span>
-                      {expired ? (
-                        <span className="text-xs font-medium text-red-600">Expired</span>
-                      ) : (
-                        <CopyButton value={`${origin}/invite/${inv.token}`} />
-                      )}
-                      <form action={revokeInvitation}>
-                        <input type="hidden" name="id" value={inv.id} />
-                        <button
-                          type="submit"
-                          className="text-xs font-semibold text-zinc-500 hover:text-red-600"
-                        >
-                          Revoke
-                        </button>
-                      </form>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : null}
-        </section>
+      {team.groups.length > 0 ? (
+        <div className="flex flex-wrap gap-2 text-sm">
+          {[{ id: "", name: "All players" }, ...team.groups].map((g) => (
+            <Link
+              key={g.id || "all"}
+              href={g.id ? `/roster?group=${g.id}` : "/roster"}
+              className={cn(
+                "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
+                g.id === groupId
+                  ? "bg-brand-700 text-white ring-brand-700"
+                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+              )}
+            >
+              {g.name}
+            </Link>
+          ))}
+        </div>
       ) : null}
 
-      {isStaff ? (
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <h2 className="font-semibold">Groups</h2>
-          <p className="mt-1 mb-4 text-sm text-zinc-600">
-            Save sets of players (Pitchers, JV…) to assign programs and filter the calendar in one
-            click.
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <p className="text-sm text-zinc-600">Team compliance, last 7 days</p>
+          <p className="mt-1 text-5xl font-semibold text-zinc-900">
+            {team7.rate == null ? "—" : `${Math.round(team7.rate * 100)}%`}
           </p>
-          <CreateGroupForm />
-          {groups && groups.length > 0 ? (
-            <ul className="mt-4 divide-y divide-zinc-100">
-              {groups.map((g) => {
-                const memberIds = new Set(g.player_group_members.map((m) => m.profile_id));
+          <p className="mt-1 text-xs text-zinc-500">
+            {team7.logged} of {team7.due} due workouts logged
+          </p>
+        </div>
+        <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <p className="text-sm text-zinc-600">Need attention</p>
+          <p className="mt-1 text-3xl font-semibold text-zinc-900">{attention.length}</p>
+          <p className="mt-1 truncate text-xs text-zinc-500">
+            {attention.length ? attention.map((p) => p.name).join(", ") : "Everyone is keeping up"}
+          </p>
+        </div>
+        <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <p className="text-sm text-zinc-600">No active program</p>
+          <p className="mt-1 text-3xl font-semibold text-zinc-900">{noProgram.length}</p>
+          <p className="mt-1 truncate text-xs text-zinc-500">
+            {noProgram.length ? noProgram.map((p) => p.name).join(", ") : "Everyone has a program"}
+          </p>
+        </div>
+      </div>
+
+      {players.length === 0 ? (
+        <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+          No players yet. Invite them from{" "}
+          <Link href="/roster/manage" className="font-semibold text-brand-700">
+            Members &amp; invites
+          </Link>
+          .
+        </p>
+      ) : (
+        <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+          <table className="w-full min-w-[60rem] text-sm">
+            <thead>
+              <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-500">
+                <th className="px-4 py-2.5">Player</th>
+                <th className="px-3 py-2.5">Last 7 days</th>
+                <th className="px-3 py-2.5">Last 28 days</th>
+                <th className="px-3 py-2.5">Last workout</th>
+                <th className="px-3 py-2.5">Programs</th>
+                {ROSTER_METRICS.map((k) => (
+                  <th key={k} className="px-3 py-2.5 text-right">
+                    {METRIC_BY_KEY.get(k)!.short}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((p) => {
+                const flag = needsAttention(c7.get(p.id));
+                const last = team.lastLogDate.get(p.id);
                 return (
-                  <li key={g.id} className="py-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-medium">{g.name}</span>
-                      <span className="text-sm text-zinc-500">
-                        {memberIds.size} player{memberIds.size === 1 ? "" : "s"}
-                      </span>
-                      <form action={deleteGroup} className="ml-auto">
-                        <input type="hidden" name="id" value={g.id} />
-                        <button
-                          type="submit"
-                          className="text-xs font-semibold text-zinc-400 hover:text-red-600"
+                  <tr
+                    key={p.id}
+                    className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50"
+                  >
+                    <td className="px-4 py-2.5">
+                      <Link href={`/roster/${p.id}`} className="font-medium hover:underline">
+                        {p.name}
+                      </Link>
+                      <span className="ml-2 text-xs text-zinc-500">{p.detail}</span>
+                      {p.status !== "active" ? (
+                        <span
+                          className={cn(
+                            "ml-2 rounded px-1.5 py-0.5 text-[11px] font-medium",
+                            p.status === "injured"
+                              ? "bg-red-50 text-red-800"
+                              : "bg-zinc-100 text-zinc-600",
+                          )}
                         >
-                          Delete group
-                        </button>
-                      </form>
-                    </div>
-                    {memberIds.size > 0 ? (
-                      <p className="mt-1 text-sm text-zinc-600">
-                        {[...memberIds].map((id) => nameOf.get(id) ?? "Player").join(", ")}
-                      </p>
-                    ) : null}
-                    <details className="mt-2">
-                      <summary className="cursor-pointer text-sm font-semibold text-brand-700">
-                        Edit players
-                      </summary>
-                      {players.length === 0 ? (
-                        <p className="mt-2 text-sm text-zinc-500">No players on the roster yet.</p>
-                      ) : (
-                        <form
-                          key={[...memberIds].sort().join(",")}
-                          action={setGroupMembers}
-                          className="mt-2 space-y-2"
-                        >
-                          <input type="hidden" name="group_id" value={g.id} />
-                          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
-                            {players.map((p) => (
-                              <label
-                                key={p.profile_id}
-                                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm ring-1 ring-inset ring-zinc-200 has-checked:bg-brand-50 has-checked:ring-brand-600"
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="player_id"
-                                  value={p.profile_id}
-                                  defaultChecked={memberIds.has(p.profile_id)}
-                                  className="size-4 accent-brand-700"
-                                />
-                                <span className="truncate">
-                                  {nameOf.get(p.profile_id)}
-                                  {p.position ? (
-                                    <span className="ml-1 text-zinc-500">{p.position}</span>
-                                  ) : null}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                          <button
-                            type="submit"
-                            className="h-9 rounded-lg bg-brand-700 px-3 text-sm font-semibold text-white hover:bg-brand-600"
-                          >
-                            Save players
-                          </button>
-                        </form>
-                      )}
-                    </details>
-                  </li>
+                          {p.status === "injured" ? "Injured" : "Inactive"}
+                        </span>
+                      ) : null}
+                      {flag ? (
+                        <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-900">
+                          ⚠ Needs attention
+                        </span>
+                      ) : null}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Meter c={c7.get(p.id)} />
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <Meter c={c28.get(p.id)} />
+                    </td>
+                    <td className="px-3 py-2.5 text-zinc-600 tabular-nums">
+                      {last ? relative(last, today) : <span className="text-zinc-400">Never</span>}
+                    </td>
+                    <td className="px-3 py-2.5 text-zinc-600 tabular-nums">
+                      {activePrograms.get(p.id) ?? 0}
+                    </td>
+                    {ROSTER_METRICS.map((k) => {
+                      const v = latest.get(p.id)?.[k];
+                      return (
+                        <td key={k} className="px-3 py-2.5 text-right tabular-nums">
+                          {v != null ? (
+                            formatMetric(k, v)
+                          ) : (
+                            <span className="text-zinc-300">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
                 );
               })}
-            </ul>
-          ) : null}
-        </section>
-      ) : null}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
 
-      <section className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200">
-        <ul className="divide-y divide-zinc-100">
-          {members.map((m) => {
-            const isOwner = m.profile_id === orgRow?.owner_id;
-            const isSelf = m.profile_id === user.id;
-            const name = m.profile.full_name || m.profile.email;
-            return (
-              <li key={m.id} className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">
-                    {m.jersey_number != null ? (
-                      <span className="mr-2 text-zinc-400 tabular-nums">#{m.jersey_number}</span>
-                    ) : null}
-                    {name}
-                    {isOwner ? (
-                      <span className="ml-2 rounded bg-zinc-100 px-1.5 py-0.5 text-xs font-medium text-zinc-600">
-                        Owner
-                      </span>
-                    ) : null}
-                    {isSelf ? <span className="ml-2 text-xs text-zinc-400">(you)</span> : null}
-                  </p>
-                  <p className="truncate text-sm text-zinc-500">{m.profile.email}</p>
-                </div>
+function sum(list: Compliance[]) {
+  const due = list.reduce((n, c) => n + c.due, 0);
+  const logged = list.reduce((n, c) => n + c.logged, 0);
+  return { due, logged, rate: due ? logged / due : null };
+}
 
-                {isAdmin && !isOwner ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <form
-                      // Remount with fresh defaults after a save; React resets forms after an action.
-                      key={`${m.role}-${m.position}-${m.jersey_number}`}
-                      action={updateMember}
-                      className="flex flex-wrap items-center gap-2"
-                    >
-                      <input type="hidden" name="id" value={m.id} />
-                      <select
-                        name="role"
-                        defaultValue={m.role}
-                        aria-label="Role"
-                        className={cn(selectClass, "h-9")}
-                      >
-                        {ORG_ROLES.map((r) => (
-                          <option key={r} value={r}>
-                            {ROLE_LABELS[r]}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        name="position"
-                        defaultValue={m.position ?? ""}
-                        aria-label="Position (players)"
-                        className={cn(selectClass, "h-9")}
-                      >
-                        <option value="">Pos.</option>
-                        {PLAYER_POSITIONS.map((p) => (
-                          <option key={p} value={p}>
-                            {p}
-                          </option>
-                        ))}
-                      </select>
-                      <input
-                        name="jersey_number"
-                        defaultValue={m.jersey_number ?? ""}
-                        inputMode="numeric"
-                        maxLength={2}
-                        placeholder="#"
-                        aria-label="Jersey number (players)"
-                        className={cn(selectClass, "h-9 w-14")}
-                      />
-                      <button
-                        type="submit"
-                        className="h-9 rounded-lg px-3 text-sm font-semibold ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50"
-                      >
-                        Save
-                      </button>
-                    </form>
-                    <form action={removeMember}>
-                      <input type="hidden" name="id" value={m.id} />
-                      <button
-                        type="submit"
-                        className="h-9 px-2 text-sm font-semibold text-zinc-500 hover:text-red-600"
-                      >
-                        Remove
-                      </button>
-                    </form>
-                  </div>
-                ) : (
-                  <p className="text-sm text-zinc-600">
-                    {ROLE_LABELS[m.role]}
-                    {m.position ? ` · ${m.position}` : ""}
-                  </p>
-                )}
-              </li>
-            );
-          })}
-        </ul>
-      </section>
+function relative(date: string, today: string) {
+  const days = Math.round((Date.parse(today) - Date.parse(date)) / 86_400_000);
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 14) return `${days} days ago`;
+  return date;
+}
+
+/** Compliance meter: fill carries severity; track is a lighter step of the same hue. */
+function Meter({ c }: { c: Compliance | undefined }) {
+  if (!c || c.due === 0) return <span className="text-xs text-zinc-400">Nothing due</span>;
+  const pct = Math.round((c.rate ?? 0) * 100);
+  const tone =
+    pct >= 80
+      ? { fill: "bg-brand-600", track: "bg-brand-100", label: "On track" }
+      : pct >= 50
+        ? { fill: "bg-amber-500", track: "bg-amber-100", label: "Slipping" }
+        : { fill: "bg-red-600", track: "bg-red-100", label: "Behind" };
+  return (
+    <div className="flex items-center gap-2" title={`${tone.label}: ${c.logged}/${c.due} logged`}>
+      <div className={cn("h-1.5 w-16 overflow-hidden rounded-full", tone.track)}>
+        <div className={cn("h-full rounded-full", tone.fill)} style={{ width: `${pct}%` }} />
+      </div>
+      <span className="text-xs text-zinc-700 tabular-nums">
+        {c.logged}/{c.due}
+      </span>
+      <span className="sr-only">{tone.label}</span>
     </div>
   );
 }

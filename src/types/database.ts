@@ -3,6 +3,61 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      assessments: {
+        Row: {
+          assessed_by: string | null;
+          assessment_date: string;
+          created_at: string;
+          data: NonNullable<Json>;
+          id: string;
+          notes: string | null;
+          org_id: string;
+          player_id: string;
+        };
+        Insert: {
+          assessed_by?: string | null;
+          assessment_date?: string;
+          created_at?: string;
+          data?: NonNullable<Json>;
+          id?: string;
+          notes?: string | null;
+          org_id: string;
+          player_id: string;
+        };
+        Update: {
+          assessed_by?: string | null;
+          assessment_date?: string;
+          created_at?: string;
+          data?: NonNullable<Json>;
+          id?: string;
+          notes?: string | null;
+          org_id?: string;
+          player_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "assessments_assessed_by_fkey";
+            columns: ["assessed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "assessments_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "assessments_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       exercise_logs: {
         Row: {
           exercise_id: string;

@@ -155,4 +155,20 @@ Logs are stored in `workout_logs` and `exercise_logs` and saved atomically by `s
 
 Docs: [docs/ROADMAP.md](docs/ROADMAP.md) keeps product notes for later phases: video review with coach drawing, angles and voice-over or AI analysis, exercise tracking types, demo videos, and the native app.
 
-See the project brief for the full roadmap. Phases 1–3 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
+## Player profiles & assessments (Phase 4)
+
+- **Roster → Overview** (`/roster`): every player at a glance.
+  - 7- and 28-day compliance meters, last workout, active programs, and latest FB velo, exit velo and 60 time.
+  - Injured/inactive badges, and a **⚠ Needs attention** flag (under 50% logged or 2+ misses in 7 days). Flagged players are sorted to the top.
+  - Filter by group.
+- **Player profile** (`/roster/[id]`): compliance, active programs, and metric tiles (latest value, change vs the previous test, sparkline).
+  - A line chart for the selected metric, with a hover/keyboard crosshair tooltip.
+  - Assessment history table, plus add or delete assessments.
+  - Recent workouts that expand to every set (weight × reps @ RPE).
+- **Testing day** (`/roster/testing`): pick the tests and a group, then enter results for the whole team in one grid. Each box shows the player's last result as a hint.
+- **Metrics:** FB velo, position throw velo, pop time, exit velo, bat speed, 60 yd, home-to-first, squat, deadlift, bench, broad jump, vertical, bodyweight, height. They're defined in `src/constants/metrics.ts` and stored in `assessments.data` (JSON), so adding a metric needs no migration.
+- **Coach dashboard:** team compliance for the last 7 days, the needs-attention list, and a feed of recent workouts.
+- **Player Profile tab:** 28-day consistency and their own metric tiles and chart (read-only).
+- **Member status:** Active, Injured or Inactive, set on Members & invites.
+
+See the project brief for the full roadmap. Phases 1–4 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.

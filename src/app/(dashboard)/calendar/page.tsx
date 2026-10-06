@@ -4,12 +4,8 @@ import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { playerToday } from "@/lib/player";
 import { addDays, dayOfWeek, weekStartOf } from "@/lib/schedule";
-import {
-  buildEntries,
-  type CalendarAssignment,
-  type CalendarEntry,
-  type EntryStatus,
-} from "@/lib/calendar";
+import type { CalendarEntry, EntryStatus } from "@/lib/calendar";
+import { loadTeam } from "@/lib/team";
 import { DAY_OF_WEEK_LABELS, SEASON_PHASE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 
@@ -54,89 +50,14 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const from = view === "week" ? weekStartOf(anchor) : weekStartOf(monthStart);
   const to = view === "week" ? addDays(from, 6) : addDays(from, 41);
 
-  const [{ data: assignmentRows, error }, { data: players }, { data: groups }] = await Promise.all([
-    supabase
-      .from("program_assignments")
-      .select(
-        `id, player_id, status, start_date,
-         program:programs!inner (id, name, org_id,
-           program_weeks (week_number,
-             program_days (id, name, day_number, day_of_week, session_type, sort_order)))`,
-      )
-      .eq("program.org_id", org.id),
-    supabase
-      .from("org_memberships")
-      .select("profile_id, position, jersey_number, profile:profiles (full_name, email)")
-      .eq("org_id", org.id)
-      .eq("role", "player"),
-    supabase
-      .from("player_groups")
-      .select("id, name, player_group_members (profile_id)")
-      .eq("org_id", org.id)
-      .order("name"),
-  ]);
-  if (error) throw error;
+  const team = await loadTeam(supabase, org.id, from, to, today);
+  const groups = team.groups;
 
-  const assignments: CalendarAssignment[] = assignmentRows.map((a) => ({
-    id: a.id,
-    playerId: a.player_id,
-    status: a.status,
-    startDate: a.start_date,
-    programId: a.program.id,
-    programName: a.program.name,
-    weeks: a.program.program_weeks
-      .toSorted((p, q) => p.week_number - q.week_number)
-      .map((w) => ({
-        days: w.program_days
-          .toSorted((p, q) => p.sort_order - q.sort_order)
-          .map((d) => ({
-            id: d.id,
-            dayOfWeek: d.day_of_week,
-            name: d.name || `Day ${d.day_number}`,
-            sessionType: d.session_type,
-          })),
-      })),
-  }));
-
-  const { data: logRows } = assignments.length
-    ? await supabase
-        .from("workout_logs")
-        .select("program_assignment_id, program_day_id, day_name, status, date_completed")
-        .in(
-          "program_assignment_id",
-          assignments.map((a) => a.id),
-        )
-        .gte("date_completed", from)
-        .lte("date_completed", to)
-    : { data: [] };
-
-  const group = (groups ?? []).find((g) => g.id === groupId);
-  const groupMembers = group ? new Set(group.player_group_members.map((m) => m.profile_id)) : null;
-  const roster = (players ?? [])
-    .filter((p) => !groupMembers || groupMembers.has(p.profile_id))
-    .map((p) => ({
-      id: p.profile_id,
-      name: p.profile.full_name || p.profile.email,
-      detail: [p.position, p.jersey_number != null ? `#${p.jersey_number}` : null]
-        .filter(Boolean)
-        .join(" "),
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const group = groups.find((g) => g.id === groupId);
+  const groupMembers = group ? new Set(group.memberIds) : null;
+  const roster = team.players.filter((p) => !groupMembers || groupMembers.has(p.id));
   const rosterIds = new Set(roster.map((p) => p.id));
-
-  const entries = buildEntries(
-    assignments,
-    (logRows ?? []).map((l) => ({
-      assignmentId: l.program_assignment_id,
-      dayId: l.program_day_id,
-      dayName: l.day_name,
-      status: l.status,
-      date: l.date_completed,
-    })),
-    from,
-    to,
-    today,
-  ).filter((e) => rosterIds.has(e.playerId));
+  const entries = team.entries.filter((e) => rosterIds.has(e.playerId));
 
   const href = (patch: Record<string, string | undefined>) => {
     const sp = new URLSearchParams();
@@ -181,7 +102,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
               className="h-9 rounded-lg border-0 bg-white px-2 text-sm ring-1 ring-inset ring-zinc-300"
             >
               <option value="">All players</option>
-              {(groups ?? []).map((g) => (
+              {groups.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
                 </option>
