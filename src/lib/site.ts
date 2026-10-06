@@ -1,12 +1,12 @@
 import "server-only";
 
 import { headers } from "next/headers";
+import { resolveOrigin } from "./origin";
 
-/** Absolute origin of the current deployment, for links in emails and invites. */
+/**
+ * Public origin for links we hand to other people (invites, email confirmations).
+ * Never a protected per-deployment Vercel URL; see resolveOrigin.
+ */
 export async function siteOrigin() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
+  return resolveOrigin(process.env, await headers());
 }
