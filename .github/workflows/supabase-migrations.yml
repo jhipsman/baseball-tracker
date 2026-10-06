@@ -30,18 +30,38 @@ jobs:
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
     steps:
-      - name: Check secrets are set
+      - name: Check secrets
         run: |
-          missing=""
-          [ -z "$SUPABASE_ACCESS_TOKEN" ] && missing="$missing SUPABASE_ACCESS_TOKEN"
-          [ -z "$SUPABASE_PROJECT_ID" ] && missing="$missing SUPABASE_PROJECT_ID"
-          [ -z "$SUPABASE_DB_PASSWORD" ] && missing="$missing SUPABASE_DB_PASSWORD"
-          if [ -n "$missing" ]; then
-            echo "::error::Missing repository secrets:$missing (see the comment at the top of this workflow)"
-            exit 1
-          fi
+          # Strip stray spaces/newlines that sneak in when pasting secrets.
+          token=$(printf '%s' "$SUPABASE_ACCESS_TOKEN" | tr -d '[:space:]')
+          project=$(printf '%s' "$SUPABASE_PROJECT_ID" | tr -d '[:space:]')
+          password=$(printf '%s' "$SUPABASE_DB_PASSWORD" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+          echo "::add-mask::$token"
+          echo "::add-mask::$password"
 
-      - uses: actions/checkout@v4
+          ok=true
+          if [ -z "$token" ]; then
+            echo "::error::Secret SUPABASE_ACCESS_TOKEN is missing."; ok=false
+          elif [ "${token#sbp_}" = "$token" ]; then
+            echo "::error::SUPABASE_ACCESS_TOKEN should start with sbp_. It's a personal access token from supabase.com/dashboard/account/tokens (Generate new token), not the publishable/anon or secret API key."; ok=false
+          fi
+          if [ -z "$project" ]; then
+            echo "::error::Secret SUPABASE_PROJECT_ID is missing."; ok=false
+          elif ! printf '%s' "$project" | grep -Eq '^[a-z0-9]{20}$'; then
+            echo "::error::SUPABASE_PROJECT_ID should be the 20-character Project ID (Project Settings → General), e.g. abcdefghijklmnopqrst, not the full URL."; ok=false
+          fi
+          if [ -z "$password" ]; then
+            echo "::error::Secret SUPABASE_DB_PASSWORD is missing."; ok=false
+          fi
+          $ok || exit 1
+
+          {
+            echo "SUPABASE_ACCESS_TOKEN=$token"
+            echo "SUPABASE_PROJECT_ID=$project"
+            echo "SUPABASE_DB_PASSWORD=$password"
+          } >> "$GITHUB_ENV"
+
+      - uses: actions/checkout@v5
 
       - uses: supabase/setup-cli@v1
         with:
