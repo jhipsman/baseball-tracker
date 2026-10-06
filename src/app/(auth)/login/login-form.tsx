@@ -12,7 +12,14 @@ export function LoginForm({ next }: { next?: string }) {
   return (
     <form action={action} className="space-y-4">
       <input type="hidden" name="next" value={next ?? "/"} />
-      <Field label="Email" name="email" type="email" autoComplete="email" required />
+      <Field
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        defaultValue={state.values?.email}
+        required
+      />
       <Field
         label="Password"
         name="password"

@@ -11,8 +11,21 @@ export function SignupForm() {
 
   return (
     <form action={action} className="space-y-4">
-      <Field label="Full name" name="full_name" autoComplete="name" required />
-      <Field label="Email" name="email" type="email" autoComplete="email" required />
+      <Field
+        label="Full name"
+        name="full_name"
+        autoComplete="name"
+        defaultValue={state.values?.full_name}
+        required
+      />
+      <Field
+        label="Email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        defaultValue={state.values?.email}
+        required
+      />
       <Field
         label="Password"
         name="password"

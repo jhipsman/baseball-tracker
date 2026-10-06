@@ -9,7 +9,10 @@ export default async function DashboardPage() {
 
   const [exercises, members, programs] = await Promise.all([
     supabase.from("exercises").select("id", { count: "exact", head: true }),
-    supabase.from("org_memberships").select("id", { count: "exact", head: true }).eq("org_id", org.id),
+    supabase
+      .from("org_memberships")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", org.id),
     supabase.from("programs").select("id", { count: "exact", head: true }).eq("org_id", org.id),
   ]);
 

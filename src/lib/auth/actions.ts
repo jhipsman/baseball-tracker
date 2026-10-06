@@ -6,7 +6,12 @@ import { createClient } from "@/lib/supabase/server";
 import { ACTIVE_ORG_COOKIE } from "@/lib/org";
 import { safeRedirectPath } from "@/lib/utils";
 
-export type FormState = { error?: string; message?: string };
+export type FormState = {
+  error?: string;
+  message?: string;
+  /** Submitted values echoed back, since React resets the form after an action. */
+  values?: Record<string, string>;
+};
 
 async function siteOrigin() {
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
@@ -21,11 +26,13 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   const password = String(formData.get("password") ?? "");
   const next = safeRedirectPath(String(formData.get("next") ?? ""));
 
-  if (!email || !password) return { error: "Email and password are required." };
+  const values = { email };
+
+  if (!email || !password) return { error: "Email and password are required.", values };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message };
+  if (error) return { error: error.message, values };
 
   redirect(next);
 }
@@ -35,8 +42,10 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
-  if (!fullName || !email || !password) return { error: "All fields are required." };
-  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  const values = { full_name: fullName, email };
+
+  if (!fullName || !email || !password) return { error: "All fields are required.", values };
+  if (password.length < 8) return { error: "Password must be at least 8 characters.", values };
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
@@ -47,7 +56,7 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
       emailRedirectTo: `${await siteOrigin()}/auth/callback?next=/onboarding`,
     },
   });
-  if (error) return { error: error.message };
+  if (error) return { error: error.message, values };
 
   // Email confirmation disabled → we already have a session.
   if (data.session) redirect("/onboarding");

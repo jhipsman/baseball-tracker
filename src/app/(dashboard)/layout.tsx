@@ -24,6 +24,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <p className="truncate text-sm font-semibold">{org.name}</p>
               <p className="text-xs text-zinc-500">{ROLE_LABELS[membership.role]}</p>
             </div>
+            <form action={signOut} className="ml-auto md:hidden">
+              <button type="submit" className="text-sm font-medium text-zinc-700">
+                Sign out
+              </button>
+            </form>
           </div>
           <NavLinks items={NAV} />
           <div className="mt-auto hidden border-t border-zinc-200 pt-4 md:block">
