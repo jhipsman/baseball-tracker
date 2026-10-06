@@ -11,7 +11,7 @@ function isCategory(value: unknown): value is ExerciseCategory {
 }
 
 export default async function ExercisesPage({ searchParams }: PageProps<"/exercises">) {
-  const { supabase } = await requireActiveOrg();
+  const { supabase, isStaff } = await requireActiveOrg();
   const params = await searchParams;
   const q = typeof params.q === "string" ? params.q.trim() : "";
   const category = isCategory(params.category) ? params.category : undefined;
@@ -45,20 +45,30 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
             {category ? ` in ${CATEGORY_LABELS[category]}` : ""}
           </p>
         </div>
-        <form className="w-full sm:w-72" action="/exercises">
-          {category ? <input type="hidden" name="category" value={category} /> : null}
-          <label htmlFor="q" className="sr-only">
-            Search exercises
-          </label>
-          <input
-            id="q"
-            name="q"
-            type="search"
-            defaultValue={q}
-            placeholder="Search exercises…"
-            className="block h-11 w-full rounded-lg border-0 bg-white px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
-          />
-        </form>
+        <div className="flex w-full items-center gap-2 sm:w-auto">
+          <form className="min-w-0 flex-1 sm:w-72 sm:flex-none" action="/exercises">
+            {category ? <input type="hidden" name="category" value={category} /> : null}
+            <label htmlFor="q" className="sr-only">
+              Search exercises
+            </label>
+            <input
+              id="q"
+              name="q"
+              type="search"
+              defaultValue={q}
+              placeholder="Search exercises…"
+              className="block h-11 w-full rounded-lg border-0 bg-white px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
+            />
+          </form>
+          {isStaff ? (
+            <Link
+              href="/exercises/new"
+              className="inline-flex h-11 shrink-0 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+            >
+              New exercise
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
@@ -111,6 +121,14 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
                   <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-800">
                     Custom
                   </span>
+                ) : null}
+                {ex.is_custom && isStaff ? (
+                  <Link
+                    href={`/exercises/${ex.id}/edit`}
+                    className="ml-auto text-xs font-semibold text-brand-700 hover:underline"
+                  >
+                    Edit
+                  </Link>
                 ) : null}
               </div>
             </li>

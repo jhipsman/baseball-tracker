@@ -76,3 +76,51 @@ export function humanize(value: string) {
   const s = value.replace(/_/g, " ");
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
+
+/** Accent per category, for fast visual scanning in the builder. */
+export const CATEGORY_DOT: Record<ExerciseCategory, string> = {
+  strength: "bg-sky-500",
+  power: "bg-orange-500",
+  mobility: "bg-teal-500",
+  arm_care: "bg-rose-500",
+  conditioning: "bg-amber-500",
+  plyometric: "bg-violet-500",
+  speed: "bg-lime-500",
+  throwing: "bg-red-600",
+  hitting: "bg-indigo-500",
+};
+
+export const SESSION_LABELS: Record<Enums<"session_type">, string> = {
+  strength: "Strength",
+  throwing: "Throwing",
+  hitting: "Hitting",
+  conditioning: "Conditioning",
+  recovery: "Recovery",
+  practice: "Practice",
+  off: "Off",
+};
+
+export const GROUP_LABELS: Record<Enums<"exercise_group_type">, string> = {
+  superset: "Superset",
+  circuit: "Circuit",
+  emom: "EMOM",
+  amrap: "AMRAP",
+};
+
+export const PROGRAM_TYPE_LABELS: Record<Enums<"program_type">, string> = {
+  strength: "Strength",
+  throwing: "Throwing",
+  arm_care: "Arm Care",
+  hitting: "Hitting",
+  conditioning: "Conditioning",
+  hybrid: "Hybrid",
+};
+
+export const SEASON_PHASE_LABELS: Record<Enums<"season_phase">, string> = {
+  off_season: "Off-season",
+  pre_season: "Pre-season",
+  in_season: "In-season",
+  post_season: "Post-season",
+};
+
+export const DAY_OF_WEEK_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;

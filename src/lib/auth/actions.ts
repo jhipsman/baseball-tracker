@@ -1,9 +1,10 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ACTIVE_ORG_COOKIE } from "@/lib/org";
+import { siteOrigin } from "@/lib/site";
 import { safeRedirectPath } from "@/lib/utils";
 
 export type FormState = {
@@ -12,14 +13,6 @@ export type FormState = {
   /** Submitted values echoed back, since React resets the form after an action. */
   values?: Record<string, string>;
 };
-
-async function siteOrigin() {
-  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${host}`;
-}
 
 export async function login(_prev: FormState, formData: FormData): Promise<FormState> {
   const email = String(formData.get("email") ?? "").trim();
@@ -41,6 +34,7 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
   const fullName = String(formData.get("full_name") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const next = safeRedirectPath(String(formData.get("next") ?? ""), "/onboarding");
 
   const values = { full_name: fullName, email };
 
@@ -53,13 +47,13 @@ export async function signup(_prev: FormState, formData: FormData): Promise<Form
     password,
     options: {
       data: { full_name: fullName },
-      emailRedirectTo: `${await siteOrigin()}/auth/callback?next=/onboarding`,
+      emailRedirectTo: `${await siteOrigin()}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
   if (error) return { error: error.message, values };
 
   // Email confirmation disabled → we already have a session.
-  if (data.session) redirect("/onboarding");
+  if (data.session) redirect(next);
 
   return { message: "Check your email for a confirmation link to finish signing up." };
 }

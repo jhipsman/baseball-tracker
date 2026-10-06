@@ -19,8 +19,8 @@ export default async function DashboardPage() {
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   const stats = [
     { label: "Exercises in library", value: exercises.count ?? 0, href: "/exercises" },
-    { label: "Members", value: members.count ?? 0 },
-    { label: "Programs", value: programs.count ?? 0 },
+    { label: "Members", value: members.count ?? 0, href: "/roster" },
+    { label: "Programs", value: programs.count ?? 0, href: "/programs" },
   ];
 
   return (

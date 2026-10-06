@@ -8,6 +8,17 @@ import { STAFF_ROLES } from "@/constants";
 
 export const ACTIVE_ORG_COOKIE = "dp_active_org";
 
+/** Remember which org the user is working in. Server actions / route handlers only. */
+export async function setActiveOrgCookie(orgId: string) {
+  (await cookies()).set(ACTIVE_ORG_COOKIE, orgId, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24 * 365,
+  });
+}
+
 /** The signed-in user, or a redirect to /login. Cached per request. */
 export const requireUser = cache(async () => {
   const supabase = await createClient();

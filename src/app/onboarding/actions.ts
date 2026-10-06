@@ -1,9 +1,8 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import type { FormState } from "@/lib/auth/actions";
-import { ACTIVE_ORG_COOKIE } from "@/lib/org";
+import { setActiveOrgCookie } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 
@@ -25,13 +24,7 @@ export async function createOrganization(_prev: FormState, formData: FormData): 
     return { error: error.message };
   }
 
-  (await cookies()).set(ACTIVE_ORG_COOKIE, org.id, {
-    path: "/",
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    maxAge: 60 * 60 * 24 * 365,
-  });
+  await setActiveOrgCookie(org.id);
 
   redirect("/");
 }

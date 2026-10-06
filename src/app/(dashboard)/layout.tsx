@@ -1,4 +1,5 @@
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
+import { OrgSwitcher } from "@/components/layout/org-switcher";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
 import { ROLE_LABELS } from "@/constants";
@@ -6,13 +7,13 @@ import { ROLE_LABELS } from "@/constants";
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard" },
   { href: "/exercises", label: "Exercises" },
-  { href: "/programs", label: "Programs", soon: true },
-  { href: "/roster", label: "Roster", soon: true },
+  { href: "/programs", label: "Programs" },
+  { href: "/roster", label: "Roster" },
   { href: "/calendar", label: "Calendar", soon: true },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, org, membership } = await requireActiveOrg();
+  const { user, org, membership, memberships } = await requireActiveOrg();
 
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
@@ -30,6 +31,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
               </button>
             </form>
           </div>
+          {memberships.length > 1 ? (
+            <OrgSwitcher orgs={memberships.map((m) => m.org)} activeId={org.id} />
+          ) : null}
           <NavLinks items={NAV} />
           <div className="mt-auto hidden border-t border-zinc-200 pt-4 md:block">
             <p className="truncate text-xs text-zinc-500">{user.email}</p>
