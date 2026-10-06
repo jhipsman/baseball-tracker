@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
 import { login, type FormState } from "@/lib/auth/actions";
 import { Field } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
@@ -27,6 +28,11 @@ export function LoginForm({ next }: { next?: string }) {
         autoComplete="current-password"
         required
       />
+      <p className="-mt-2 text-right text-sm">
+        <Link href="/forgot-password" className="font-medium text-brand-700 hover:underline">
+          Forgot password?
+        </Link>
+      </p>
       <FormMessage state={state} />
       <SubmitButton className="w-full" pendingLabel="Signing in…">
         Sign in

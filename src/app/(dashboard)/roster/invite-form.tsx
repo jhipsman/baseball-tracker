@@ -6,7 +6,7 @@ import { Field } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { SelectField } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { ORG_ROLES, ROLE_LABELS } from "@/constants";
+import { INVITABLE_ROLES, ROLE_LABELS } from "@/constants";
 import { inviteMember } from "./actions";
 
 export function InviteForm() {
@@ -24,7 +24,7 @@ export function InviteForm() {
           required
         />
         <SelectField label="Role" name="role" defaultValue={state.values?.role ?? "player"}>
-          {ORG_ROLES.map((r) => (
+          {INVITABLE_ROLES.map((r) => (
             <option key={r} value={r}>
               {ROLE_LABELS[r]}
             </option>

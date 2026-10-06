@@ -171,4 +171,24 @@ Docs: [docs/ROADMAP.md](docs/ROADMAP.md) keeps product notes for later phases: v
 - **Player Profile tab:** 28-day consistency and their own metric tiles and chart (read-only).
 - **Member status:** Active, Injured or Inactive, set on Members & invites.
 
-See the project brief for the full roadmap. Phases 1–4 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
+## Throwing & arm care (Phase 5)
+
+- **Throwing logs** (`throwing_logs`): long toss (throws + max distance), flat ground, bullpen, live ABs, game, or an **arm check-in** (no throwing, just arm feel). Each log has a pitch count, intensity, optional pitch mix (FB/CB/SL/CH/Other), arm feel (great → pain), and notes. Players log their own sessions. Coaches log for any player, e.g. game pitch counts after a game.
+- **Pitch Smart** (`src/lib/workload.ts`, unit-tested): daily max and required rest days by age, applied to games and live ABs.
+  - Players set their birthday, or coaches set it on the player's profile.
+  - Shows each player's status: **Available (N left today) / Rest until …** for games and live ABs.
+- **Alerts:**
+  - Reported arm pain.
+  - Repeated soreness or a tired arm.
+  - Over the daily max.
+  - Pitched before the required rest was up.
+  - A throwing volume spike (acute:chronic ratio over 1.5× once a player has 3+ weeks of logs).
+  - Critical alerts show as a red banner on the coach dashboard.
+- **Coach `/throwing`:** alerts, a team board (age, today's availability, last outing, 7-day throws, vs usual, latest arm feel), and a "Log pitch counts" panel.
+- **Player Throwing tab:** pitching status, week volume, alerts, quick log or check-in, a 28-day chart, and recent sessions.
+- **Player profile (coach):** throwing section with status, alerts, a 28-day chart, sessions, and birthdate.
+- **Starter templates** (Programs → Templates): Long Toss Build-up (6 wk), Bullpen Progression (4 wk), Daily Arm Care (J-Bands).
+
+Also in this pass: **Forgot password** flow, a **Getting started** checklist for new coaches, and the "Parent" invite role is hidden until the parent dashboard exists. See [docs/PRODUCT_REVIEW.md](docs/PRODUCT_REVIEW.md) for the full product review and prioritized gaps.
+
+See the project brief for the full roadmap. Phases 1–5 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.

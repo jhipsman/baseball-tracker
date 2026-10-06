@@ -41,6 +41,15 @@ Storage: Supabase Storage buckets per org. Annotations stored as structured data
   - Hide weight and RPE where they don't apply.
 - **Demo videos on exercises:** `exercises.video_demo_url` already exists. Show an embedded YouTube or Vimeo player in the library, the builder, and the player's workout screen. Fill in links for the built-in library.
 
+## From the Phase 5 product review
+
+See [PRODUCT_REVIEW.md](PRODUCT_REVIEW.md) for the full list. Highlights:
+
+- Link throwing program days to throwing logs (prompt "log your throws" when a throwing day is finished)
+- Workload across teams: a player's throwing history should follow them between orgs
+- Pitch Smart annual limits (innings per year, months off from overhead throwing)
+- Privacy policy, terms, and parental consent for under-13 players
+
 ## Notifications
 
 - Push workout reminders (Phase 2 leftover). Needs VAPID keys, a push-subscription table, and a scheduled job (Vercel Cron) now that the site is live on HTTPS.

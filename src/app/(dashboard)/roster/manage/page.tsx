@@ -3,7 +3,7 @@ import { requireActiveOrg } from "@/lib/org";
 import { siteOrigin } from "@/lib/site";
 import { CopyButton } from "@/components/ui/copy-button";
 import { selectClass } from "@/components/ui/select";
-import { ORG_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
+import { INVITABLE_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { InviteForm } from "../invite-form";
 import { RosterTabs } from "../tabs";
@@ -236,7 +236,7 @@ export default async function RosterPage() {
                         aria-label="Role"
                         className={cn(selectClass, "h-9")}
                       >
-                        {ORG_ROLES.map((r) => (
+                        {INVITABLE_ROLES.map((r) => (
                           <option key={r} value={r}>
                             {ROLE_LABELS[r]}
                           </option>

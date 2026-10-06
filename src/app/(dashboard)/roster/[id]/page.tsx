@@ -13,6 +13,15 @@ import { MetricTile } from "@/components/charts/stat-tile";
 import { cn } from "@/lib/utils";
 import { AssessmentForm } from "../assessment-form";
 import { deleteAssessment } from "../assess-actions";
+import { loadThrowing } from "@/lib/throwing";
+import { ageOn, availability, dailySeries, pitchSmartBand, throwingAlerts } from "@/lib/workload";
+import { ThrowsChart } from "@/components/throwing/throws-chart";
+import {
+  AlertList,
+  AvailabilityBadge,
+  BirthDateForm,
+  ThrowingList,
+} from "@/components/throwing/status";
 
 export const metadata: Metadata = { title: "Player" };
 
@@ -50,6 +59,11 @@ export default async function PlayerProfilePage({
   if (!member || member.role !== "player") notFound();
 
   const from28 = addDays(today, -27);
+  const [throwing, { data: prof }] = await Promise.all([
+    loadThrowing(supabase, org.id, addDays(today, -60), id),
+    supabase.from("profiles").select("birth_date").eq("id", id).single(),
+  ]);
+  const birth = prof?.birth_date ?? null;
   const [team, assessments, { data: logs }] = await Promise.all([
     loadTeam(supabase, org.id, from28, today, today),
     loadAssessments(supabase, org.id, id),
@@ -253,6 +267,37 @@ export default async function PlayerProfilePage({
           <summary className="cursor-pointer font-semibold">Add assessment</summary>
           <div className="mt-4">
             <AssessmentForm playerId={id} today={today} />
+          </div>
+        </details>
+      </section>
+
+      <section id="throwing" className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="text-lg font-semibold">Throwing</h2>
+          <AvailabilityBadge a={availability(throwing, birth, today)} />
+          {birth ? (
+            <span className="text-sm text-zinc-500">
+              Age {ageOn(birth, today)} · Pitch Smart max{" "}
+              {pitchSmartBand(ageOn(birth, today)).dailyMax}/day
+            </span>
+          ) : null}
+        </div>
+        <AlertList alerts={throwingAlerts(throwing, birth, today)} />
+        <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+          <ThrowsChart
+            days={dailySeries(throwing, from28, today)}
+            dailyMax={birth ? pitchSmartBand(ageOn(birth, today)).dailyMax : null}
+          />
+        </div>
+        <ThrowingList rows={throwing.slice(0, 10)} canDelete={() => true} />
+        <details className="rounded-xl bg-white p-4 ring-1 ring-zinc-200" open={!birth}>
+          <summary className="cursor-pointer text-sm font-semibold">Birthdate</summary>
+          <div className="mt-3">
+            <BirthDateForm
+              playerId={id}
+              current={birth}
+              label="Birthdate (for Pitch Smart limits)"
+            />
           </div>
         </details>
       </section>

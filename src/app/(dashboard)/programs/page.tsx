@@ -8,6 +8,9 @@ import {
   SEASON_PHASES,
 } from "@/constants";
 import type { Enums } from "@/types/database";
+import { STARTER_TEMPLATES } from "@/lib/starter-templates";
+import { SubmitButton } from "@/components/ui/submit-button";
+import { addStarterTemplates } from "./actions";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Programs" };
@@ -89,6 +92,23 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
             </Link>
           ))}
         </div>
+      ) : null}
+
+      {isStaff &&
+      templates &&
+      STARTER_TEMPLATES.some((t) => !programs.some((p) => p.name === t.name)) ? (
+        <form
+          action={addStarterTemplates}
+          className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-brand-50 p-4 ring-1 ring-brand-100"
+        >
+          <div>
+            <p className="font-medium text-brand-900">Starter throwing &amp; arm care templates</p>
+            <p className="text-sm text-brand-900/80">
+              {STARTER_TEMPLATES.map((t) => t.name).join(" · ")}
+            </p>
+          </div>
+          <SubmitButton pendingLabel="Adding…">Add templates</SubmitButton>
+        </form>
       ) : null}
 
       <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">

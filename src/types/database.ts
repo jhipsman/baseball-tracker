@@ -398,6 +398,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null;
+          birth_date: string | null;
           created_at: string;
           email: string;
           full_name: string | null;
@@ -405,6 +406,7 @@ export type Database = {
         };
         Insert: {
           avatar_url?: string | null;
+          birth_date?: string | null;
           created_at?: string;
           email: string;
           full_name?: string | null;
@@ -412,6 +414,7 @@ export type Database = {
         };
         Update: {
           avatar_url?: string | null;
+          birth_date?: string | null;
           created_at?: string;
           email?: string;
           full_name?: string | null;
@@ -661,6 +664,76 @@ export type Database = {
           },
         ];
       };
+      throwing_logs: {
+        Row: {
+          arm_feel: Database["public"]["Enums"]["arm_feel"] | null;
+          created_at: string;
+          date: string;
+          id: string;
+          intensity: Database["public"]["Enums"]["throwing_intensity"] | null;
+          logged_by: string | null;
+          max_distance_ft: number | null;
+          notes: string | null;
+          org_id: string;
+          pitch_count: number;
+          pitches_by_type: Json | null;
+          player_id: string;
+          throwing_type: Database["public"]["Enums"]["throwing_type"];
+        };
+        Insert: {
+          arm_feel?: Database["public"]["Enums"]["arm_feel"] | null;
+          created_at?: string;
+          date?: string;
+          id?: string;
+          intensity?: Database["public"]["Enums"]["throwing_intensity"] | null;
+          logged_by?: string | null;
+          max_distance_ft?: number | null;
+          notes?: string | null;
+          org_id: string;
+          pitch_count?: number;
+          pitches_by_type?: Json | null;
+          player_id: string;
+          throwing_type: Database["public"]["Enums"]["throwing_type"];
+        };
+        Update: {
+          arm_feel?: Database["public"]["Enums"]["arm_feel"] | null;
+          created_at?: string;
+          date?: string;
+          id?: string;
+          intensity?: Database["public"]["Enums"]["throwing_intensity"] | null;
+          logged_by?: string | null;
+          max_distance_ft?: number | null;
+          notes?: string | null;
+          org_id?: string;
+          pitch_count?: number;
+          pitches_by_type?: Json | null;
+          player_id?: string;
+          throwing_type?: Database["public"]["Enums"]["throwing_type"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "throwing_logs_logged_by_fkey";
+            columns: ["logged_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "throwing_logs_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "throwing_logs_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workout_logs: {
         Row: {
           created_at: string;
@@ -796,8 +869,13 @@ export type Database = {
         Args: { p_org_id: string; p_phase: Database["public"]["Enums"]["season_phase"] };
         Returns: undefined;
       };
+      set_player_birth_date: {
+        Args: { p_birth_date: string; p_org_id: string; p_player_id: string };
+        Returns: undefined;
+      };
     };
     Enums: {
+      arm_feel: "great" | "good" | "okay" | "tired" | "sore" | "pain";
       assignment_status: "active" | "completed" | "paused";
       exercise_category:
         | "strength"
@@ -818,6 +896,8 @@ export type Database = {
       season_phase: "off_season" | "pre_season" | "in_season" | "post_season";
       session_type:
         "strength" | "throwing" | "hitting" | "conditioning" | "recovery" | "practice" | "off";
+      throwing_intensity: "low" | "moderate" | "high" | "max_effort";
+      throwing_type: "long_toss" | "flat_ground" | "bullpen" | "live_abs" | "game" | "check_in";
       workout_status: "completed" | "partial" | "skipped";
     };
     CompositeTypes: {
@@ -930,6 +1010,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      arm_feel: ["great", "good", "okay", "tired", "sore", "pain"],
       assignment_status: ["active", "completed", "paused"],
       exercise_category: [
         "strength",
@@ -958,6 +1039,8 @@ export const Constants = {
         "practice",
         "off",
       ],
+      throwing_intensity: ["low", "moderate", "high", "max_effort"],
+      throwing_type: ["long_toss", "flat_ground", "bullpen", "live_abs", "game", "check_in"],
       workout_status: ["completed", "partial", "skipped"],
     },
   },

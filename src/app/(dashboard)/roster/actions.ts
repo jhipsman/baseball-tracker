@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { FormState } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
-import { ORG_ROLES, PLAYER_POSITIONS, type OrgRole } from "@/constants";
+import { INVITABLE_ROLES, ORG_ROLES, PLAYER_POSITIONS, type OrgRole } from "@/constants";
 import type { Enums } from "@/types/database";
 
 function isRole(v: unknown): v is OrgRole {
@@ -21,7 +21,7 @@ export async function inviteMember(_prev: FormState, formData: FormData): Promis
   const values = { email, role: String(role ?? "") };
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Enter a valid email.", values };
-  if (!isRole(role)) return { error: "Choose a role.", values };
+  if (!isRole(role) || !INVITABLE_ROLES.includes(role)) return { error: "Choose a role.", values };
 
   const { error } = await supabase
     .from("org_invitations")

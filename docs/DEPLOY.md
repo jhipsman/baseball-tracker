@@ -70,6 +70,15 @@ In Supabase:
    ```
 
    Click **Save**.
+3. Still under **Templates**, open **Reset password** and replace its body the same way, so "Forgot password?" links work on any device:
+
+   ```html
+   <h2>Reset your password</h2>
+   <p>Tap below to choose a new password for Diamond Program.</p>
+   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">Choose a new password</a></p>
+   ```
+
+   Click **Save**.
 
 Leave **Confirm email** turned on. Invitations only work for a verified email address, so turning it off would let someone sign up with a coach's or player's address and claim their invite.
 
