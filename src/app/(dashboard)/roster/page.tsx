@@ -6,12 +6,19 @@ import { selectClass } from "@/components/ui/select";
 import { ORG_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { InviteForm } from "./invite-form";
-import { removeMember, revokeInvitation, updateMember } from "./actions";
+import { CreateGroupForm } from "./group-form";
+import {
+  deleteGroup,
+  removeMember,
+  revokeInvitation,
+  setGroupMembers,
+  updateMember,
+} from "./actions";
 
 export const metadata: Metadata = { title: "Roster" };
 
 export default async function RosterPage() {
-  const { supabase, org, membership, user } = await requireActiveOrg();
+  const { supabase, org, membership, user, isStaff } = await requireActiveOrg();
   const isAdmin = membership.role === "admin";
 
   const [{ data: members, error }, invitations] = await Promise.all([
@@ -40,6 +47,15 @@ export default async function RosterPage() {
     .eq("id", org.id)
     .single();
   const origin = await siteOrigin();
+  const { data: groups } = await supabase
+    .from("player_groups")
+    .select("id, name, player_group_members (profile_id)")
+    .eq("org_id", org.id)
+    .order("name");
+  const players = members.filter((m) => m.role === "player");
+  const nameOf = new Map(
+    members.map((m) => [m.profile_id, m.profile.full_name || m.profile.email]),
+  );
   const pending = invitations.data ?? [];
 
   return (
@@ -93,6 +109,92 @@ export default async function RosterPage() {
         </section>
       ) : null}
 
+      {isStaff ? (
+        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <h2 className="font-semibold">Groups</h2>
+          <p className="mt-1 mb-4 text-sm text-zinc-600">
+            Save sets of players (Pitchers, JV…) to assign programs and filter the calendar in one
+            click.
+          </p>
+          <CreateGroupForm />
+          {groups && groups.length > 0 ? (
+            <ul className="mt-4 divide-y divide-zinc-100">
+              {groups.map((g) => {
+                const memberIds = new Set(g.player_group_members.map((m) => m.profile_id));
+                return (
+                  <li key={g.id} className="py-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-medium">{g.name}</span>
+                      <span className="text-sm text-zinc-500">
+                        {memberIds.size} player{memberIds.size === 1 ? "" : "s"}
+                      </span>
+                      <form action={deleteGroup} className="ml-auto">
+                        <input type="hidden" name="id" value={g.id} />
+                        <button
+                          type="submit"
+                          className="text-xs font-semibold text-zinc-400 hover:text-red-600"
+                        >
+                          Delete group
+                        </button>
+                      </form>
+                    </div>
+                    {memberIds.size > 0 ? (
+                      <p className="mt-1 text-sm text-zinc-600">
+                        {[...memberIds].map((id) => nameOf.get(id) ?? "Player").join(", ")}
+                      </p>
+                    ) : null}
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-sm font-semibold text-brand-700">
+                        Edit players
+                      </summary>
+                      {players.length === 0 ? (
+                        <p className="mt-2 text-sm text-zinc-500">No players on the roster yet.</p>
+                      ) : (
+                        <form
+                          key={[...memberIds].sort().join(",")}
+                          action={setGroupMembers}
+                          className="mt-2 space-y-2"
+                        >
+                          <input type="hidden" name="group_id" value={g.id} />
+                          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+                            {players.map((p) => (
+                              <label
+                                key={p.profile_id}
+                                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm ring-1 ring-inset ring-zinc-200 has-checked:bg-brand-50 has-checked:ring-brand-600"
+                              >
+                                <input
+                                  type="checkbox"
+                                  name="player_id"
+                                  value={p.profile_id}
+                                  defaultChecked={memberIds.has(p.profile_id)}
+                                  className="size-4 accent-brand-700"
+                                />
+                                <span className="truncate">
+                                  {nameOf.get(p.profile_id)}
+                                  {p.position ? (
+                                    <span className="ml-1 text-zinc-500">{p.position}</span>
+                                  ) : null}
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                          <button
+                            type="submit"
+                            className="h-9 rounded-lg bg-brand-700 px-3 text-sm font-semibold text-white hover:bg-brand-600"
+                          >
+                            Save players
+                          </button>
+                        </form>
+                      )}
+                    </details>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
+
       <section className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200">
         <ul className="divide-y divide-zinc-100">
           {members.map((m) => {
@@ -119,7 +221,12 @@ export default async function RosterPage() {
 
                 {isAdmin && !isOwner ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    <form action={updateMember} className="flex flex-wrap items-center gap-2">
+                    <form
+                      // Remount with fresh defaults after a save; React resets forms after an action.
+                      key={`${m.role}-${m.position}-${m.jersey_number}`}
+                      action={updateMember}
+                      className="flex flex-wrap items-center gap-2"
+                    >
                       <input type="hidden" name="id" value={m.id} />
                       <select
                         name="role"

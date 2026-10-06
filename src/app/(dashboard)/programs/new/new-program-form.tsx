@@ -9,7 +9,13 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { createProgram } from "../actions";
 import { ProgramFields } from "../program-fields";
 
-export function NewProgramForm({ templates }: { templates: { id: string; name: string }[] }) {
+export function NewProgramForm({
+  templates,
+  defaultSeason,
+}: {
+  templates: { id: string; name: string }[];
+  defaultSeason: string;
+}) {
   const [state, action] = useActionState<FormState, FormData>(createProgram, {});
   const [templateId, setTemplateId] = useState(state.values?.template_id ?? "");
   const v = state.values ?? {};
@@ -37,7 +43,7 @@ export function NewProgramForm({ templates }: { templates: { id: string; name: s
           name: v.name,
           description: v.description,
           program_type: v.program_type,
-          season_phase: v.season_phase,
+          season_phase: v.season_phase ?? defaultSeason,
           is_template: v.is_template === "on",
         }}
       />

@@ -1,6 +1,5 @@
 "use client";
 
-import { useActionState } from "react";
 import Link from "next/link";
 import type { FormState } from "@/lib/auth/actions";
 import type { Tables } from "@/types/database";
@@ -8,6 +7,7 @@ import { Field } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { SelectField } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { useFormAction } from "@/components/ui/use-form-action";
 import {
   CATEGORY_LABELS,
   EQUIPMENT,
@@ -56,12 +56,17 @@ function CheckboxGroup({
 }
 
 export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
-  const [state, action] = useActionState<FormState, FormData>(saveExercise, {});
-  const [deleteState, deleteAction] = useActionState<FormState, FormData>(deleteExercise, {});
+  const save = useFormAction<FormState>(saveExercise, {});
+  const del = useFormAction<FormState>(deleteExercise, {});
+  const state = save.state;
+  const deleteState = del.state;
 
   return (
     <div className="space-y-6">
-      <form action={action} className="space-y-5 rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+      <form
+        onSubmit={save.onSubmit}
+        className="space-y-5 rounded-xl bg-white p-5 ring-1 ring-zinc-200"
+      >
         {exercise ? <input type="hidden" name="id" value={exercise.id} /> : null}
         <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
           <Field label="Name" name="name" defaultValue={exercise?.name} required />
@@ -121,7 +126,7 @@ export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
         />
         <FormMessage state={state} />
         <div className="flex items-center gap-3">
-          <SubmitButton pendingLabel="Saving…">
+          <SubmitButton pending={save.pending} pendingLabel="Saving…">
             {exercise ? "Save changes" : "Create exercise"}
           </SubmitButton>
           <Link href="/exercises" className="text-sm font-medium text-zinc-600 hover:underline">
@@ -131,10 +136,15 @@ export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
       </form>
 
       {exercise ? (
-        <form action={deleteAction} className="space-y-2">
+        <form onSubmit={del.onSubmit} className="space-y-2">
           <input type="hidden" name="id" value={exercise.id} />
           <FormMessage state={deleteState} />
-          <SubmitButton variant="ghost" className="text-red-700" pendingLabel="Deleting…">
+          <SubmitButton
+            pending={del.pending}
+            variant="ghost"
+            className="text-red-700"
+            pendingLabel="Deleting…"
+          >
             Delete exercise
           </SubmitButton>
         </form>

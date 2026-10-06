@@ -1,5 +1,8 @@
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { OrgSwitcher } from "@/components/layout/org-switcher";
+import { SeasonToggle } from "@/components/layout/season-toggle";
+import { TimezoneSync } from "@/components/layout/timezone-sync";
+import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
 import { ROLE_LABELS } from "@/constants";
@@ -9,14 +12,16 @@ const NAV: NavItem[] = [
   { href: "/exercises", label: "Exercises" },
   { href: "/programs", label: "Programs" },
   { href: "/roster", label: "Roster" },
-  { href: "/calendar", label: "Calendar", soon: true },
+  { href: "/calendar", label: "Calendar" },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, org, membership, memberships } = await requireActiveOrg();
+  const { user, org, membership, memberships, isStaff } = await requireActiveOrg();
+  const { tz } = await playerToday();
 
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
+      <TimezoneSync current={tz ? decodeURIComponent(tz) : undefined} />
       <aside className="border-b border-zinc-200 bg-white md:sticky md:top-0 md:h-dvh md:w-60 md:shrink-0 md:border-r md:border-b-0">
         <div className="flex h-full flex-col gap-4 p-4">
           <div className="flex items-center gap-2">
@@ -34,6 +39,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {memberships.length > 1 ? (
             <OrgSwitcher orgs={memberships.map((m) => m.org)} activeId={org.id} />
           ) : null}
+          <div className="space-y-1">
+            <p className="text-[11px] font-semibold tracking-wide text-zinc-400 uppercase">
+              Season
+            </p>
+            <SeasonToggle phase={org.current_season_phase} editable={isStaff} />
+          </div>
           <NavLinks items={NAV} />
           <div className="mt-auto hidden border-t border-zinc-200 pt-4 md:block">
             <p className="truncate text-xs text-zinc-500">{user.email}</p>

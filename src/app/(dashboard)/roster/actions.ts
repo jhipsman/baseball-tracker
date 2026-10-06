@@ -81,3 +81,55 @@ export async function removeMember(formData: FormData) {
     .eq("org_id", org.id);
   revalidatePath("/roster");
 }
+
+export async function createGroup(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { supabase, user, org, isStaff } = await requireActiveOrg();
+  if (!isStaff) return { error: "Only coaches, trainers, and admins can manage groups." };
+  const name = String(formData.get("name") ?? "")
+    .trim()
+    .slice(0, 60);
+  if (!name) return { error: "Group name is required." };
+
+  const { error } = await supabase
+    .from("player_groups")
+    .insert({ org_id: org.id, name, created_by: user.id });
+  if (error) {
+    if (error.code === "23505") return { error: `There's already a group called "${name}".` };
+    return { error: error.message };
+  }
+  revalidatePath("/roster");
+  return { message: `Created "${name}". Add players to it below.` };
+}
+
+export async function deleteGroup(formData: FormData) {
+  const { supabase, org } = await requireActiveOrg();
+  await supabase
+    .from("player_groups")
+    .delete()
+    .eq("id", String(formData.get("id")))
+    .eq("org_id", org.id);
+  revalidatePath("/roster");
+}
+
+/** Replace a group's members with the checked players. */
+export async function setGroupMembers(formData: FormData) {
+  const { supabase, org } = await requireActiveOrg();
+  const groupId = String(formData.get("group_id") ?? "");
+  const playerIds = [...new Set(formData.getAll("player_id").map(String))];
+
+  const { data: group } = await supabase
+    .from("player_groups")
+    .select("id")
+    .eq("id", groupId)
+    .eq("org_id", org.id)
+    .maybeSingle();
+  if (!group) return;
+
+  await supabase.from("player_group_members").delete().eq("group_id", groupId);
+  if (playerIds.length > 0) {
+    await supabase
+      .from("player_group_members")
+      .insert(playerIds.map((profile_id) => ({ group_id: groupId, profile_id })));
+  }
+  revalidatePath("/roster");
+}

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { addDays, daysBetween, dayOfWeek, scheduleFor, todayIn } from "./schedule";
+import {
+  addDays,
+  daysBetween,
+  dayOfWeek,
+  planDates,
+  scheduleFor,
+  todayIn,
+  weekStartOf,
+} from "./schedule";
 
 const flexWeek = (prefix: string, n = 3) => ({
   days: Array.from({ length: n }, (_, i) => ({ id: `${prefix}d${i + 1}`, dayOfWeek: null })),
@@ -89,5 +97,40 @@ describe("scheduleFor", () => {
         catchUpDayId: "mon",
       });
     });
+  });
+});
+
+describe("planDates", () => {
+  it("spreads flexible days through each week", () => {
+    const plan = planDates(START, [flexWeek("w1"), flexWeek("w2")]);
+    expect(plan.map((p) => p.date)).toEqual([
+      "2026-10-05",
+      "2026-10-07",
+      "2026-10-09",
+      "2026-10-12",
+      "2026-10-14",
+      "2026-10-16",
+    ]);
+  });
+
+  it("places weekday-pinned days on their weekday within the program week", () => {
+    // Start on a Wednesday; Monday falls 5 days later in the same program week.
+    const plan = planDates("2026-10-07", [
+      {
+        days: [
+          { id: "mon", dayOfWeek: 1 },
+          { id: "wed", dayOfWeek: 3 },
+        ],
+      },
+    ]);
+    expect(plan).toEqual([
+      { dayId: "mon", weekIndex: 0, date: "2026-10-12" },
+      { dayId: "wed", weekIndex: 0, date: "2026-10-07" },
+    ]);
+  });
+
+  it("finds the Sunday that starts a week", () => {
+    expect(weekStartOf("2026-10-07")).toBe("2026-10-04");
+    expect(weekStartOf("2026-10-04")).toBe("2026-10-04");
   });
 });

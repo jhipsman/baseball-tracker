@@ -193,7 +193,8 @@ export function LogForm({
     });
   }
 
-  const finishStatus = done === total && total > 0 ? "completed" : "partial";
+  // A day with nothing to tick off (e.g. practice) counts as completed.
+  const finishStatus = done === total ? "completed" : "partial";
 
   return (
     <div className="space-y-4">
@@ -420,7 +421,7 @@ export function LogForm({
       <div className="sticky bottom-20 z-10 space-y-2 rounded-2xl bg-white/95 p-3 shadow-lg ring-1 ring-zinc-200 backdrop-blur">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
-            {done}/{total} sets done
+            {total > 0 ? `${done}/${total} sets done` : "Session"}
           </span>
           <span className="text-zinc-500">
             {finishStatus === "completed" ? "Ready to finish" : "Will save as partial"}

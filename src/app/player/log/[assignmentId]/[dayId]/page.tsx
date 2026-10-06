@@ -155,12 +155,11 @@ export default async function LogWorkoutPage({
       </div>
 
       {items.length === 0 ? (
-        <p className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
-          Your coach hasn&apos;t added exercises to this day yet.
+        <p className="rounded-2xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+          No exercises listed for this day. Mark it done when you&apos;ve finished the session.
         </p>
-      ) : (
-        <LogForm assignmentId={assignmentId} dayId={dayId} items={items} existing={existing} />
-      )}
+      ) : null}
+      <LogForm assignmentId={assignmentId} dayId={dayId} items={items} existing={existing} />
     </div>
   );
 }

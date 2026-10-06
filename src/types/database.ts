@@ -230,6 +230,7 @@ export type Database = {
       organizations: {
         Row: {
           created_at: string;
+          current_season_phase: Database["public"]["Enums"]["season_phase"];
           id: string;
           name: string;
           owner_id: string;
@@ -240,6 +241,7 @@ export type Database = {
         };
         Insert: {
           created_at?: string;
+          current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
           name: string;
           owner_id: string;
@@ -250,6 +252,7 @@ export type Database = {
         };
         Update: {
           created_at?: string;
+          current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
           name?: string;
           owner_id?: string;
@@ -264,6 +267,75 @@ export type Database = {
             columns: ["owner_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      player_group_members: {
+        Row: {
+          group_id: string;
+          profile_id: string;
+        };
+        Insert: {
+          group_id: string;
+          profile_id: string;
+        };
+        Update: {
+          group_id?: string;
+          profile_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "player_group_members_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "player_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "player_group_members_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      player_groups: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          name: string;
+          org_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name: string;
+          org_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          name?: string;
+          org_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "player_groups_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "player_groups_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -611,6 +683,7 @@ export type Database = {
         Args: { p_name: string; p_slug: string };
         Returns: {
           created_at: string;
+          current_season_phase: Database["public"]["Enums"]["season_phase"];
           id: string;
           name: string;
           owner_id: string;
@@ -663,6 +736,10 @@ export type Database = {
           p_status: Database["public"]["Enums"]["workout_status"];
         };
         Returns: string;
+      };
+      set_current_season_phase: {
+        Args: { p_org_id: string; p_phase: Database["public"]["Enums"]["season_phase"] };
+        Returns: undefined;
       };
     };
     Enums: {

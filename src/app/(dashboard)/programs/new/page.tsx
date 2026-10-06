@@ -19,7 +19,7 @@ export default async function NewProgramPage() {
   return (
     <div className="max-w-2xl">
       <h1 className="mb-6 text-2xl font-semibold tracking-tight">New program</h1>
-      <NewProgramForm templates={templates ?? []} />
+      <NewProgramForm templates={templates ?? []} defaultSeason={org.current_season_phase} />
     </div>
   );
 }

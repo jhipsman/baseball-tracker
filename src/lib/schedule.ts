@@ -100,3 +100,32 @@ export function todayIn(timeZone: string | undefined, now = new Date()) {
     return now.toISOString().slice(0, 10);
   }
 }
+
+/**
+ * Calendar date for every day of a program.
+ * - Week w starts on startDate + 7w.
+ * - Weekday-pinned days land on that weekday within the week.
+ * - Flexible days are spread evenly through the week in order
+ *   (e.g. 3 days → offsets 0, 2, 4), so a coach sees a sensible plan.
+ */
+export function planDates(startDate: string, weeks: ScheduleWeek[]) {
+  const startDow = dayOfWeek(startDate);
+  const out: { dayId: string; weekIndex: number; date: string }[] = [];
+  weeks.forEach((week, w) => {
+    const weekStart = addDays(startDate, w * 7);
+    const n = week.days.length;
+    week.days.forEach((d, i) => {
+      const offset =
+        d.dayOfWeek != null
+          ? (d.dayOfWeek - startDow + 7) % 7
+          : Math.floor((i * 7) / Math.max(n, 1));
+      out.push({ dayId: d.id, weekIndex: w, date: addDays(weekStart, offset) });
+    });
+  });
+  return out;
+}
+
+/** Sunday-start week containing `date`. */
+export function weekStartOf(date: string) {
+  return addDays(date, -dayOfWeek(date));
+}

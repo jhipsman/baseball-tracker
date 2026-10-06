@@ -142,4 +142,17 @@ Coaches see each assignment's progress ("3/12 logged · last 2026-10-05") on the
 
 Logs are stored in `workout_logs` and `exercise_logs` and saved atomically by `save_workout_log(...)`. Players can only write their own logs for days of programs assigned to them. Coaches can read logs in their org but not change them. Logs survive program edits, because a deleted day or exercise leaves the log intact.
 
-See the project brief for the full roadmap. Phases 1 and 2 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
+## Planning views (Phase 3)
+
+- **Calendar** (`/calendar`, coaches):
+  - **Week view:** players × days. Each workout is colored *done / partial / skipped / missed / today / upcoming*, with "3/4 logged" per player.
+  - **Month view:** team totals per day, e.g. "Lower ×12 · 9✓ · 2 missed".
+  - Filter by group.
+  - Weekday-pinned days sit on their weekday. Flexible days are spread evenly through each program week. Logged workouts show on the day they were actually done.
+- **Season toggle** in the sidebar (off, pre, in, post). Programs built for the current season are starred and listed first, new programs default to it, and the Programs and Templates lists filter by type and season.
+- **Groups** (Roster → Groups): saved sets of players like "Pitchers" or "JV".
+- **Bulk assign:** on a program, quick-select by group, by position, or all players, then assign in one click.
+
+Docs: [docs/ROADMAP.md](docs/ROADMAP.md) keeps product notes for later phases: video review with coach drawing, angles and voice-over or AI analysis, exercise tracking types, demo videos, and the native app.
+
+See the project brief for the full roadmap. Phases 1–3 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.

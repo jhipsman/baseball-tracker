@@ -1,15 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
-import { PROGRAM_TYPE_LABELS, SEASON_PHASE_LABELS } from "@/constants";
+import {
+  PROGRAM_TYPE_LABELS,
+  PROGRAM_TYPES,
+  SEASON_PHASE_LABELS,
+  SEASON_PHASES,
+} from "@/constants";
+import type { Enums } from "@/types/database";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Programs" };
 
 export default async function ProgramsPage({ searchParams }: PageProps<"/programs">) {
   const { supabase, org, isStaff } = await requireActiveOrg();
-  const { view } = await searchParams;
-  const templates = view === "templates";
+  const params = await searchParams;
+  const templates = params.view === "templates";
+  const type = (PROGRAM_TYPES as readonly string[]).includes(String(params.type))
+    ? (params.type as Enums<"program_type">)
+    : undefined;
+  const phase = (SEASON_PHASES as readonly string[]).includes(String(params.phase))
+    ? (params.phase as Enums<"season_phase">)
+    : undefined;
+  const season = org.current_season_phase;
 
   const { data: programs, error } = await supabase
     .from("programs")
@@ -20,6 +33,19 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
     .eq("is_template", templates)
     .order("updated_at", { ascending: false });
   if (error) throw error;
+
+  const filtered = programs
+    .filter((p) => (!type || p.program_type === type) && (!phase || p.season_phase === phase))
+    // Programs built for the current season first ("affects recommendations").
+    .toSorted((a, b) => Number(b.season_phase === season) - Number(a.season_phase === season));
+
+  const href = (patch: Record<string, string | undefined>) => {
+    const sp = new URLSearchParams();
+    const next = { view: templates ? "templates" : undefined, type, phase, ...patch };
+    for (const [k, v] of Object.entries(next)) if (v) sp.set(k, v);
+    const q = sp.toString();
+    return q ? `/programs?${q}` : "/programs";
+  };
 
   return (
     <div className="max-w-5xl">
@@ -45,8 +71,8 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
       {isStaff ? (
         <div className="mt-6 flex gap-1 border-b border-zinc-200">
           {[
-            { label: "Programs", href: "/programs", active: !templates },
-            { label: "Templates", href: "/programs?view=templates", active: templates },
+            { label: "Programs", href: href({ view: undefined }), active: !templates },
+            { label: "Templates", href: href({ view: "templates" }), active: templates },
           ].map((t) => (
             <Link
               key={t.label}
@@ -65,10 +91,48 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
         </div>
       ) : null}
 
-      {programs.length === 0 ? (
+      <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+        {[undefined, ...PROGRAM_TYPES].map((t) => (
+          <Link
+            key={t ?? "all"}
+            href={href({ type: t })}
+            className={cn(
+              "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
+              t === type
+                ? "bg-brand-700 text-white ring-brand-700"
+                : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+            )}
+          >
+            {t ? PROGRAM_TYPE_LABELS[t] : "All types"}
+          </Link>
+        ))}
+        <span className="mx-1 h-5 w-px bg-zinc-300" aria-hidden />
+        {[undefined, ...SEASON_PHASES].map((ph) => (
+          <Link
+            key={ph ?? "any"}
+            href={href({ phase: ph })}
+            className={cn(
+              "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
+              ph === phase
+                ? "bg-zinc-900 text-white ring-zinc-900"
+                : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+            )}
+          >
+            {ph ? SEASON_PHASE_LABELS[ph] : "Any season"}
+          </Link>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
         <div className="mt-10 rounded-xl border-2 border-dashed border-zinc-300 p-10 text-center">
           <p className="font-medium">
-            {templates ? "No templates yet" : isStaff ? "No programs yet" : "Nothing assigned yet"}
+            {type || phase
+              ? "Nothing matches these filters"
+              : templates
+                ? "No templates yet"
+                : isStaff
+                  ? "No programs yet"
+                  : "Nothing assigned yet"}
           </p>
           <p className="mt-1 text-sm text-zinc-500">
             {templates
@@ -80,7 +144,7 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
         </div>
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-          {programs.map((p) => {
+          {filtered.map((p) => {
             const assigned = p.program_assignments[0]?.count ?? 0;
             return (
               <li key={p.id}>
@@ -97,7 +161,15 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
                       {PROGRAM_TYPE_LABELS[p.program_type]}
                     </span>
                     {p.season_phase ? (
-                      <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-zinc-700">
+                      <span
+                        className={cn(
+                          "rounded px-1.5 py-0.5",
+                          p.season_phase === season
+                            ? "bg-amber-100 font-medium text-amber-900"
+                            : "bg-zinc-100 text-zinc-700",
+                        )}
+                      >
+                        {p.season_phase === season ? "★ " : ""}
                         {SEASON_PHASE_LABELS[p.season_phase]}
                       </span>
                     ) : null}

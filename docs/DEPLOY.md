@@ -31,7 +31,14 @@ npx supabase db push --include-seed
 - `link` asks for the database password from step 1.
 - `db push --include-seed` creates every table and security rule, then loads the 130-exercise library. Answer `Y` when it lists the migrations.
 
-Run `npx supabase db push` again after any future update that adds a migration. Leave off `--include-seed` from now on, although re-running it is harmless.
+**After every update that adds a migration** (files in `supabase/migrations/`), run this from the project folder **before** or right after Vercel redeploys, otherwise new pages error until the database catches up:
+
+```
+git pull
+npx supabase db push
+```
+
+Leave off `--include-seed` from now on, although re-running it is harmless.
 
 ## 3. Deploy to Vercel
 

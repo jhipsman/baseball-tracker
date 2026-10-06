@@ -61,6 +61,13 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
   ]);
 
   const names = new Map((exercises ?? []).map((e) => [e.id, e.name]));
+  const { data: groups } = isStaff
+    ? await supabase
+        .from("player_groups")
+        .select("id, name, player_group_members (profile_id)")
+        .eq("org_id", org.id)
+        .order("name")
+    : { data: [] };
 
   // Workout logging progress per assignment.
   const assignmentIds = (assignments ?? []).map((a) => a.id);
@@ -236,7 +243,13 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
               detail: [p.position, p.jersey_number != null ? `#${p.jersey_number}` : null]
                 .filter(Boolean)
                 .join(" "),
+              position: p.position,
               assigned: activeIds.has(p.profile_id),
+            }))}
+            groups={(groups ?? []).map((g) => ({
+              id: g.id,
+              name: g.name,
+              memberIds: g.player_group_members.map((m) => m.profile_id),
             }))}
           />
 
