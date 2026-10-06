@@ -1,7 +1,7 @@
 import "server-only";
 
 import { cache } from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { STAFF_ROLES } from "@/constants";
@@ -10,11 +10,13 @@ export const ACTIVE_ORG_COOKIE = "dp_active_org";
 
 /** Remember which org the user is working in. Server actions / route handlers only. */
 export async function setActiveOrgCookie(orgId: string) {
+  // Secure only over HTTPS, so `next start` over plain http on a LAN still works.
+  const https = (await headers()).get("x-forwarded-proto") === "https";
   (await cookies()).set(ACTIVE_ORG_COOKIE, orgId, {
     path: "/",
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: https,
     maxAge: 60 * 60 * 24 * 365,
   });
 }

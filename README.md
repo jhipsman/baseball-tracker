@@ -19,6 +19,16 @@ npm run dev
 
 Open http://localhost:3000, create an account, and create your organization. Email confirmation is off locally, so sign-up logs you straight in.
 
+### Opening it from another device (laptop, phone) on the same network
+
+```bash
+npm run dev:lan
+```
+
+Then browse to `http://<this-computer's-IP>:3000` from the other device. On Windows, find the IP with `ipconfig` (the "IPv4 Address", e.g. `192.168.1.20`), and allow Node.js through Windows Defender Firewall when prompted (Private networks). Only the computer running the app needs Supabase/Docker; other devices just need the browser.
+
+Common home/office address ranges are already allowed in `next.config.ts`. For anything else (e.g. a tunnel hostname), set `DEV_ALLOWED_ORIGINS=host1,host2` in `.env.local`.
+
 ### Using a hosted Supabase project
 
 ```bash

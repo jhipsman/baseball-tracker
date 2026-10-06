@@ -1,3 +1,4 @@
+import { uuid } from "@/lib/uuid";
 import type {
   BuilderDay,
   BuilderItem,
@@ -34,7 +35,7 @@ export type BuilderAction =
   | { type: "ungroup"; dayId: string; groupId: string }
   | { type: "replaceWeeks"; weeks: BuilderWeek[] };
 
-let idFactory: () => string = () => crypto.randomUUID();
+let idFactory: () => string = uuid;
 /** Test hook for deterministic ids. */
 export function setIdFactory(fn: () => string) {
   idFactory = fn;
