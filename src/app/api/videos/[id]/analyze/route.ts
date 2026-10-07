@@ -68,6 +68,7 @@ export async function POST(request: Request, ctx: RouteContext<"/api/videos/[id]
   } catch (e) {
     if (e instanceof AnalysisError) return NextResponse.json({ error: e.message }, { status: 502 });
     console.error(e);
-    return NextResponse.json({ error: "The AI analysis failed. Try again." }, { status: 500 });
+    const detail = e instanceof Error && e.message ? `: ${e.message.slice(0, 200)}` : ".";
+    return NextResponse.json({ error: `The AI analysis failed${detail}` }, { status: 500 });
   }
 }

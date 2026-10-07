@@ -274,7 +274,16 @@ function AiPanel({
         body: JSON.stringify({ frames, focus }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error ?? "The AI analysis failed.");
+      if (!res.ok) {
+        throw new Error(
+          json.error ??
+            (res.status === 504
+              ? "The analysis ran past the server's time limit. Try fewer frames."
+              : res.status === 413
+                ? "Too much image data. Try fewer frames."
+                : `The AI analysis failed (error ${res.status}).`),
+        );
+      }
       setDrafts((d) => [
         { id: json.id, createdAt: json.createdAt, model: json.model, analysis: json.analysis },
         ...d,

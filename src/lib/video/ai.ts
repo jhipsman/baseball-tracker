@@ -16,6 +16,51 @@ Give at most three improvements, most important first, each with a short cue and
 
 export class AnalysisError extends Error {}
 
+/** The human-readable message inside an API error body, e.g. "Your credit balance is too low…". */
+function apiMessage(e: InstanceType<typeof Anthropic.APIError>): string {
+  const body = e.error as { error?: { message?: unknown }; message?: unknown } | undefined;
+  const m = body?.error?.message ?? body?.message ?? e.message;
+  return String(m ?? "").slice(0, 300);
+}
+
+/** Maps SDK errors to messages a coach can act on. API messages never contain the key. */
+function toAnalysisError(e: unknown): Error {
+  if (!(e instanceof Anthropic.APIError)) {
+    console.error("AI analysis failed", e);
+    return e instanceof Error ? e : new Error(String(e));
+  }
+  const msg = apiMessage(e);
+  console.error("AI analysis failed", e.status, msg);
+  if (e instanceof Anthropic.APIConnectionTimeoutError) {
+    return new AnalysisError(
+      "The AI took too long to answer. Try fewer frames or a shorter window.",
+    );
+  }
+  if (e instanceof Anthropic.APIConnectionError) {
+    return new AnalysisError("Couldn't reach the AI service. Try again in a minute.");
+  }
+  if (e instanceof Anthropic.AuthenticationError) {
+    return new AnalysisError(
+      "The AI key isn't valid. In Vercel, check ANTHROPIC_API_KEY (no spaces or quotes), then redeploy.",
+    );
+  }
+  if (/credit balance/i.test(msg)) {
+    return new AnalysisError(
+      "Your Anthropic account is out of credits. Add credits at console.anthropic.com → Settings → Billing, then try again.",
+    );
+  }
+  if (e instanceof Anthropic.PermissionDeniedError || e instanceof Anthropic.NotFoundError) {
+    return new AnalysisError(`This API key can't use ${AI_MODEL}: ${msg}`);
+  }
+  if (e instanceof Anthropic.RateLimitError) {
+    return new AnalysisError("The AI rate limit was hit. Wait a minute and try again.");
+  }
+  if (e.status === 529 || e instanceof Anthropic.InternalServerError) {
+    return new AnalysisError("The AI service is busy right now. Try again in a minute.");
+  }
+  return new AnalysisError(`The AI request failed (${e.status ?? "error"}): ${msg}`);
+}
+
 export async function analyzeFrames(args: {
   frames: Frame[];
   videoType: Enums<"video_type">;
@@ -23,7 +68,12 @@ export async function analyzeFrames(args: {
   playerNotes: string | null;
   focus: string;
 }): Promise<{ analysis: VideoAnalysis; model: string }> {
-  const client = new Anthropic(); // reads ANTHROPIC_API_KEY
+  // Reads ANTHROPIC_API_KEY. Stop well before the route's time limit so the coach gets a real error.
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY?.trim(),
+    timeout: 100_000,
+    maxRetries: 1,
+  });
 
   const content: Anthropic.Beta.BetaContentBlockParam[] = [];
   for (const [i, f] of args.frames.entries()) {
@@ -44,9 +94,8 @@ export async function analyzeFrames(args: {
     .join("\n");
   content.push({ type: "text", text: context });
 
-  let message: Anthropic.Beta.BetaMessage;
-  try {
-    message = await client.beta.messages
+  const request = (withFallbacks: boolean) =>
+    client.beta.messages
       .stream({
         model: AI_MODEL,
         max_tokens: 8000,
@@ -56,24 +105,28 @@ export async function analyzeFrames(args: {
           format: { type: "json_schema", schema: ANALYSIS_SCHEMA },
         },
         // If the model declines, the API retries on Anthropic's recommended fallback model.
-        betas: ["server-side-fallback-2026-07-01"],
-        fallbacks: "default",
+        ...(withFallbacks
+          ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" as const }
+          : {}),
         system: SYSTEM,
         messages: [{ role: "user", content }],
       })
       .finalMessage();
+
+  let message: Anthropic.Beta.BetaMessage;
+  try {
+    try {
+      message = await request(true);
+    } catch (e) {
+      // If this account can't use the fallback beta, run the plain request instead.
+      if (e instanceof Anthropic.BadRequestError && /fallback|beta/i.test(apiMessage(e))) {
+        message = await request(false);
+      } else {
+        throw e;
+      }
+    }
   } catch (e) {
-    if (e instanceof Anthropic.AuthenticationError) {
-      throw new AnalysisError("The AI key isn't valid. Check ANTHROPIC_API_KEY.");
-    }
-    if (e instanceof Anthropic.RateLimitError) {
-      throw new AnalysisError("The AI service is busy. Try again in a minute.");
-    }
-    if (e instanceof Anthropic.APIError) {
-      console.error("AI analysis failed", e.status, e.message);
-      throw new AnalysisError("The AI analysis failed. Try again.");
-    }
-    throw e;
+    throw toAnalysisError(e);
   }
 
   if (message.stop_reason === "refusal") {
