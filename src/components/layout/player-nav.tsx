@@ -17,6 +17,12 @@ const ITEMS = [
     icon: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM5.6 6.6c2.2 1.6 3.4 3.4 3.4 5.4s-1.2 3.8-3.4 5.4M18.4 6.6c-2.2 1.6-3.4 3.4-3.4 5.4s1.2 3.8 3.4 5.4",
   },
   {
+    href: "/player/videos",
+    label: "Videos",
+    // video camera
+    icon: "M3 7a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 10l5-3v10l-5-3",
+  },
+  {
     href: "/player/history",
     label: "History",
     icon: "M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z",

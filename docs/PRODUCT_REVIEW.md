@@ -48,7 +48,6 @@ The core loop works end to end and is covered by automated browser tests:
 
 ### Already planned (later phases)
 
-- Video review with coach drawing, angles, and voice-over, or AI analysis (Phase 6)
 - Practice plans, messaging, and the parent dashboard (Phase 7)
 - Billing and plan tiers (Phase 8)
 - Native app (Phase 9)

@@ -9,26 +9,23 @@ Generic apps log lifts. Diamond Program should know about **the throwing arm and
 - Throwing workload: pitch counts, long-toss distances, bullpen plans, arm-feel check-ins (Phase 5)
 - Safety alerts: MLB Pitch Smart limits by age, acute:chronic workload spikes, multi-sport load (Phase 5)
 - Season-aware programming: off-season → pre-season → in-season periodization (Phase 3 toggle, AI later)
-- Swing and pitching video feedback from a coach or AI (Phase 6)
+- Swing and pitching video feedback from a coach or AI, with drawings, angles, and voice-over (Phase 6)
 - Coach-run teams: one coach, many players, compliance at a glance (Phases 3–4)
 
 Phase 5 is the strongest differentiator. Consider pulling it ahead of Phase 4 if needed.
 
-## Video analysis (Phase 6)
+## Video analysis (Phase 6, built)
 
-Two review paths for every uploaded video (swing, pitching, fielding, exercise form):
+Built: upload, coach queue, frame stepping and slow motion, line/arrow/angle/circle/freehand drawings and timestamped notes, voice-over breakdown recording, written feedback, and optional Claude analysis that the coach edits before sharing.
 
-1. **Coach review**
-   - Frame-by-frame scrubbing and slow motion.
-   - Drawing tools on the video: lines, **angles** (e.g. hip-shoulder separation, arm slot, knee flexion), circles, arrows, freehand.
-   - **Voice-over** recorded while scrubbing and drawing, so the player gets a narrated breakdown.
-   - Text notes, and side-by-side or overlay comparison with an earlier rep or a model video.
-   - Annotated review sent back to the player with a notification.
-2. **AI analysis (optional)**
-   - Claude vision analysis of mechanics, with clear "AI, not a replacement for coaching eyes" framing.
-   - Coach can accept, edit, or discard the AI notes before they reach the player ("AI assists, never overrides").
+Still to do:
 
-Storage: Supabase Storage buckets per org. Annotations stored as structured data (shape + timestamp + frame), not burned into the video, so they stay editable.
+- Side-by-side or overlay comparison with an earlier rep or a model video.
+- Notify the player when a review is sent (needs push notifications).
+- Player replies on a review (a short thread per video).
+- Larger uploads: compress in the browser or use resumable uploads (TUS) on a paid Supabase plan.
+- Clean up storage files when a whole org or player is deleted (today files are removed when a video is deleted).
+- Pose estimation (joint tracking) to measure angles automatically and give the AI real measurements, not just frames.
 
 ## Workout logging improvements (queued)
 

@@ -734,6 +734,194 @@ export type Database = {
           },
         ];
       };
+      video_ai_analyses: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          model: string;
+          result: NonNullable<Json>;
+          video_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          model: string;
+          result: NonNullable<Json>;
+          video_id: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          model?: string;
+          result?: NonNullable<Json>;
+          video_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "video_ai_analyses_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "video_ai_analyses_video_id_fkey";
+            columns: ["video_id"];
+            isOneToOne: false;
+            referencedRelation: "videos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      video_annotations: {
+        Row: {
+          author_id: string | null;
+          color: string | null;
+          comment: string | null;
+          created_at: string;
+          id: string;
+          kind: Database["public"]["Enums"]["annotation_kind"];
+          shape: Json | null;
+          t_seconds: number;
+          video_id: string;
+        };
+        Insert: {
+          author_id?: string | null;
+          color?: string | null;
+          comment?: string | null;
+          created_at?: string;
+          id?: string;
+          kind: Database["public"]["Enums"]["annotation_kind"];
+          shape?: Json | null;
+          t_seconds: number;
+          video_id: string;
+        };
+        Update: {
+          author_id?: string | null;
+          color?: string | null;
+          comment?: string | null;
+          created_at?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["annotation_kind"];
+          shape?: Json | null;
+          t_seconds?: number;
+          video_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "video_annotations_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "video_annotations_video_id_fkey";
+            columns: ["video_id"];
+            isOneToOne: false;
+            referencedRelation: "videos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      videos: {
+        Row: {
+          ai_summary: string | null;
+          breakdown_path: string | null;
+          created_at: string;
+          duration_s: number | null;
+          id: string;
+          mime_type: string | null;
+          notes: string | null;
+          org_id: string;
+          player_id: string;
+          review_summary: string | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
+          size_bytes: number | null;
+          status: Database["public"]["Enums"]["video_status"];
+          storage_path: string;
+          thumb_path: string | null;
+          title: string;
+          uploaded_by: string | null;
+          video_type: Database["public"]["Enums"]["video_type"];
+        };
+        Insert: {
+          ai_summary?: string | null;
+          breakdown_path?: string | null;
+          created_at?: string;
+          duration_s?: number | null;
+          id?: string;
+          mime_type?: string | null;
+          notes?: string | null;
+          org_id: string;
+          player_id: string;
+          review_summary?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          size_bytes?: number | null;
+          status?: Database["public"]["Enums"]["video_status"];
+          storage_path: string;
+          thumb_path?: string | null;
+          title: string;
+          uploaded_by?: string | null;
+          video_type?: Database["public"]["Enums"]["video_type"];
+        };
+        Update: {
+          ai_summary?: string | null;
+          breakdown_path?: string | null;
+          created_at?: string;
+          duration_s?: number | null;
+          id?: string;
+          mime_type?: string | null;
+          notes?: string | null;
+          org_id?: string;
+          player_id?: string;
+          review_summary?: string | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
+          size_bytes?: number | null;
+          status?: Database["public"]["Enums"]["video_status"];
+          storage_path?: string;
+          thumb_path?: string | null;
+          title?: string;
+          uploaded_by?: string | null;
+          video_type?: Database["public"]["Enums"]["video_type"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "videos_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "videos_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "videos_reviewed_by_fkey";
+            columns: ["reviewed_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "videos_uploaded_by_fkey";
+            columns: ["uploaded_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       workout_logs: {
         Row: {
           created_at: string;
@@ -875,6 +1063,7 @@ export type Database = {
       };
     };
     Enums: {
+      annotation_kind: "note" | "line" | "arrow" | "angle" | "circle" | "freehand";
       arm_feel: "great" | "good" | "okay" | "tired" | "sore" | "pain";
       assignment_status: "active" | "completed" | "paused";
       exercise_category:
@@ -898,6 +1087,8 @@ export type Database = {
         "strength" | "throwing" | "hitting" | "conditioning" | "recovery" | "practice" | "off";
       throwing_intensity: "low" | "moderate" | "high" | "max_effort";
       throwing_type: "long_toss" | "flat_ground" | "bullpen" | "live_abs" | "game" | "check_in";
+      video_status: "pending" | "reviewed";
+      video_type: "hitting" | "pitching" | "fielding" | "catching" | "exercise_form" | "other";
       workout_status: "completed" | "partial" | "skipped";
     };
     CompositeTypes: {
@@ -1010,6 +1201,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      annotation_kind: ["note", "line", "arrow", "angle", "circle", "freehand"],
       arm_feel: ["great", "good", "okay", "tired", "sore", "pain"],
       assignment_status: ["active", "completed", "paused"],
       exercise_category: [
@@ -1041,6 +1233,8 @@ export const Constants = {
       ],
       throwing_intensity: ["low", "moderate", "high", "max_effort"],
       throwing_type: ["long_toss", "flat_ground", "bullpen", "live_abs", "game", "check_in"],
+      video_status: ["pending", "reviewed"],
+      video_type: ["hitting", "pitching", "fielding", "catching", "exercise_form", "other"],
       workout_status: ["completed", "partial", "skipped"],
     },
   },

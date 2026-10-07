@@ -62,6 +62,14 @@ Leave off `--include-seed` from now on, although re-running it is harmless.
 4. Click **Deploy**. When it finishes you'll get a URL like `https://baseball-tracker-xyz.vercel.app`.
 5. In Vercel, open **Settings → Environment Variables** and add `NEXT_PUBLIC_SITE_URL` set to that URL (no trailing slash). Then go to **Deployments → ⋯ → Redeploy**. Email and invite links use this address.
 
+### Turning on AI video analysis (optional)
+
+1. Get an API key at <https://console.anthropic.com> → **API Keys** → **Create Key**. Add a payment method; each analysis costs a few cents.
+2. In Vercel → **Settings → Environment Variables**, add `ANTHROPIC_API_KEY` with that key. Do **not** prefix it with `NEXT_PUBLIC_`: it must stay on the server.
+3. **Deployments → ⋯ → Redeploy.**
+
+Video upload and coach review work without it; only the "Analyze with AI" button needs the key.
+
 ## 4. Point Supabase logins at your site
 
 In Supabase:
@@ -103,5 +111,6 @@ Leave **Confirm email** turned on. Invitations only work for a verified email ad
 
 - **Email limits:** Supabase's built-in email sender only allows a few emails per hour, which is fine for testing. Before inviting a whole team, connect a real email service under **Project Settings → Authentication → SMTP Settings**. [Resend](https://resend.com) has a free tier and a Supabase guide.
 - **Updates:** every `git push` to the repo's default branch redeploys the site automatically. Pushes to other branches get their own preview URLs.
+- **Video storage:** the database migration creates the private `videos` storage bucket (50 MB per file, the free plan's maximum). Supabase's free plan includes 1 GB of file storage, roughly 50–100 short clips; upgrade when a team uploads regularly.
 - **Custom domain:** in Vercel, **Settings → Domains** (e.g. `train.yourteam.com`). After adding one, update `NEXT_PUBLIC_SITE_URL` and the Supabase Site URL and Redirect URLs to match.
 - **Local development is unchanged:** `npm run db:start` and `npm run dev` still use the local database. The hosted one is only touched by `npx supabase db push`.

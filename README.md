@@ -191,4 +191,16 @@ Docs: [docs/ROADMAP.md](docs/ROADMAP.md) keeps product notes for later phases: v
 
 Also in this pass: **Forgot password** flow, a **Getting started** checklist for new coaches, and the "Parent" invite role is hidden until the parent dashboard exists. See [docs/PRODUCT_REVIEW.md](docs/PRODUCT_REVIEW.md) for the full product review and prioritized gaps.
 
-See the project brief for the full roadmap. Phases 1–5 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
+## Video review & AI analysis (Phase 6)
+
+- **Upload** (players from the phone's Videos tab, coaches for any player at `/videos`): MP4, MOV, or WebM up to 50 MB, tagged hitting / pitching / fielding / catching / exercise form / other, with a note for the coach. The browser makes a thumbnail and reads the duration, then uploads straight to Supabase Storage with a progress bar.
+- **Storage:** private `videos` bucket, files at `{org_id}/{player_id}/{video_id}/…`. Storage policies check the path (staff of the org, or the player themself); pages use short-lived signed URLs. Nothing is public.
+- **Coach review queue** (`/videos`): Needs review / Reviewed / All, filter by player; "Videos to review" count on the dashboard; a Videos section on each player's profile.
+- **Reviewer** (`/videos/[id]`):
+  - Frame-by-frame stepping (buttons or ← →), ¼× / ½× / 1× speed, scrubber with markers where drawings are.
+  - Drawing tools: line, arrow, **angle** (tap end → joint → end; shows degrees, corrected for the frame's aspect ratio), circle, freehand, plus timestamped notes and per-drawing comments. Stored as data (`video_annotations`, normalized coordinates), so they stay editable.
+  - **Voice-over breakdown:** records the video, drawings, and the coach's microphone while they play, pause, step, and draw (`canvas.captureStream` + `MediaRecorder`), up to 5 minutes; preview, then save.
+  - Written feedback + **Send review**. Players see drawings, notes, the breakdown, and feedback only after it's sent.
+- **AI analysis (optional):** the coach marks a window (e.g. load → follow-through) and frame count; the browser grabs still frames and `/api/videos/[id]/analyze` sends them to Claude (`claude-opus-5-5`, adaptive thinking, JSON-schema output, server-side refusal fallbacks). The result is a **staff-only draft** (`video_ai_analyses`): summary, phases with timestamps, strengths, up to 3 fixes with a cue and a drill, confidence, and limits. The coach edits it and chooses to share it; players see it labeled "AI-assisted notes, reviewed by your coach." Turned on by setting `ANTHROPIC_API_KEY`; without it the panel explains how to enable it.
+
+See the project brief for the full roadmap. Phases 1–6 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.

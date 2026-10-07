@@ -16,6 +16,8 @@ import { deleteAssessment } from "../assess-actions";
 import { loadThrowing } from "@/lib/throwing";
 import { ageOn, availability, dailySeries, pitchSmartBand, throwingAlerts } from "@/lib/workload";
 import { ThrowsChart } from "@/components/throwing/throws-chart";
+import { loadVideos } from "@/lib/videos";
+import { VideoGrid } from "@/components/video/video-grid";
 import {
   AlertList,
   AvailabilityBadge,
@@ -59,9 +61,10 @@ export default async function PlayerProfilePage({
   if (!member || member.role !== "player") notFound();
 
   const from28 = addDays(today, -27);
-  const [throwing, { data: prof }] = await Promise.all([
+  const [throwing, { data: prof }, videos] = await Promise.all([
     loadThrowing(supabase, org.id, addDays(today, -60), id),
     supabase.from("profiles").select("birth_date").eq("id", id).single(),
+    loadVideos(supabase, org.id, { playerId: id, limit: 6 }),
   ]);
   const birth = prof?.birth_date ?? null;
   const [team, assessments, { data: logs }] = await Promise.all([
@@ -269,6 +272,19 @@ export default async function PlayerProfilePage({
             <AssessmentForm playerId={id} today={today} />
           </div>
         </details>
+      </section>
+
+      <section id="videos" className="space-y-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="text-lg font-semibold">Videos</h2>
+          <Link
+            href={`/videos?tab=all&player=${id}`}
+            className="text-sm text-brand-700 hover:underline"
+          >
+            All videos / upload →
+          </Link>
+        </div>
+        <VideoGrid videos={videos} hrefBase="/videos" showPlayer={false} empty="No videos yet." />
       </section>
 
       <section id="throwing" className="space-y-3">

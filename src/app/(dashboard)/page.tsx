@@ -9,6 +9,7 @@ import { complianceByPlayer, complianceOf, needsAttention } from "@/lib/complian
 import { cn } from "@/lib/utils";
 import { loadBirthDates, loadThrowing } from "@/lib/throwing";
 import { throwingAlerts } from "@/lib/workload";
+import { pendingVideoCount } from "@/lib/videos";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -49,13 +50,14 @@ export default async function DashboardPage() {
   const perPlayer = complianceByPlayer(team.entries);
   const attention = team.players.filter((p) => needsAttention(perPlayer.get(p.id)));
 
-  const [exercises, members, programs] = await Promise.all([
+  const [exercises, members, programs, videosToReview] = await Promise.all([
     supabase.from("exercises").select("id", { count: "exact", head: true }),
     supabase
       .from("org_memberships")
       .select("id", { count: "exact", head: true })
       .eq("org_id", org.id),
     supabase.from("programs").select("id", { count: "exact", head: true }).eq("org_id", org.id),
+    pendingVideoCount(supabase, org.id),
   ]);
 
   const [{ count: assignmentCount }, { count: assessmentCount }] = await Promise.all([
@@ -79,9 +81,10 @@ export default async function DashboardPage() {
 
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   const stats = [
-    { label: "Exercises in library", value: exercises.count ?? 0, href: "/exercises" },
+    { label: "Videos to review", value: videosToReview, href: "/videos" },
     { label: "Members", value: members.count ?? 0, href: "/roster" },
     { label: "Programs", value: programs.count ?? 0, href: "/programs" },
+    { label: "Exercises in library", value: exercises.count ?? 0, href: "/exercises" },
   ];
 
   return (
@@ -145,7 +148,7 @@ export default async function DashboardPage() {
         </section>
       ) : null}
 
-      <dl className="mt-6 grid gap-4 sm:grid-cols-3">
+      <dl className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((s) => {
           const body = (
             <>

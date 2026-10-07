@@ -14,6 +14,7 @@ const NAV: NavItem[] = [
   { href: "/roster", label: "Roster" },
   { href: "/calendar", label: "Calendar" },
   { href: "/throwing", label: "Throwing" },
+  { href: "/videos", label: "Videos" },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
