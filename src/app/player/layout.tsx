@@ -4,6 +4,7 @@ import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { requireActiveOrg } from "@/lib/org";
 import { playerToday } from "@/lib/player";
 import { NotificationBell } from "@/components/notifications/bell";
+import { MessagesIconLink } from "@/components/messages/messages-icon-link";
 import { redirect } from "next/navigation";
 
 export default async function PlayerLayout({ children }: { children: React.ReactNode }) {
@@ -24,24 +25,7 @@ export default async function PlayerLayout({ children }: { children: React.React
                 Coach view
               </Link>
             ) : null}
-            <Link
-              href="/player/messages"
-              aria-label="Messages"
-              className="inline-flex size-10 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="size-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={1.8}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-              >
-                <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
-              </svg>
-            </Link>
+            <MessagesIconLink href="/player/messages" />
             <NotificationBell />
           </div>
         </div>

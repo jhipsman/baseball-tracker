@@ -229,4 +229,13 @@ Also in this pass: **Forgot password** flow, a **Getting started** checklist for
 - **Players & parents:** a "Next practice" card on the player Today page; read-only timelines at `/player/practices/[id]` and `/parent/practices/[id]` (shared `PracticeView`). RLS hides drafts and other groups' plans, and those pages return 404.
 - Time math (`blockTimes`, `practiceRange`, …) is in `src/lib/practices.ts` and unit-tested.
 
-See the project brief for the full roadmap. Phases 1–6 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
+## Messaging & notifications (Phase 7)
+
+- **Coach `/messages`:** Conversations and Announcements tabs.
+  - **Announcements:** to the whole team or one player group, "Also send to parents" (on by default), pin. Staff see "12 of 18 read" (players + copied parents). `?a=<id>` scrolls to and highlights one.
+  - **Conversations:** unread dots, last-message preview, and **New message** (`/messages/new`): pick players, parents ("Parent of X"), or staff, with quick-pick by group. The `start_thread` RPC enforces the rules: everyone is on the team, a coach is always included (no player-to-player DMs), and linked parents are copied on threads with their player.
+- **Player `/player/messages`, parent `/parent/messages`:** team announcements (marked read when shown) and conversations, plus **Message a coach**. Threads live at `…/messages/[id]` (read marker updates on view). The player header's chat icon shows a dot for unread conversations.
+- **Notifications:** DB triggers create them; the bell links to `/notifications` (list, "Mark all read"). Each item goes through `/n/[id]`, which marks it read, switches to that team, and redirects to the right page for the viewer's role (`hrefForRole` in `src/lib/notifications.ts`; only relative links).
+- **Web push (optional):** `public/sw.js` + "Turn on phone notifications" on `/notifications`, with per-kind mutes (`profiles.push_muted`). `dispatchPush()` (`src/lib/push.ts`) sends unpushed notifications from the last 15 minutes with `web-push`, using the role-mapped link, and removes expired subscriptions. Call it with `after(() => dispatchPush())` at the end of a server action. Needs `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [docs/DEPLOY.md](docs/DEPLOY.md)); without them it does nothing.
+
+See the project brief for the full roadmap. Phases 1–7 are complete. Phone push notifications are optional and need the keys described in docs/DEPLOY.md.
