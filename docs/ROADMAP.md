@@ -27,16 +27,11 @@ Still to do:
 - Clean up storage files when a whole org or player is deleted (today files are removed when a video is deleted).
 - Pose estimation (joint tracking) to measure angles automatically and give the AI real measurements, not just frames.
 
-## Workout logging improvements (queued)
+## Workout logging improvements (built in Phase 7)
 
-- **Tracking types per exercise** so each logs the right thing:
-  - weight × reps
-  - reps only
-  - time (e.g. 60-yard sprint, 7.1 s)
-  - distance
-  - distance + time
-  - Hide weight and RPE where they don't apply.
-- **Demo videos on exercises:** `exercises.video_demo_url` already exists. Show an embedded YouTube or Vimeo player in the library, the builder, and the player's workout screen. Fill in links for the built-in library.
+- **Tracking types per exercise** (built): weight × reps, reps only, time (e.g. 60-yard sprint, 7.1 s), distance, and distance + time. The player's workout screen shows only the inputs that apply, and the built-in library has sensible defaults.
+- **Demo videos on exercises** (built): coaches add a YouTube or Vimeo link to a custom exercise. Players watch it in a pop-up during the workout; it also shows in the library, the builder, and program pages. Exercises without a video get a "Find a demo" YouTube search.
+- Still open: curated demo links for the built-in library (needs someone to pick and vet real videos), and letting coaches set a tracking type or video on a global exercise for their org only.
 
 ## From the Phase 5 product review
 

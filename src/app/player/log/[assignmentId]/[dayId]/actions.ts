@@ -4,14 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/org";
 import type { Enums, Json } from "@/types/database";
+import { isDistanceUnit, type LoggedSet } from "@/lib/sets-format";
 
-export type LoggedSet = {
-  set: number;
-  reps: number | string | null;
-  weight: number | null;
-  rpe: number | null;
-  done: boolean;
-};
+export type { LoggedSet };
 
 export type WorkoutLogInput = {
   assignmentId: string;
@@ -54,16 +49,28 @@ export async function saveWorkoutLog(input: WorkoutLogInput): Promise<{ error?: 
       program_exercise_id: e.programExerciseId,
       sort_order: intOrNull(e.sortOrder, 0, 10_000) ?? i,
       notes: String(e.notes ?? "").slice(0, 2000),
-      sets: e.sets.slice(0, 50).map((s, j) => ({
-        set: j + 1,
-        reps:
-          typeof s.reps === "number"
-            ? intOrNull(s.reps, 0, 1000)
-            : String(s.reps ?? "").slice(0, 16) || null,
-        weight: numOrNull(s.weight, 0, 2000),
-        rpe: numOrNull(s.rpe, 1, 10),
-        done: Boolean(s.done),
-      })),
+      sets: e.sets.slice(0, 50).map((s, j) => {
+        const set: LoggedSet = {
+          set: j + 1,
+          reps:
+            typeof s.reps === "number"
+              ? intOrNull(s.reps, 0, 1000)
+              : String(s.reps ?? "").slice(0, 16) || null,
+          weight: numOrNull(s.weight, 0, 2000),
+          rpe: numOrNull(s.rpe, 1, 10),
+          done: Boolean(s.done),
+        };
+        // Time / distance exercises (Phase 7). Only stored when present so
+        // weight × reps rows keep their original shape.
+        const time = numOrNull(s.time_s, 0, 86_400);
+        const distance = numOrNull(s.distance, 0, 100_000);
+        if (time != null) set.time_s = time;
+        if (distance != null) {
+          set.distance = distance;
+          set.distance_unit = isDistanceUnit(s.distance_unit) ? s.distance_unit : "yd";
+        }
+        return set;
+      }),
     }));
 
   const { error } = await supabase.rpc("save_workout_log", {

@@ -22,7 +22,7 @@ export type BuilderAction =
       dayId: string;
       patch: Partial<Pick<BuilderDay, "name" | "sessionType" | "dayOfWeek" | "notes">>;
     }
-  | { type: "addExercise"; dayId: string; exerciseId: string; index?: number }
+  | { type: "addExercise"; dayId: string; exerciseId: string; index?: number; reps?: string }
   /** Live move while dragging; no group changes. */
   | { type: "moveRaw"; itemId: string; toDayId: string; toIndex: number }
   /** Final move on drop; applies grouping rules. */
@@ -42,14 +42,14 @@ export function setIdFactory(fn: () => string) {
 }
 const newId = () => idFactory();
 
-export function newItem(exerciseId: string): BuilderItem {
+export function newItem(exerciseId: string, reps = "8"): BuilderItem {
   return {
     id: newId(),
     exerciseId,
     groupId: null,
     groupType: null,
     sets: 3,
-    reps: "8",
+    reps,
     intensity: "",
     tempo: "",
     restSeconds: null,
@@ -309,7 +309,7 @@ export function builderReducer(state: BuilderState, action: BuilderAction): Buil
       };
 
     case "addExercise": {
-      const item = newItem(action.exerciseId);
+      const item = newItem(action.exerciseId, action.reps);
       let placedIndex = 0;
       let next = updateDayById(weeks, action.dayId, (d) => {
         placedIndex = Math.max(0, Math.min(action.index ?? d.items.length, d.items.length));

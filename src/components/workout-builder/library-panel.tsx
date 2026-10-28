@@ -7,9 +7,11 @@ import {
   CATEGORY_LABELS,
   EQUIPMENT,
   EXERCISE_CATEGORIES,
+  TRACKING_CHIPS,
   humanize,
   type ExerciseCategory,
 } from "@/constants";
+import { ExerciseDemo } from "@/components/exercise-demo";
 import { cn } from "@/lib/utils";
 import type { LibraryExercise } from "./types";
 
@@ -47,9 +49,15 @@ const LibraryCard = memo(function LibraryCard({
         <span className="block truncate text-sm font-medium">{exercise.name}</span>
         <span className="block truncate text-xs text-zinc-500">
           {CATEGORY_LABELS[exercise.category]}
+          {TRACKING_CHIPS[exercise.tracking_type]
+            ? ` · ${TRACKING_CHIPS[exercise.tracking_type]}`
+            : ""}
           {exercise.is_custom ? " · Custom" : ""}
         </span>
       </span>
+      {/* Only exercises with their own video get a button here; a day's exercise row
+          shows "Find a demo" for the rest. */}
+      <ExerciseDemo name={exercise.name} url={exercise.video_demo_url} compact showSearch={false} />
       <button
         type="button"
         // Keep the button clickable without starting a drag.

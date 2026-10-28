@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
+import { formatSets } from "@/lib/sets-format";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "History" };
@@ -20,7 +21,7 @@ export default async function HistoryPage() {
       `id, date_completed, status, overall_rpe, duration_minutes, day_name, program_day_id,
        program_assignment_id,
        assignment:program_assignments (program:programs (name)),
-       exercise_logs (sets_completed)`,
+       exercise_logs (sort_order, sets_completed, exercise:exercises (name, tracking_type))`,
     )
     .eq("player_id", user.id)
     .order("date_completed", { ascending: false })
@@ -50,6 +51,14 @@ export default async function HistoryPage() {
               Array.isArray(e.sets_completed) ? (e.sets_completed as { done?: boolean }[]) : [],
             );
             const doneSets = sets.filter((s) => s.done !== false).length;
+            const lines = l.exercise_logs
+              .toSorted((a, b) => a.sort_order - b.sort_order)
+              .map((e) => ({
+                name: e.exercise?.name ?? "Exercise",
+                text: formatSets(e.sets_completed, e.exercise?.tracking_type),
+              }))
+              .filter((e) => e.text);
+            const shown = lines.slice(0, 4);
             const body = (
               <>
                 <div className="flex items-start justify-between gap-2">
@@ -72,6 +81,21 @@ export default async function HistoryPage() {
                   {l.duration_minutes != null ? ` · ${l.duration_minutes} min` : ""}
                   {l.overall_rpe != null ? ` · RPE ${l.overall_rpe}` : ""}
                 </p>
+                {shown.length > 0 ? (
+                  <ul className="mt-2 space-y-0.5 text-sm">
+                    {shown.map((e, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className="min-w-0 truncate text-zinc-700">{e.name}</span>
+                        <span className="ml-auto shrink-0 text-zinc-500 tabular-nums">
+                          {e.text}
+                        </span>
+                      </li>
+                    ))}
+                    {lines.length > shown.length ? (
+                      <li className="text-xs text-zinc-400">+{lines.length - shown.length} more</li>
+                    ) : null}
+                  </ul>
+                ) : null}
               </>
             );
             return (

@@ -5,7 +5,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { CATEGORY_DOT, GROUP_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
-import { summarize } from "./format";
+import { ExerciseDemo } from "@/components/exercise-demo";
+import { REPS_FIELD, summarize } from "./format";
 import type { BuilderAction } from "./reducer";
 import type { BuilderItem, LibraryExercise } from "./types";
 
@@ -53,7 +54,7 @@ export function ExerciseCardBody({
         </span>
         {item ? (
           <span className="block truncate text-xs text-zinc-500">
-            {summarize(item) || "Tap to set sets & reps"}
+            {summarize(item, exercise?.tracking_type) || "Tap to set sets & reps"}
           </span>
         ) : null}
       </span>
@@ -91,6 +92,7 @@ export const ExerciseRow = memo(function ExerciseRow({
     isDragging,
   } = useSortable({ id: item.id, data: { type: "item", dayId } });
 
+  const repsField = REPS_FIELD[exercise?.tracking_type ?? "weight_reps"];
   const update = (patch: Partial<Omit<BuilderItem, "id">>) =>
     dispatch({ type: "updateItem", itemId: item.id, patch });
 
@@ -173,11 +175,11 @@ export const ExerciseRow = memo(function ExerciseRow({
             />
           </label>
           <label className="text-xs text-zinc-600">
-            Reps
+            {repsField.label}
             <input
               className={inputClass}
               value={item.reps}
-              placeholder="8, 8-10, 30s"
+              placeholder={repsField.placeholder}
               maxLength={32}
               onChange={(e) => update({ reps: e.target.value })}
             />
@@ -187,7 +189,7 @@ export const ExerciseRow = memo(function ExerciseRow({
             <input
               className={inputClass}
               value={item.intensity}
-              placeholder="75%, RPE 7"
+              placeholder={exercise?.tracking_type === "time" ? "Max effort, 90%" : "75%, RPE 7"}
               maxLength={32}
               onChange={(e) => update({ intensity: e.target.value })}
             />
@@ -224,6 +226,11 @@ export const ExerciseRow = memo(function ExerciseRow({
               onChange={(e) => update({ notes: e.target.value })}
             />
           </label>
+          {exercise ? (
+            <div className="col-span-2 flex justify-end sm:col-span-3">
+              <ExerciseDemo name={exercise.name} url={exercise.video_demo_url} />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </li>

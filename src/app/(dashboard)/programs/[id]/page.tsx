@@ -13,6 +13,7 @@ import {
   SESSION_LABELS,
 } from "@/constants";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { ExerciseDemo } from "@/components/exercise-demo";
 import { cn } from "@/lib/utils";
 import { deleteProgram, duplicateProgram, updateAssignment } from "../actions";
 import { AssignForm, EditProgramForm } from "./program-forms";
@@ -42,8 +43,11 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
 
   const [{ data: exercises }, { data: assignments }, { data: players }] = await Promise.all([
     exerciseIds.length
-      ? supabase.from("exercises").select("id, name").in("id", exerciseIds)
-      : Promise.resolve({ data: [] as { id: string; name: string }[] }),
+      ? supabase
+          .from("exercises")
+          .select("id, name, tracking_type, video_demo_url")
+          .in("id", exerciseIds)
+      : Promise.resolve({ data: [] }),
     supabase
       .from("program_assignments")
       .select(
@@ -60,7 +64,7 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
       : Promise.resolve({ data: [] }),
   ]);
 
-  const names = new Map((exercises ?? []).map((e) => [e.id, e.name]));
+  const exerciseById = new Map((exercises ?? []).map((e) => [e.id, e]));
   const { data: groups } = isStaff
     ? await supabase
         .from("player_groups")
@@ -192,35 +196,47 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
                       <p className="mt-2 text-sm text-zinc-400">No exercises yet.</p>
                     ) : (
                       <ol className="mt-2 space-y-1.5">
-                        {items.map((it, i) => (
-                          <li
-                            key={it.id}
-                            className={cn(
-                              "flex gap-2 text-sm",
-                              it.groupId && "border-l-2 border-zinc-300 pl-2",
-                            )}
-                          >
-                            <span className="w-6 shrink-0 text-xs font-semibold text-zinc-400 tabular-nums">
-                              {labels[i]}
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block font-medium">
-                                {names.get(it.exerciseId) ?? "Exercise"}
-                                {it.groupType && items[i - 1]?.groupId !== it.groupId ? (
-                                  <span className="ml-1.5 text-[10px] font-semibold tracking-wide text-zinc-400 uppercase">
-                                    {GROUP_LABELS[it.groupType]}
+                        {items.map((it, i) => {
+                          const ex = exerciseById.get(it.exerciseId);
+                          return (
+                            <li
+                              key={it.id}
+                              className={cn(
+                                "flex gap-2 text-sm",
+                                it.groupId && "border-l-2 border-zinc-300 pl-2",
+                              )}
+                            >
+                              <span className="w-6 shrink-0 text-xs font-semibold text-zinc-400 tabular-nums">
+                                {labels[i]}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block font-medium">
+                                  {ex?.name ?? "Exercise"}
+                                  {it.groupType && items[i - 1]?.groupId !== it.groupId ? (
+                                    <span className="ml-1.5 text-[10px] font-semibold tracking-wide text-zinc-400 uppercase">
+                                      {GROUP_LABELS[it.groupType]}
+                                    </span>
+                                  ) : null}
+                                </span>
+                                <span className="block text-xs text-zinc-500">
+                                  {summarize(it, ex?.tracking_type)}
+                                </span>
+                                {it.notes ? (
+                                  <span className="block text-xs text-zinc-500 italic">
+                                    {it.notes}
                                   </span>
                                 ) : null}
                               </span>
-                              <span className="block text-xs text-zinc-500">{summarize(it)}</span>
-                              {it.notes ? (
-                                <span className="block text-xs text-zinc-500 italic">
-                                  {it.notes}
-                                </span>
+                              {ex ? (
+                                <ExerciseDemo
+                                  name={ex.name}
+                                  url={ex.video_demo_url}
+                                  className="self-start"
+                                />
                               ) : null}
-                            </span>
-                          </li>
-                        ))}
+                            </li>
+                          );
+                        })}
                       </ol>
                     )}
                   </div>

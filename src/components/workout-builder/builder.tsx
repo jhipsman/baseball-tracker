@@ -23,6 +23,7 @@ import { GROUP_LABELS, EXERCISE_GROUP_TYPES } from "@/constants";
 import { cn } from "@/lib/utils";
 import { DayColumn } from "./day-column";
 import { ExerciseCardBody } from "./exercise-row";
+import { DEFAULT_REPS } from "./format";
 import { LibraryPanel } from "./library-panel";
 import { builderReducer, findItem, toPayload, type BuilderAction } from "./reducer";
 import type { BuilderItem, BuilderState, BuilderWeek, LibraryExercise } from "./types";
@@ -75,9 +76,16 @@ export function WorkoutBuilder({
 
   const addToTarget = useCallback(
     (exerciseId: string) => {
-      if (targetDay) dispatch({ type: "addExercise", dayId: targetDay.id, exerciseId });
+      if (targetDay) {
+        dispatch({
+          type: "addExercise",
+          dayId: targetDay.id,
+          exerciseId,
+          reps: DEFAULT_REPS[exercisesById.get(exerciseId)?.tracking_type ?? "weight_reps"],
+        });
+      }
     },
-    [targetDay],
+    [targetDay, exercisesById],
   );
 
   // ---------------------------------------------------------------- autosave
@@ -237,6 +245,7 @@ export function WorkoutBuilder({
           dayId: target[0],
           exerciseId: data.exerciseId,
           index: target[1],
+          reps: DEFAULT_REPS[exercisesById.get(data.exerciseId)?.tracking_type ?? "weight_reps"],
         });
         setTargetDayId(target[0]);
       }

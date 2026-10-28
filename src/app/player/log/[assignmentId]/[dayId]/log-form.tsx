@@ -1,15 +1,33 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { CATEGORY_DOT, GROUP_LABELS, type ExerciseCategory } from "@/constants";
+import {
+  CATEGORY_DOT,
+  DISTANCE_UNITS,
+  GROUP_LABELS,
+  type DistanceUnit,
+  type ExerciseCategory,
+  type TrackingType,
+} from "@/constants";
 import type { Enums } from "@/types/database";
+import { ExerciseDemo } from "@/components/exercise-demo";
+import {
+  bestTime,
+  formatSeconds,
+  formatSets,
+  isDistanceUnit,
+  parseDistance,
+  type LoggedSet,
+} from "@/lib/sets-format";
 import { cn } from "@/lib/utils";
-import { saveWorkoutLog, type LoggedSet } from "./actions";
+import { saveWorkoutLog } from "./actions";
 
 export type LogItem = {
   programExerciseId: string;
   name: string;
   category: ExerciseCategory | null;
+  trackingType: TrackingType;
+  videoUrl: string | null;
   label: string;
   groupType: Enums<"exercise_group_type"> | null;
   groupStart: boolean;
@@ -30,41 +48,143 @@ export type ExistingLog = {
   exercises: Record<string, { sets: LoggedSet[]; notes: string }>;
 };
 
-type SetRow = { reps: string; weight: string; rpe: string; done: boolean };
-type ExState = { sets: SetRow[]; notes: string; showNotes: boolean };
+type SetRow = {
+  reps: string;
+  weight: string;
+  rpe: string;
+  time: string;
+  distance: string;
+  done: boolean;
+};
+type ExState = { sets: SetRow[]; notes: string; showNotes: boolean; unit: DistanceUnit };
+type Field = Exclude<keyof SetRow, "done">;
 
 const cellInput =
   "h-12 w-full min-w-0 rounded-lg border-0 bg-white px-2 text-center text-base tabular-nums ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600";
+
+/** Which inputs each tracking type shows, left to right. */
+function columnsFor(type: TrackingType, unit: DistanceUnit) {
+  const reps = { field: "reps", label: "Reps", aria: "reps", mode: "numeric" } as const;
+  const weight = {
+    field: "weight",
+    label: "Weight (lb)",
+    aria: "weight",
+    mode: "decimal",
+  } as const;
+  const rpe = { field: "rpe", label: "RPE", aria: "RPE", mode: "decimal" } as const;
+  const time = { field: "time", label: "Time (sec)", aria: "time", mode: "decimal" } as const;
+  const distance = {
+    field: "distance",
+    label: `Distance (${unit})`,
+    aria: "distance",
+    mode: "decimal",
+  } as const;
+  switch (type) {
+    case "weight_reps":
+      return [reps, weight, rpe];
+    case "reps":
+      return [reps];
+    case "time":
+      return [time];
+    case "distance":
+      return [distance];
+    case "distance_time":
+      return [distance, time];
+  }
+}
 
 function firstInt(s: string) {
   const m = /^\s*(\d+)/.exec(s);
   return m ? m[1] : "";
 }
 
+/** "7,12" → 7.12 (phones in some locales type commas). Empty/invalid → null. */
+function toNumber(s: string): number | null {
+  const t = s.trim().replace(",", ".");
+  if (t === "") return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+const str = (v: unknown) => (v == null ? "" : String(v));
+
+const emptyRow = (): SetRow => ({
+  reps: "",
+  weight: "",
+  rpe: "",
+  time: "",
+  distance: "",
+  done: false,
+});
+
+/** Fill in fields missing from drafts saved before time/distance tracking existed. */
+function normalizeExState(raw: Partial<ExState> | undefined, fallback: ExState): ExState {
+  if (!raw || !Array.isArray(raw.sets)) return fallback;
+  return {
+    sets: raw.sets.map((r) => ({ ...emptyRow(), ...r, done: Boolean(r?.done) })),
+    notes: typeof raw.notes === "string" ? raw.notes : "",
+    showNotes: Boolean(raw.showNotes),
+    unit: isDistanceUnit(raw.unit) ? raw.unit : fallback.unit,
+  };
+}
+
+function initialUnit(item: LogItem, existing?: { sets: LoggedSet[] }): DistanceUnit {
+  const logged = existing?.sets.find((s) => isDistanceUnit(s.distance_unit))?.distance_unit;
+  if (logged) return logged;
+  const prescribed = parseDistance(item.prescribedReps)?.unit;
+  if (prescribed) return prescribed;
+  const last = item.lastTime?.sets.find((s) => isDistanceUnit(s.distance_unit))?.distance_unit;
+  return last ?? "yd";
+}
+
 function initialSets(item: LogItem, existing?: { sets: LoggedSet[] }): SetRow[] {
   if (existing && existing.sets.length > 0) {
     return existing.sets.map((s) => ({
-      reps: s.reps == null ? "" : String(s.reps),
-      weight: s.weight == null ? "" : String(s.weight),
-      rpe: s.rpe == null ? "" : String(s.rpe),
+      reps: str(s.reps),
+      weight: str(s.weight),
+      rpe: str(s.rpe),
+      time: str(s.time_s),
+      distance: str(s.distance),
       done: s.done !== false,
     }));
   }
   const count = Math.max(1, Math.min(item.prescribedSets ?? 1, 20));
+  const type = item.trackingType;
+  const usesReps = type === "weight_reps" || type === "reps";
+  const usesDistance = type === "distance" || type === "distance_time";
+  const prescribedDistance = usesDistance ? parseDistance(item.prescribedReps)?.value : undefined;
   return Array.from({ length: count }, (_, i) => ({
-    reps: firstInt(item.prescribedReps),
+    ...emptyRow(),
+    reps: usesReps ? firstInt(item.prescribedReps) : "",
     // Start from what they lifted last time for the same set.
-    weight: item.lastTime?.sets[i]?.weight != null ? String(item.lastTime.sets[i].weight) : "",
-    rpe: "",
-    done: false,
+    weight:
+      type === "weight_reps" && item.lastTime?.sets[i]?.weight != null
+        ? String(item.lastTime.sets[i].weight)
+        : "",
+    distance: prescribedDistance != null ? String(prescribedDistance) : "",
   }));
 }
 
-function formatLast(sets: LoggedSet[]) {
-  return sets
-    .filter((s) => s.reps != null || s.weight != null)
-    .map((s) => (s.weight != null ? `${s.weight}×${s.reps ?? "–"}` : `${s.reps}`))
-    .join(", ");
+function toLoggedSet(
+  row: SetRow,
+  index: number,
+  type: TrackingType,
+  unit: DistanceUnit,
+): LoggedSet {
+  const set: LoggedSet = { set: index + 1, reps: null, weight: null, rpe: null, done: row.done };
+  if (type === "weight_reps" || type === "reps") {
+    set.reps = /^\d+$/.test(row.reps.trim()) ? Number(row.reps) : row.reps.trim() || null;
+  }
+  if (type === "weight_reps") {
+    set.weight = toNumber(row.weight);
+    set.rpe = toNumber(row.rpe);
+  }
+  if (type === "time" || type === "distance_time") set.time_s = toNumber(row.time);
+  if (type === "distance" || type === "distance_time") {
+    set.distance = toNumber(row.distance);
+    set.distance_unit = unit;
+  }
+  return set;
 }
 
 function localDate() {
@@ -94,6 +214,7 @@ export function LogForm({
             sets: initialSets(it, prev),
             notes: prev?.notes ?? "",
             showNotes: Boolean(prev?.notes),
+            unit: initialUnit(it, prev),
           },
         ];
       }),
@@ -120,7 +241,7 @@ export function LogForm({
       const raw = localStorage.getItem(draftKey);
       if (!raw) return;
       const draft = JSON.parse(raw) as {
-        state: Record<string, ExState>;
+        state: Record<string, Partial<ExState>>;
         duration: string;
         rpe: number | null;
         notes: string;
@@ -128,7 +249,10 @@ export function LogForm({
       const known = Object.keys(draft.state ?? {}).filter((k) => k in state);
       if (known.length === 0) return;
       // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time restore after mount
-      setState((s) => ({ ...s, ...Object.fromEntries(known.map((k) => [k, draft.state[k]])) }));
+      setState((s) => ({
+        ...s,
+        ...Object.fromEntries(known.map((k) => [k, normalizeExState(draft.state[k], s[k])])),
+      }));
       setDuration(draft.duration ?? "");
       setRpe(draft.rpe ?? null);
       setNotes(draft.notes ?? "");
@@ -162,21 +286,18 @@ export function LogForm({
 
   function submit(status: Enums<"workout_status">) {
     setError(null);
-    const exercises = items.map((it, i) => ({
-      programExerciseId: it.programExerciseId,
-      sortOrder: i,
-      notes: state[it.programExerciseId].notes,
-      sets:
-        status === "skipped"
-          ? []
-          : state[it.programExerciseId].sets.map((row, j) => ({
-              set: j + 1,
-              reps: /^\d+$/.test(row.reps.trim()) ? Number(row.reps) : row.reps.trim() || null,
-              weight: row.weight.trim() === "" ? null : Number(row.weight),
-              rpe: row.rpe.trim() === "" ? null : Number(row.rpe),
-              done: row.done,
-            })),
-    }));
+    const exercises = items.map((it, i) => {
+      const ex = state[it.programExerciseId];
+      return {
+        programExerciseId: it.programExerciseId,
+        sortOrder: i,
+        notes: ex.notes,
+        sets:
+          status === "skipped"
+            ? []
+            : ex.sets.map((row, j) => toLoggedSet(row, j, it.trackingType, ex.unit)),
+      };
+    });
     startTransition(async () => {
       const result = await saveWorkoutLog({
         assignmentId,
@@ -207,6 +328,19 @@ export function LogForm({
       <ol className="space-y-3">
         {items.map((it) => {
           const ex = state[it.programExerciseId];
+          const type = it.trackingType;
+          const cols = columnsFor(type, ex.unit);
+          const grid = {
+            gridTemplateColumns: `1.5rem repeat(${cols.length}, minmax(0, 1fr)) 3rem`,
+          };
+          const last = it.lastTime ? formatSets(it.lastTime.sets, type) : "";
+          // Sprints: lower is better. Flag a new best against last time.
+          const lastBest =
+            type === "time" && (it.category === "speed" || it.category === "conditioning")
+              ? bestTime(it.lastTime?.sets)
+              : null;
+          const nowBest =
+            lastBest != null ? bestTime(ex.sets.map((r) => ({ time_s: toNumber(r.time) }))) : null;
           return (
             <li
               key={it.programExerciseId}
@@ -225,24 +359,27 @@ export function LogForm({
                   {it.label}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <h2 className="flex items-center gap-2 font-semibold">
-                    {it.category ? (
-                      <span
-                        aria-hidden
-                        className={cn("size-2 shrink-0 rounded-full", CATEGORY_DOT[it.category])}
-                      />
-                    ) : null}
-                    {it.name}
-                  </h2>
+                  <div className="flex items-start justify-between gap-2">
+                    <h2 className="flex min-w-0 items-center gap-2 font-semibold">
+                      {it.category ? (
+                        <span
+                          aria-hidden
+                          className={cn("size-2 shrink-0 rounded-full", CATEGORY_DOT[it.category])}
+                        />
+                      ) : null}
+                      {it.name}
+                    </h2>
+                    <ExerciseDemo name={it.name} url={it.videoUrl} className="mt-[-2px]" />
+                  </div>
                   {it.prescription ? (
                     <p className="text-sm text-zinc-600">{it.prescription}</p>
                   ) : null}
                   {it.coachNotes ? (
                     <p className="mt-1 text-sm text-zinc-500 italic">“{it.coachNotes}”</p>
                   ) : null}
-                  {it.lastTime && formatLast(it.lastTime.sets) ? (
+                  {it.lastTime && last ? (
                     <p className="mt-1 text-xs text-zinc-500">
-                      Last time ({it.lastTime.date}): {formatLast(it.lastTime.sets)}
+                      Last time ({it.lastTime.date}): {last}
                     </p>
                   ) : null}
                   {it.instructions ? (
@@ -254,48 +391,60 @@ export function LogForm({
                 </div>
               </div>
 
-              <div className="mt-3 grid grid-cols-[1.5rem_1fr_1fr_1fr_3rem] items-center gap-2 text-xs text-zinc-500">
+              {type === "distance" || type === "distance_time" ? (
+                <label className="mt-3 flex items-center justify-end gap-2 text-xs text-zinc-500">
+                  Unit
+                  <select
+                    aria-label={`${it.name} distance unit`}
+                    value={ex.unit}
+                    onChange={(e) =>
+                      updateEx(it.programExerciseId, { unit: e.target.value as DistanceUnit })
+                    }
+                    className="h-9 rounded-lg border-0 bg-white px-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300"
+                  >
+                    {DISTANCE_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+
+              <div className="mt-3 grid items-center gap-2 text-xs text-zinc-500" style={grid}>
                 <span />
-                <span className="text-center">Reps</span>
-                <span className="text-center">Weight (lb)</span>
-                <span className="text-center">RPE</span>
+                {cols.map((c) => (
+                  <span key={c.field} className="text-center">
+                    {c.label}
+                  </span>
+                ))}
                 <span className="sr-only">Done</span>
               </div>
               <div className="mt-1 space-y-2">
                 {ex.sets.map((row, i) => (
-                  <div
-                    key={i}
-                    className="grid grid-cols-[1.5rem_1fr_1fr_1fr_3rem] items-center gap-2"
-                  >
+                  <div key={i} className="grid items-center gap-2" style={grid}>
                     <span className="text-center text-sm font-semibold text-zinc-400 tabular-nums">
                       {i + 1}
                     </span>
-                    <input
-                      aria-label={`${it.name} set ${i + 1} reps`}
-                      className={cellInput}
-                      inputMode="numeric"
-                      placeholder={it.prescribedReps || "–"}
-                      value={row.reps}
-                      onChange={(e) => updateSet(it.programExerciseId, i, { reps: e.target.value })}
-                    />
-                    <input
-                      aria-label={`${it.name} set ${i + 1} weight`}
-                      className={cellInput}
-                      inputMode="decimal"
-                      placeholder="–"
-                      value={row.weight}
-                      onChange={(e) =>
-                        updateSet(it.programExerciseId, i, { weight: e.target.value })
-                      }
-                    />
-                    <input
-                      aria-label={`${it.name} set ${i + 1} RPE`}
-                      className={cellInput}
-                      inputMode="decimal"
-                      placeholder="–"
-                      value={row.rpe}
-                      onChange={(e) => updateSet(it.programExerciseId, i, { rpe: e.target.value })}
-                    />
+                    {cols.map((c) => (
+                      <input
+                        key={c.field}
+                        aria-label={`${it.name} set ${i + 1} ${c.aria}`}
+                        className={cellInput}
+                        inputMode={c.mode}
+                        placeholder={
+                          c.field === "reps"
+                            ? it.prescribedReps || "–"
+                            : c.field === "time"
+                              ? "sec"
+                              : "–"
+                        }
+                        value={row[c.field as Field]}
+                        onChange={(e) =>
+                          updateSet(it.programExerciseId, i, { [c.field]: e.target.value })
+                        }
+                      />
+                    ))}
                     <button
                       type="button"
                       aria-pressed={row.done}
@@ -313,21 +462,27 @@ export function LogForm({
                   </div>
                 ))}
               </div>
+              {lastBest != null && nowBest != null && nowBest < lastBest ? (
+                <p className="mt-2 text-sm font-semibold text-brand-700">
+                  New best: {formatSeconds(nowBest)} (was {formatSeconds(lastBest)})
+                </p>
+              ) : null}
 
               <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
                 <button
                   type="button"
                   className="font-semibold text-brand-700"
                   onClick={() => {
-                    const last = ex.sets.at(-1);
+                    const prev = ex.sets.at(-1);
                     updateEx(it.programExerciseId, {
                       sets: [
                         ...ex.sets,
                         {
-                          reps: last?.reps ?? "",
-                          weight: last?.weight ?? "",
-                          rpe: "",
-                          done: false,
+                          ...emptyRow(),
+                          // Carry the prescription forward, but never a time.
+                          reps: prev?.reps ?? "",
+                          weight: prev?.weight ?? "",
+                          distance: prev?.distance ?? "",
                         },
                       ],
                     });

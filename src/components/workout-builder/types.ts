@@ -5,7 +5,14 @@ export type SessionType = Enums<"session_type">;
 
 export type LibraryExercise = Pick<
   Tables<"exercises">,
-  "id" | "name" | "category" | "muscle_groups" | "equipment" | "is_custom"
+  | "id"
+  | "name"
+  | "category"
+  | "muscle_groups"
+  | "equipment"
+  | "is_custom"
+  | "tracking_type"
+  | "video_demo_url"
 >;
 
 /** One exercise slot inside a day (a program_exercises row). */

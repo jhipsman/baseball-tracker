@@ -1,20 +1,28 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import type { FormState } from "@/lib/auth/actions";
 import type { Tables } from "@/types/database";
 import { Field } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
-import { SelectField } from "@/components/ui/select";
+import { SelectField, selectClass } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormAction } from "@/components/ui/use-form-action";
+import { cn } from "@/lib/utils";
 import {
   CATEGORY_LABELS,
   EQUIPMENT,
   EXERCISE_CATEGORIES,
   MUSCLE_GROUPS,
+  TRACKING_HINTS,
+  TRACKING_LABELS,
+  TRACKING_TYPES,
   humanize,
+  type TrackingType,
 } from "@/constants";
+import { ExerciseDemo } from "@/components/exercise-demo";
+import { parseDemoVideo } from "@/lib/exercise-video";
 import { deleteExercise, saveExercise } from "./actions";
 
 const textareaClass =
@@ -60,6 +68,9 @@ export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
   const del = useFormAction<FormState>(deleteExercise, {});
   const state = save.state;
   const deleteState = del.state;
+  const [tracking, setTracking] = useState<TrackingType>(exercise?.tracking_type ?? "weight_reps");
+  const [videoUrl, setVideoUrl] = useState(exercise?.video_demo_url ?? "");
+  const videoOk = videoUrl.trim() === "" || parseDemoVideo(videoUrl) != null;
 
   return (
     <div className="space-y-6">
@@ -81,6 +92,28 @@ export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
               </option>
             ))}
           </SelectField>
+        </div>
+        <div className="space-y-1.5">
+          <label htmlFor="tracking_type" className="block text-sm font-medium text-zinc-800">
+            How it&apos;s tracked
+          </label>
+          <select
+            id="tracking_type"
+            name="tracking_type"
+            value={tracking}
+            onChange={(e) => setTracking(e.target.value as TrackingType)}
+            aria-describedby="tracking_hint"
+            className={selectClass + " w-full sm:w-72"}
+          >
+            {TRACKING_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {TRACKING_LABELS[t]}
+              </option>
+            ))}
+          </select>
+          <p id="tracking_hint" className="text-xs text-zinc-500">
+            {TRACKING_HINTS[tracking]}
+          </p>
         </div>
         <div className="space-y-1.5">
           <label htmlFor="description" className="block text-sm font-medium text-zinc-800">
@@ -117,13 +150,40 @@ export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
           options={EQUIPMENT}
           selected={exercise?.equipment ?? []}
         />
-        <Field
-          label="Demo video URL"
-          name="video_demo_url"
-          type="url"
-          placeholder="https://youtube.com/…"
-          defaultValue={exercise?.video_demo_url ?? ""}
-        />
+        <div className="space-y-1.5">
+          <label htmlFor="video_demo_url" className="block text-sm font-medium text-zinc-800">
+            Demo video link
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              id="video_demo_url"
+              name="video_demo_url"
+              type="text"
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              maxLength={500}
+              placeholder="https://www.youtube.com/watch?v=…"
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              aria-invalid={!videoOk}
+              aria-describedby="video_hint"
+              className={cn(
+                textareaClass,
+                "h-11 min-w-0 flex-1 py-0",
+                !videoOk && "ring-red-400 focus:ring-red-500",
+              )}
+            />
+            {videoOk && videoUrl.trim() ? (
+              <ExerciseDemo name={exercise?.name ?? "New exercise"} url={videoUrl} />
+            ) : null}
+          </div>
+          <p id="video_hint" className={cn("text-xs", videoOk ? "text-zinc-500" : "text-red-700")}>
+            {videoOk
+              ? "YouTube (including Shorts) or Vimeo link; add ?t=30 to start at 0:30. Players watch it without leaving their workout."
+              : "That doesn't look like a YouTube or Vimeo video link."}
+          </p>
+        </div>
         <FormMessage state={state} />
         <div className="flex items-center gap-3">
           <SubmitButton pending={save.pending} pendingLabel="Saving…">

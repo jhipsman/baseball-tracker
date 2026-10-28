@@ -16,7 +16,9 @@ export default async function BuilderPage({ params }: PageProps<"/programs/[id]/
     loadProgramTree(supabase, id),
     supabase
       .from("exercises")
-      .select("id, name, category, muscle_groups, equipment, is_custom")
+      .select(
+        "id, name, category, muscle_groups, equipment, is_custom, tracking_type, video_demo_url",
+      )
       .order("name"),
   ]);
   if (error) throw error;

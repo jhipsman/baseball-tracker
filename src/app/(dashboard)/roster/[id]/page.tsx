@@ -18,6 +18,7 @@ import { ageOn, availability, dailySeries, pitchSmartBand, throwingAlerts } from
 import { ThrowsChart } from "@/components/throwing/throws-chart";
 import { loadVideos } from "@/lib/videos";
 import { VideoGrid } from "@/components/video/video-grid";
+import { formatSets } from "@/lib/sets-format";
 import {
   AlertList,
   AvailabilityBadge,
@@ -26,13 +27,6 @@ import {
 } from "@/components/throwing/status";
 
 export const metadata: Metadata = { title: "Player" };
-
-type SetRow = {
-  reps?: number | string | null;
-  weight?: number | null;
-  rpe?: number | null;
-  done?: boolean;
-};
 
 const STATUS = {
   completed: "bg-brand-50 text-brand-900",
@@ -99,9 +93,10 @@ export default async function PlayerProfilePage({
     ...new Set((logs ?? []).flatMap((l) => l.exercise_logs.map((e) => e.exercise_id))),
   ];
   const { data: exNames } = exerciseIds.length
-    ? await supabase.from("exercises").select("id, name").in("id", exerciseIds)
+    ? await supabase.from("exercises").select("id, name, tracking_type").in("id", exerciseIds)
     : { data: [] };
   const nameOf = new Map((exNames ?? []).map((e) => [e.id, e.name]));
+  const trackingOf = new Map((exNames ?? []).map((e) => [e.id, e.tracking_type]));
 
   const name = member.profile.full_name || member.profile.email;
   const pct = (c: { rate: number | null; logged: number; due: number }) =>
@@ -348,23 +343,18 @@ export default async function PlayerProfilePage({
                     {l.exercise_logs
                       .toSorted((a, b) => a.sort_order - b.sort_order)
                       .map((e, i) => {
-                        const sets = (
-                          Array.isArray(e.sets_completed) ? e.sets_completed : []
-                        ) as SetRow[];
+                        const summary = formatSets(
+                          e.sets_completed,
+                          trackingOf.get(e.exercise_id),
+                          { rpe: true, notDone: true },
+                        );
                         return (
                           <div key={i}>
                             <span className="font-medium">
                               {nameOf.get(e.exercise_id) ?? "Exercise"}
                             </span>
                             <span className="ml-2 text-zinc-600 tabular-nums">
-                              {sets.length === 0
-                                ? "—"
-                                : sets
-                                    .map(
-                                      (s) =>
-                                        `${s.weight != null ? `${s.weight}×` : ""}${s.reps ?? "–"}${s.rpe != null ? ` @${s.rpe}` : ""}${s.done === false ? " (not done)" : ""}`,
-                                    )
-                                    .join(", ")}
+                              {summary || "—"}
                             </span>
                             {e.notes ? (
                               <span className="ml-2 text-zinc-500 italic">“{e.notes}”</span>

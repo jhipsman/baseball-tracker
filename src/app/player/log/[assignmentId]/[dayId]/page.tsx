@@ -5,7 +5,7 @@ import { requireActiveOrg } from "@/lib/org";
 import { blockLabels } from "@/components/workout-builder/reducer";
 import { summarize } from "@/components/workout-builder/format";
 import { SESSION_LABELS } from "@/constants";
-import type { LoggedSet } from "./actions";
+import type { LoggedSet } from "@/lib/sets-format";
 import { LogForm, type ExistingLog, type LogItem } from "./log-form";
 
 export const metadata: Metadata = { title: "Log workout" };
@@ -47,7 +47,10 @@ export default async function LogWorkoutPage({
 
   const [{ data: exercises }, { data: existingLog }, { data: recent }] = await Promise.all([
     exerciseIds.length
-      ? supabase.from("exercises").select("id, name, category, instructions").in("id", exerciseIds)
+      ? supabase
+          .from("exercises")
+          .select("id, name, category, instructions, tracking_type, video_demo_url")
+          .in("id", exerciseIds)
       : Promise.resolve({ data: [] }),
     supabase
       .from("workout_logs")
@@ -102,10 +105,12 @@ export default async function LogWorkoutPage({
       programExerciseId: e.id,
       name: ex?.name ?? "Exercise",
       category: ex?.category ?? null,
+      trackingType: ex?.tracking_type ?? "weight_reps",
+      videoUrl: ex?.video_demo_url ?? null,
       label: labels[i],
       groupType: e.group_type,
       groupStart: !!e.group_id && programExercises[i - 1]?.group_id !== e.group_id,
-      prescription: summarize(builderItems[i]),
+      prescription: summarize(builderItems[i], ex?.tracking_type),
       coachNotes: e.notes,
       instructions: ex?.instructions ?? null,
       prescribedSets: e.sets,

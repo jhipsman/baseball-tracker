@@ -169,6 +169,11 @@ describe("addExercise", () => {
     expect(added).toMatchObject({ exerciseId: "squat", sets: 3, reps: "8", groupId: null });
   });
 
+  it("takes a per-tracking-type default prescription", () => {
+    const s = run(state([]), { type: "addExercise", dayId: "d1", exerciseId: "dash", reps: "" });
+    expect(s.weeks[0].days[0].items[0]).toMatchObject({ exerciseId: "dash", sets: 3, reps: "" });
+  });
+
   it("inserts at an index and joins a group when placed inside it", () => {
     const s = run(state([item("a", "g"), item("b", "g")]), {
       type: "addExercise",

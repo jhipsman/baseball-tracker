@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
-import { CATEGORY_LABELS, EXERCISE_CATEGORIES, humanize, type ExerciseCategory } from "@/constants";
+import {
+  CATEGORY_LABELS,
+  EXERCISE_CATEGORIES,
+  TRACKING_CHIPS,
+  TRACKING_LABELS,
+  humanize,
+  type ExerciseCategory,
+} from "@/constants";
+import { ExerciseDemo } from "@/components/exercise-demo";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Exercise library" };
@@ -18,7 +26,9 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
 
   let query = supabase
     .from("exercises")
-    .select("id, name, description, category, muscle_groups, equipment, is_custom")
+    .select(
+      "id, name, description, category, muscle_groups, equipment, is_custom, tracking_type, video_demo_url",
+    )
     .order("category")
     .order("name");
   if (category) query = query.eq("category", category);
@@ -93,11 +103,21 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {exercises.map((ex) => (
-            <li key={ex.id} className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+            <li key={ex.id} className="flex flex-col rounded-xl bg-white p-4 ring-1 ring-zinc-200">
               <div className="flex items-start justify-between gap-2">
-                <h2 className="font-medium">{ex.name}</h2>
-                <span className="shrink-0 rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-900">
-                  {CATEGORY_LABELS[ex.category]}
+                <h2 className="min-w-0 font-medium">{ex.name}</h2>
+                <span className="flex shrink-0 flex-wrap justify-end gap-1">
+                  {TRACKING_CHIPS[ex.tracking_type] ? (
+                    <span
+                      title={`Tracked by ${TRACKING_LABELS[ex.tracking_type].toLowerCase()}`}
+                      className="rounded-md bg-sky-50 px-2 py-0.5 text-xs font-medium text-sky-900"
+                    >
+                      {TRACKING_CHIPS[ex.tracking_type]}
+                    </span>
+                  ) : null}
+                  <span className="rounded-md bg-brand-50 px-2 py-0.5 text-xs font-medium text-brand-900">
+                    {CATEGORY_LABELS[ex.category]}
+                  </span>
                 </span>
               </div>
               {ex.description ? (
@@ -130,6 +150,9 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
                     Edit
                   </Link>
                 ) : null}
+              </div>
+              <div className="mt-auto flex justify-end pt-3">
+                <ExerciseDemo name={ex.name} url={ex.video_demo_url} />
               </div>
             </li>
           ))}
