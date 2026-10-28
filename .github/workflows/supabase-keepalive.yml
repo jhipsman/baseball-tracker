@@ -1,0 +1,51 @@
+# Keeps the free Supabase project from pausing while the app is between test
+# sessions. Supabase pauses free projects after about a week with no database
+# activity; this runs a tiny read query every 3 days.
+#
+# Uses the same SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_ID secrets as the
+# migrations workflow. If the project is already paused, the run fails with a
+# message saying how to restore it (it does not unpause it for you).
+#
+# Note: GitHub turns off scheduled workflows in repos with no commits for 60
+# days. If that happens, re-enable it from the Actions tab.
+name: Keep database awake
+
+on:
+  schedule:
+    - cron: "17 14 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+    steps:
+      - name: Ping the database
+        run: |
+          token=$(printf '%s' "$SUPABASE_ACCESS_TOKEN" | tr -d '[:space:]')
+          project=$(printf '%s' "$SUPABASE_PROJECT_ID" | tr -d '[:space:]')
+          echo "::add-mask::$token"
+          if [ -z "$token" ] || [ -z "$project" ]; then
+            echo "::error::Secrets SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_ID are required (see supabase-migrations.yml)."
+            exit 1
+          fi
+          api="https://api.supabase.com/v1/projects/$project"
+
+          status=$(curl -fsS -H "Authorization: Bearer $token" "$api" | jq -r '.status')
+          echo "Project status: $status"
+          case "$status" in
+            ACTIVE_HEALTHY) ;;
+            INACTIVE|PAUSING)
+              echo "::error::The Supabase project is paused. Restore it at https://supabase.com/dashboard/project/$project (Restore project), then re-run 'Deploy database migrations'."
+              exit 1 ;;
+            *)
+              echo "::warning::Project status is $status; trying the query anyway." ;;
+          esac
+
+          result=$(curl -fsS -X POST "$api/database/query" \
+            -H "Authorization: Bearer $token" \
+            -H "Content-Type: application/json" \
+            -d '{"query": "select count(*) as teams from public.organizations"}')
+          echo "Query result: $result"
