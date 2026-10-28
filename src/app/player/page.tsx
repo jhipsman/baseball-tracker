@@ -9,6 +9,8 @@ import {
 } from "@/lib/player";
 import { DAY_OF_WEEK_LABELS, SESSION_LABELS } from "@/constants";
 import { dayOfWeek } from "@/lib/schedule";
+import { loadNextPractice } from "@/lib/practices";
+import { NextPracticeCard } from "@/components/practice/next-practice-card";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Today" };
@@ -23,7 +25,10 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
   const { supabase, user, org } = await requireActiveOrg();
   const { today } = await playerToday();
   const { saved } = await searchParams;
-  const assignments = await loadPlayerAssignments(supabase, user.id, org.id, today);
+  const [assignments, nextPractice] = await Promise.all([
+    loadPlayerAssignments(supabase, user.id, org.id, today),
+    loadNextPractice(supabase, org.id, today),
+  ]);
 
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   const dateLabel = new Date(`${today}T12:00:00Z`).toLocaleDateString("en-US", {
@@ -49,6 +54,14 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
         >
           {saved === "skipped" ? "Workout marked as skipped." : "Workout saved. Nice work!"}
         </p>
+      ) : null}
+
+      {nextPractice ? (
+        <NextPracticeCard
+          practice={nextPractice}
+          today={today}
+          href={`/player/practices/${nextPractice.id}`}
+        />
       ) : null}
 
       {assignments.length === 0 ? (

@@ -6,6 +6,7 @@ import { playerToday } from "@/lib/player";
 import { addDays, dayOfWeek, weekStartOf } from "@/lib/schedule";
 import type { CalendarEntry, EntryStatus } from "@/lib/calendar";
 import { loadTeam } from "@/lib/team";
+import { formatClock, loadPractices, parseTime, type PracticeSummary } from "@/lib/practices";
 import { DAY_OF_WEEK_LABELS, SEASON_PHASE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +51,10 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const from = view === "week" ? weekStartOf(anchor) : weekStartOf(monthStart);
   const to = view === "week" ? addDays(from, 6) : addDays(from, 41);
 
-  const team = await loadTeam(supabase, org.id, from, to, today);
+  const [team, allPractices] = await Promise.all([
+    loadTeam(supabase, org.id, from, to, today),
+    loadPractices(supabase, org.id, from, to),
+  ]);
   const groups = team.groups;
 
   const group = groups.find((g) => g.id === groupId);
@@ -58,6 +62,8 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const roster = team.players.filter((p) => !groupMembers || groupMembers.has(p.id));
   const rosterIds = new Set(roster.map((p) => p.id));
   const entries = team.entries.filter((e) => rosterIds.has(e.playerId));
+  // Team-wide practices always show; group practices only for that group (or "All players").
+  const practices = allPractices.filter((p) => !group || !p.groupId || p.groupId === group.id);
 
   const href = (patch: Record<string, string | undefined>) => {
     const sp = new URLSearchParams();
@@ -86,6 +92,9 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
             {due > 0
               ? `${done} of ${due} due workouts logged`
               : `${entries.length} workouts scheduled`}
+            {practices.length > 0
+              ? ` · ${practices.length} practice${practices.length === 1 ? "" : "s"}`
+              : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -159,18 +168,25 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
 
       <Legend />
 
-      {roster.length === 0 ? (
+      {roster.length === 0 && practices.length === 0 ? (
         <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           {group ? `No players in ${group.name} yet.` : "No players on the roster yet."}
         </p>
       ) : view === "week" ? (
-        <WeekGrid from={from} today={today} roster={roster} entries={entries} />
+        <WeekGrid
+          from={from}
+          today={today}
+          roster={roster}
+          entries={entries}
+          practices={practices}
+        />
       ) : (
         <MonthGrid
           from={from}
           month={monthStart.slice(0, 7)}
           today={today}
           entries={entries}
+          practices={practices}
           dayHref={(d) => href({ view: "week", date: d })}
         />
       )}
@@ -192,7 +208,34 @@ function Legend() {
           {STATUS_LABEL[s]}
         </li>
       ))}
+      <li className={cn("rounded px-2 py-0.5 font-medium", PRACTICE_STYLE)}>⚾ Practice</li>
+      <li className={cn("rounded px-2 py-0.5 font-medium", PRACTICE_DRAFT_STYLE)}>
+        Practice (draft)
+      </li>
     </ul>
+  );
+}
+
+const PRACTICE_STYLE = "bg-sky-100 text-sky-900 ring-1 ring-inset ring-sky-300";
+const PRACTICE_DRAFT_STYLE = "border border-dashed border-sky-400 bg-white text-sky-900";
+
+function PracticePill({ p, compact }: { p: PracticeSummary; compact?: boolean }) {
+  const start = parseTime(p.startTime);
+  return (
+    <Link
+      href={`/practices/${p.id}`}
+      data-testid="calendar-practice"
+      title={`${p.title}${p.groupName ? ` · ${p.groupName}` : ""}${p.published ? "" : " · Draft"}`}
+      className={cn(
+        "relative z-10 block truncate rounded px-1.5 py-0.5 font-medium",
+        compact ? "text-[11px]" : "text-xs",
+        p.published ? PRACTICE_STYLE : PRACTICE_DRAFT_STYLE,
+      )}
+    >
+      {p.published ? "⚾ " : <span className="mr-1 font-semibold text-amber-700">Draft</span>}
+      {start != null ? `${formatClock(start)} ` : ""}
+      {p.title}
+    </Link>
   );
 }
 
@@ -217,11 +260,13 @@ function WeekGrid({
   today,
   roster,
   entries,
+  practices,
 }: {
   from: string;
   today: string;
   roster: { id: string; name: string; detail: string }[];
   entries: CalendarEntry[];
+  practices: PracticeSummary[];
 }) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i));
   const byCell = new Map<string, CalendarEntry[]>();
@@ -252,6 +297,28 @@ function WeekGrid({
           </tr>
         </thead>
         <tbody>
+          {practices.length > 0 ? (
+            <tr className="border-b border-zinc-200 bg-sky-50/40 align-top">
+              <th
+                scope="row"
+                className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-medium"
+              >
+                Practices
+              </th>
+              {days.map((d) => (
+                <td
+                  key={d}
+                  className={cn("space-y-1 px-1.5 py-1.5", d === today && "bg-brand-50/50")}
+                >
+                  {practices
+                    .filter((p) => p.date === d)
+                    .map((p) => (
+                      <PracticePill key={p.id} p={p} />
+                    ))}
+                </td>
+              ))}
+            </tr>
+          ) : null}
           {roster.map((p) => {
             const mine = entries.filter((e) => e.playerId === p.id);
             const due = mine.filter((e) => e.status !== "upcoming" && e.status !== "today");
@@ -294,12 +361,14 @@ function MonthGrid({
   month,
   today,
   entries,
+  practices,
   dayHref,
 }: {
   from: string;
   month: string;
   today: string;
   entries: CalendarEntry[];
+  practices: PracticeSummary[];
   dayHref: (date: string) => string;
 }) {
   const days = Array.from({ length: 42 }, (_, i) => addDays(from, i));
@@ -325,15 +394,17 @@ function MonthGrid({
             groups.set(k, [...(groups.get(k) ?? []), e]);
           }
           const outside = !d.startsWith(month);
+          const dayPractices = practices.filter((p) => p.date === d);
           return (
-            <Link
+            <div
               key={d}
-              href={dayHref(d)}
               className={cn(
-                "min-h-28 border-r border-b border-zinc-100 p-1.5 hover:bg-zinc-50",
+                "relative min-h-28 border-r border-b border-zinc-100 p-1.5 hover:bg-zinc-50",
                 outside && "bg-zinc-50/60 text-zinc-400",
               )}
             >
+              {/* Whole cell opens the week; practice pills sit above this link. */}
+              <Link href={dayHref(d)} aria-label={`Week of ${d}`} className="absolute inset-0" />
               <span
                 className={cn(
                   "inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
@@ -342,7 +413,12 @@ function MonthGrid({
               >
                 {Number(d.slice(8))}
               </span>
-              <div className="mt-1 space-y-1">
+              <div className="pointer-events-none relative mt-1 space-y-1">
+                {dayPractices.map((p) => (
+                  <div key={p.id} className="pointer-events-auto">
+                    <PracticePill p={p} compact />
+                  </div>
+                ))}
                 {[...groups.entries()].slice(0, 3).map(([k, g]) => {
                   const doneCount = g.filter(
                     (e) => e.status === "completed" || e.status === "partial",
@@ -370,7 +446,7 @@ function MonthGrid({
                   <div className="text-[11px] text-zinc-500">+{groups.size - 3} more</div>
                 ) : null}
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>
