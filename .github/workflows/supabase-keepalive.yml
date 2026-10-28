@@ -33,7 +33,14 @@ jobs:
           fi
           api="https://api.supabase.com/v1/projects/$project"
 
-          status=$(curl -fsS -H "Authorization: Bearer $token" "$api" | jq -r '.status')
+          # Wait (up to ~6 minutes) if the project is starting up or restoring.
+          for i in $(seq 1 36); do
+            status=$(curl -fsS -H "Authorization: Bearer $token" "$api" | jq -r '.status')
+            case "$status" in
+              COMING_UP|RESTORING|UNKNOWN) echo "Project status: $status (waiting…)"; sleep 10 ;;
+              *) break ;;
+            esac
+          done
           echo "Project status: $status"
           case "$status" in
             ACTIVE_HEALTHY) ;;
@@ -44,8 +51,11 @@ jobs:
               echo "::warning::Project status is $status; trying the query anyway." ;;
           esac
 
-          result=$(curl -fsS -X POST "$api/database/query" \
+          result=$(curl -sS --fail-with-body -X POST "$api/database/query" \
             -H "Authorization: Bearer $token" \
             -H "Content-Type: application/json" \
-            -d '{"query": "select count(*) as teams from public.organizations"}')
+            -d '{"query": "select count(*) as teams from public.organizations"}') || {
+            echo "::error::Query failed: $result"
+            exit 1
+          }
           echo "Query result: $result"
