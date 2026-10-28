@@ -70,6 +70,19 @@ Leave off `--include-seed` from now on, although re-running it is harmless.
 
 Video upload and coach review work without it; only the "Analyze with AI" button needs the key.
 
+### Push notifications (optional)
+
+In-app notifications (the bell) always work. To also buzz phones, add these in Vercel → **Settings → Environment Variables**, then **Deployments → ⋯ → Redeploy**:
+
+| Name | Value |
+| --- | --- |
+| `SUPABASE_SECRET_KEY` | Supabase → **Project Settings → API keys** → **Secret key** (`sb_secret_…`; older projects: `service_role`). Server-only: **never** prefix it with `NEXT_PUBLIC_`. |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | The VAPID public key you were given. |
+| `VAPID_PRIVATE_KEY` | The matching VAPID private key. Server-only. |
+| `VAPID_SUBJECT` | Optional. A contact like `mailto:you@yourteam.com`. Defaults to your site URL. |
+
+Without them, the Notifications page shows a short note instead of the "Turn on phone notifications" switch. Each person turns it on per device from the bell → Notifications, and can choose which kinds buzz their phone. On iPhone they first need **Share → Add to Home Screen** and to open the app from there.
+
 ## 4. Point Supabase logins at your site
 
 In Supabase:
