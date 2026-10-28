@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { loadBirthDates, loadThrowing } from "@/lib/throwing";
 import { throwingAlerts } from "@/lib/workload";
 import { pendingVideoCount } from "@/lib/videos";
+import { formatPracticeDate, loadPractices, practiceRange } from "@/lib/practices";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -50,7 +51,7 @@ export default async function DashboardPage() {
   const perPlayer = complianceByPlayer(team.entries);
   const attention = team.players.filter((p) => needsAttention(perPlayer.get(p.id)));
 
-  const [exercises, members, programs, videosToReview] = await Promise.all([
+  const [exercises, members, programs, videosToReview, [nextPractice]] = await Promise.all([
     supabase.from("exercises").select("id", { count: "exact", head: true }),
     supabase
       .from("org_memberships")
@@ -58,6 +59,7 @@ export default async function DashboardPage() {
       .eq("org_id", org.id),
     supabase.from("programs").select("id", { count: "exact", head: true }).eq("org_id", org.id),
     pendingVideoCount(supabase, org.id),
+    loadPractices(supabase, org.id, today, null, { limit: 1 }),
   ]);
 
   const [{ count: assignmentCount }, { count: assessmentCount }] = await Promise.all([
@@ -93,6 +95,19 @@ export default async function DashboardPage() {
         {firstName ? `Welcome, ${firstName}` : "Welcome"}
       </h1>
       <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
+      {nextPractice?.date ? (
+        <Link
+          href={`/practices/${nextPractice.id}`}
+          className="mt-2 inline-block text-sm text-zinc-700 hover:underline"
+        >
+          ⚾ Next practice: <strong>{nextPractice.title}</strong> ·{" "}
+          {nextPractice.date === today ? "Today" : formatPracticeDate(nextPractice.date)}
+          {practiceRange(nextPractice.startTime, nextPractice.totalMin)
+            ? `, ${practiceRange(nextPractice.startTime, nextPractice.totalMin)}`
+            : ""}
+          {nextPractice.published ? "" : " (draft)"}
+        </Link>
+      ) : null}
 
       {armAlerts.length > 0 ? (
         <Link

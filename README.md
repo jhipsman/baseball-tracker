@@ -203,4 +203,15 @@ Also in this pass: **Forgot password** flow, a **Getting started** checklist for
   - Written feedback + **Send review**. Players see drawings, notes, the breakdown, and feedback only after it's sent.
 - **AI analysis (optional):** the coach marks a window (e.g. load → follow-through) and frame count; the browser grabs still frames and `/api/videos/[id]/analyze` sends them to Claude (`claude-opus-5-5`, adaptive thinking, JSON-schema output, server-side refusal fallbacks). The result is a **staff-only draft** (`video_ai_analyses`): summary, phases with timestamps, strengths, up to 3 fixes with a cue and a drill, confidence, and limits. The coach edits it and chooses to share it; players see it labeled "AI-assisted notes, reviewed by your coach." Turned on by setting `ANTHROPIC_API_KEY`; without it the panel explains how to enable it.
 
+## Practice plans (Phase 7)
+
+- **Coach `/practices`:** Upcoming / Past / Templates. Start a new practice blank or from a template (title, date, start time, location, whole team or one group, notes).
+- **Builder** (`/practices/[id]`): add blocks by kind (warm-up, throwing, defense, hitting, pitching, baserunning, conditioning, team, other; each has a color), set minutes with ±5 steppers, add details and concurrent **stations** (name, coach, what they're doing). Reorder by drag handle or Move up/down. A running clock shows each block's time ("3:30–3:45"), plus the total and end time. Autosaves through the `save_practice_blocks` RPC (⌘/Ctrl+S saves now). Works at the field on a phone.
+- **Publish to team** (`setPracticePublished` in `src/lib/practice-actions.ts`): drafts are staff-only. Publishing shows the plan to players and parents (whole team, or only the plan's group) and the `practice_plans_notify` trigger notifies them. Also: Duplicate to a new date, Save as template, Delete.
+- **Print** (`/practices/[id]/print`): one-page plan with a time column, blocks, stations/coaches, and notes. Print CSS hides the app chrome.
+- **Starter templates** (Practices → Templates → Add templates): Standard 2-hour practice, Pre-game routine, Pitchers & catchers day.
+- **Calendar:** practices show in week and month views next to workouts and link to the plan. Drafts are marked "Draft".
+- **Players & parents:** a "Next practice" card on the player Today page; read-only timelines at `/player/practices/[id]` and `/parent/practices/[id]` (shared `PracticeView`). RLS hides drafts and other groups' plans, and those pages return 404.
+- Time math (`blockTimes`, `practiceRange`, …) is in `src/lib/practices.ts` and unit-tested.
+
 See the project brief for the full roadmap. Phases 1–6 are complete, except Phase 2's push-notification workout reminders, which need the deployed site.
