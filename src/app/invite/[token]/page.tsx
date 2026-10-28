@@ -48,10 +48,23 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
     body = (
       <form action={acceptInvitation} className="space-y-4">
         <input type="hidden" name="token" value={token} />
-        <p className="text-sm text-zinc-600">
-          You&apos;ve been invited to join <strong>{invite.org_name}</strong> as a{" "}
-          <strong>{ROLE_LABELS[invite.role].toLowerCase()}</strong>.
-        </p>
+        {invite.role === "parent" ? (
+          <div className="space-y-2 text-sm text-zinc-600">
+            <p>
+              You&apos;re invited to follow <strong>{invite.player_name ?? "your player"}</strong>{" "}
+              on <strong>{invite.org_name}</strong> as a parent/guardian.
+            </p>
+            <p>
+              You&apos;ll see their workouts, throwing, testing numbers, and coach-reviewed videos.
+              It&apos;s read-only, and you only see your own player.
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-zinc-600">
+            You&apos;ve been invited to join <strong>{invite.org_name}</strong> as a{" "}
+            <strong>{ROLE_LABELS[invite.role].toLowerCase()}</strong>.
+          </p>
+        )}
         {typeof error === "string" ? (
           <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
             {error}
@@ -68,7 +81,11 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
         <h1 className="mb-4 text-xl font-semibold">
-          {invite ? `Join ${invite.org_name}` : "Invitation"}
+          {invite
+            ? invite.role === "parent"
+              ? `Follow ${invite.player_name ?? "your player"}`
+              : `Join ${invite.org_name}`
+            : "Invitation"}
         </h1>
         {body}
       </div>

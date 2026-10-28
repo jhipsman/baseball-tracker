@@ -11,6 +11,7 @@ import { METRICS } from "@/constants/metrics";
 import { MetricChart } from "@/components/charts/metric-chart";
 import { MetricTile } from "@/components/charts/stat-tile";
 import { ProfileForm } from "./profile-form";
+import { ParentsCard } from "./parents-card";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -81,6 +82,9 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
             </div>
           ) : null}
         </section>
+      ) : null}
+      {membership.role === "player" ? (
+        <ParentsCard supabase={supabase} orgId={org.id} userId={user.id} />
       ) : null}
       <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
         <ProfileForm fullName={profile?.full_name ?? ""} />

@@ -26,14 +26,17 @@ function localDate() {
 
 /**
  * Log a throwing session or arm check-in. With `players`, a coach picks who
- * it's for (e.g. entering game pitch counts); otherwise it logs for yourself.
+ * it's for (e.g. entering game pitch counts); with `forPlayerId`, it logs for
+ * that one player (a parent logging for their child); otherwise for yourself.
  */
 export function ThrowLogForm({
   players,
+  forPlayerId,
   defaultType = "long_toss",
   compact = false,
 }: {
   players?: { id: string; name: string }[];
+  forPlayerId?: string;
   defaultType?: ThrowingType;
   compact?: boolean;
 }) {
@@ -61,7 +64,7 @@ export function ThrowLogForm({
     setMessage(null);
     startTransition(async () => {
       const res = await logThrowing({
-        playerId: players ? playerId : undefined,
+        playerId: players ? playerId : forPlayerId,
         date,
         type,
         pitches: Number(pitches || (showMix ? mixTotal : 0)),

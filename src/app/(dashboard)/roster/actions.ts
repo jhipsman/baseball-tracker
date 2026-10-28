@@ -11,21 +11,53 @@ function isRole(v: unknown): v is OrgRole {
 }
 
 export async function inviteMember(_prev: FormState, formData: FormData): Promise<FormState> {
-  const { supabase, user, org, membership } = await requireActiveOrg();
-  if (membership.role !== "admin") return { error: "Only admins can invite members." };
+  const { supabase, user, org, membership, isStaff } = await requireActiveOrg();
+  if (!isStaff) return { error: "Only coaches, trainers, and admins can invite people." };
 
   const email = String(formData.get("email") ?? "")
     .trim()
     .toLowerCase();
   const role = formData.get("role");
-  const values = { email, role: String(role ?? "") };
+  const playerId = String(formData.get("player_id") ?? "");
+  const values = { email, role: String(role ?? ""), player_id: playerId };
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: "Enter a valid email.", values };
   if (!isRole(role) || !INVITABLE_ROLES.includes(role)) return { error: "Choose a role.", values };
+  if (role !== "parent" && membership.role !== "admin") {
+    return { error: "Only admins can invite players and staff.", values };
+  }
 
-  const { error } = await supabase
-    .from("org_invitations")
-    .insert({ org_id: org.id, email, role, invited_by: user.id });
+  let playerName = "";
+  if (role === "parent") {
+    if (!playerId) return { error: "Choose which player they're the parent of.", values };
+    const { data: player } = await supabase
+      .from("org_memberships")
+      .select("profile_id, profile:profiles (full_name, email)")
+      .eq("org_id", org.id)
+      .eq("profile_id", playerId)
+      .eq("role", "player")
+      .maybeSingle();
+    if (!player) return { error: "Choose a player on this team.", values };
+    playerName = player.profile.full_name || player.profile.email;
+    // Already a member in another role? Accepting would fail, so say so now.
+    const { data: existing } = await supabase
+      .from("org_memberships")
+      .select("role, profile:profiles!inner (email)")
+      .eq("org_id", org.id)
+      .eq("profile.email", email)
+      .maybeSingle();
+    if (existing && existing.role !== "parent") {
+      return { error: `${email} is already on this team as a ${existing.role}.`, values };
+    }
+  }
+
+  const { error } = await supabase.from("org_invitations").insert({
+    org_id: org.id,
+    email,
+    role,
+    invited_by: user.id,
+    player_id: role === "parent" ? playerId : null,
+  });
 
   if (error) {
     if (error.code === "23505") {
@@ -35,7 +67,23 @@ export async function inviteMember(_prev: FormState, formData: FormData): Promis
   }
 
   revalidatePath("/roster", "layout");
-  return { message: `Invitation created for ${email}. Copy the link below and send it to them.` };
+  revalidatePath("/player/profile");
+  return {
+    message: `Invitation created for ${email}${playerName ? ` (parent of ${playerName})` : ""}. Copy the link below and send it to them.`,
+  };
+}
+
+/** Unlink a parent from a player (staff). The parent stays a member until removed. */
+export async function unlinkParent(formData: FormData) {
+  const { supabase, org, isStaff } = await requireActiveOrg();
+  if (!isStaff) return;
+  await supabase
+    .from("parent_links")
+    .delete()
+    .eq("id", String(formData.get("id") ?? ""))
+    .eq("org_id", org.id);
+  revalidatePath("/roster", "layout");
+  revalidatePath("/player/profile");
 }
 
 export async function revokeInvitation(formData: FormData) {
@@ -45,12 +93,14 @@ export async function revokeInvitation(formData: FormData) {
     .delete()
     .eq("id", String(formData.get("id")));
   revalidatePath("/roster", "layout");
+  revalidatePath("/player/profile");
 }
 
 export async function updateMember(formData: FormData) {
   const { supabase, org } = await requireActiveOrg();
   const role = formData.get("role");
-  if (!isRole(role)) return;
+  // Parents are linked to players through invitations, so no one is switched to or from parent.
+  if (!isRole(role) || role === "parent") return;
 
   const position = String(formData.get("position") ?? "");
   const status = String(formData.get("status") ?? "");
@@ -70,7 +120,8 @@ export async function updateMember(formData: FormData) {
       ...(status === "active" || status === "injured" || status === "inactive" ? { status } : {}),
     })
     .eq("id", String(formData.get("id")))
-    .eq("org_id", org.id);
+    .eq("org_id", org.id)
+    .neq("role", "parent");
   revalidatePath("/roster", "layout");
 }
 

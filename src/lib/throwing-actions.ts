@@ -20,8 +20,21 @@ export type ThrowingInput = {
 const ARM = new Set(["great", "good", "okay", "tired", "sore", "pain"]);
 
 export async function logThrowing(input: ThrowingInput): Promise<{ error?: string; ok?: true }> {
-  const { supabase, user, org, isStaff } = await requireActiveOrg();
-  const playerId = input.playerId && isStaff ? input.playerId : user.id;
+  const { supabase, user, org, isStaff, membership } = await requireActiveOrg();
+  let playerId = input.playerId && isStaff ? input.playerId : user.id;
+  // Parents log for a linked child (e.g. a travel-ball pitch count). RLS enforces this too.
+  if (membership.role === "parent") {
+    if (!input.playerId) return { error: "Choose which player this is for." };
+    const { data: link } = await supabase
+      .from("parent_links")
+      .select("id")
+      .eq("org_id", org.id)
+      .eq("parent_id", user.id)
+      .eq("player_id", input.playerId)
+      .maybeSingle();
+    if (!link) return { error: "You can only log for your own player." };
+    playerId = input.playerId;
+  }
 
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date)) return { error: "Choose a date." };
   if (!THROW_TYPES.some((t) => t.key === input.type)) return { error: "Choose a session type." };
@@ -70,6 +83,7 @@ export async function logThrowing(input: ThrowingInput): Promise<{ error?: strin
   revalidatePath("/player/throwing");
   revalidatePath("/throwing");
   revalidatePath("/roster", "layout");
+  revalidatePath("/parent", "layout");
   return { ok: true };
 }
 
@@ -83,6 +97,7 @@ export async function deleteThrowing(formData: FormData) {
   revalidatePath("/player/throwing");
   revalidatePath("/throwing");
   revalidatePath("/roster", "layout");
+  revalidatePath("/parent", "layout");
 }
 
 /** Player sets own birthdate, or staff set a player's (playerId). */

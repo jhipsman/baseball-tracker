@@ -12,5 +12,18 @@ export async function acceptInvitation(formData: FormData) {
     redirect(`/invite/${encodeURIComponent(token)}?error=${encodeURIComponent(error.message)}`);
 
   await setActiveOrgCookie(orgId);
-  redirect("/");
+
+  // Parents land straight on their dashboard.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const { data: membership } = user
+    ? await supabase
+        .from("org_memberships")
+        .select("role")
+        .eq("org_id", orgId)
+        .eq("profile_id", user.id)
+        .maybeSingle()
+    : { data: null };
+  redirect(membership?.role === "parent" ? "/parent" : "/");
 }
