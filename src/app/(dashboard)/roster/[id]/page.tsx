@@ -13,6 +13,7 @@ import { MetricTile } from "@/components/charts/stat-tile";
 import { cn } from "@/lib/utils";
 import { AssessmentForm } from "../assessment-form";
 import { deleteAssessment } from "../assess-actions";
+import { ParentsSection } from "../parents-section";
 import { loadThrowing } from "@/lib/throwing";
 import { ageOn, availability, dailySeries, pitchSmartBand, throwingAlerts } from "@/lib/workload";
 import { ThrowsChart } from "@/components/throwing/throws-chart";
@@ -268,6 +269,8 @@ export default async function PlayerProfilePage({
           </div>
         </details>
       </section>
+
+      <ParentsSection supabase={supabase} orgId={org.id} playerId={id} />
 
       <section id="videos" className="space-y-3">
         <div className="flex flex-wrap items-center gap-3">

@@ -31,10 +31,10 @@ export default async function RosterPage() {
       .eq("org_id", org.id)
       .order("role")
       .order("created_at"),
-    isAdmin
+    isStaff
       ? supabase
           .from("org_invitations")
-          .select("id, email, role, token, expires_at")
+          .select("id, email, role, token, expires_at, player_id")
           .eq("org_id", org.id)
           .is("accepted_at", null)
           .order("created_at", { ascending: false })
@@ -48,6 +48,10 @@ export default async function RosterPage() {
     .eq("id", org.id)
     .single();
   const origin = await siteOrigin();
+  const { data: links } = await supabase
+    .from("parent_links")
+    .select("parent_id, player_id")
+    .eq("org_id", org.id);
   const { data: groups } = await supabase
     .from("player_groups")
     .select("id, name, player_group_members (profile_id)")
@@ -58,6 +62,17 @@ export default async function RosterPage() {
     members.map((m) => [m.profile_id, m.profile.full_name || m.profile.email]),
   );
   const pending = invitations.data ?? [];
+  const childrenOf = new Map<string, string[]>();
+  for (const l of links ?? []) {
+    childrenOf.set(l.parent_id, [...(childrenOf.get(l.parent_id) ?? []), l.player_id]);
+  }
+  const parentOf = (parentId: string) =>
+    (childrenOf.get(parentId) ?? [])
+      .map((id) => nameOf.get(id))
+      .filter(Boolean)
+      .join(", ") || "no player linked";
+  const inviteRoles = isAdmin ? INVITABLE_ROLES : (["parent"] as const);
+  const memberRoles = INVITABLE_ROLES.filter((r) => r !== "parent");
 
   return (
     <div className="max-w-5xl space-y-8">
@@ -69,14 +84,20 @@ export default async function RosterPage() {
         {isStaff ? <RosterTabs active="manage" /> : null}
       </div>
 
-      {isAdmin ? (
+      {isStaff ? (
         <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <h2 className="font-semibold">Invite someone</h2>
+          <h2 className="font-semibold">{isAdmin ? "Invite someone" : "Invite a parent"}</h2>
           <p className="mt-1 mb-4 text-sm text-zinc-600">
             They&apos;ll join once they sign in with this email and open the invite link. Pending
             invitations also appear for them right after sign-up.
           </p>
-          <InviteForm />
+          <InviteForm
+            roles={inviteRoles}
+            players={players.map((p) => ({
+              id: p.profile_id,
+              name: nameOf.get(p.profile_id) ?? "Player",
+            }))}
+          />
 
           {pending.length > 0 ? (
             <div className="mt-6">
@@ -87,7 +108,11 @@ export default async function RosterPage() {
                   return (
                     <li key={inv.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
                       <span className="min-w-0 flex-1 truncate">{inv.email}</span>
-                      <span className="text-zinc-500">{ROLE_LABELS[inv.role]}</span>
+                      <span className="text-zinc-500">
+                        {inv.role === "parent" && inv.player_id
+                          ? `Parent of ${nameOf.get(inv.player_id) ?? "a player"}`
+                          : ROLE_LABELS[inv.role]}
+                      </span>
                       {expired ? (
                         <span className="text-xs font-medium text-red-600">Expired</span>
                       ) : (
@@ -221,7 +246,22 @@ export default async function RosterPage() {
                   <p className="truncate text-sm text-zinc-500">{m.profile.email}</p>
                 </div>
 
-                {isAdmin && !isOwner ? (
+                {m.role === "parent" ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm text-zinc-600">Parent of {parentOf(m.profile_id)}</p>
+                    {isAdmin ? (
+                      <form action={removeMember}>
+                        <input type="hidden" name="id" value={m.id} />
+                        <button
+                          type="submit"
+                          className="h-9 px-2 text-sm font-semibold text-zinc-500 hover:text-red-600"
+                        >
+                          Remove
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
+                ) : isAdmin && !isOwner ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <form
                       // Remount with fresh defaults after a save; React resets forms after an action.
@@ -236,7 +276,7 @@ export default async function RosterPage() {
                         aria-label="Role"
                         className={cn(selectClass, "h-9")}
                       >
-                        {INVITABLE_ROLES.map((r) => (
+                        {memberRoles.map((r) => (
                           <option key={r} value={r}>
                             {ROLE_LABELS[r]}
                           </option>

@@ -51,8 +51,17 @@ export type Equipment = (typeof EQUIPMENT)[number];
 
 export const STAFF_ROLES: readonly OrgRole[] = ["admin", "coach", "trainer"];
 
-/** Roles a coach can invite today. "parent" returns with the parent dashboard (Phase 7). */
-export const INVITABLE_ROLES: readonly OrgRole[] = ["player", "coach", "trainer", "admin"];
+/**
+ * Roles that can be invited. Parent invites also name the player they follow;
+ * coaches and trainers may invite parents, every other role is admin-only.
+ */
+export const INVITABLE_ROLES: readonly OrgRole[] = [
+  "player",
+  "parent",
+  "coach",
+  "trainer",
+  "admin",
+];
 
 export const CATEGORY_LABELS: Record<ExerciseCategory, string> = {
   strength: "Strength",
