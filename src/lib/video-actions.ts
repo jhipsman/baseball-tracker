@@ -1,5 +1,8 @@
 "use server";
 
+import { after } from "next/server";
+import { dispatchPush } from "@/lib/push";
+
 import { revalidatePath } from "next/cache";
 import { requireActiveOrg } from "@/lib/org";
 import { VIDEO_BUCKET } from "@/lib/videos";
@@ -42,6 +45,8 @@ export type NewVideo = {
 /** Records a clip the browser already uploaded to {org}/{player}/{id}/. */
 export async function createVideo(input: NewVideo): Promise<Result<{ id: string }>> {
   const { supabase, user, org, isStaff } = await requireActiveOrg();
+  // Push any notifications this action's DB triggers create (no-op without push keys).
+  after(() => dispatchPush());
   const playerId = isStaff && input.playerId ? input.playerId : user.id;
   if (!UUID.test(input.id)) return { error: "Invalid upload." };
   const prefix = `${org.id}/${playerId}/${input.id}/`;
@@ -191,6 +196,8 @@ async function updateVideo(
 
 export async function sendReview(videoId: string, summary: string): Promise<Result> {
   const { user } = await requireActiveOrg();
+  // Push any notifications this action's DB triggers create (no-op without push keys).
+  after(() => dispatchPush());
   return updateVideo(videoId, {
     status: "reviewed",
     review_summary: text(summary, 5000) || null,

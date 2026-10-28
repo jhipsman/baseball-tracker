@@ -1,5 +1,8 @@
 "use server";
 
+import { after } from "next/server";
+import { dispatchPush } from "@/lib/push";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -152,6 +155,8 @@ export async function setPracticePublished(
   published: boolean,
 ): Promise<{ error?: string }> {
   const { supabase, isStaff } = await requireActiveOrg();
+  // Push any notifications this action's DB triggers create (no-op without push keys).
+  after(() => dispatchPush());
   if (!isStaff) return { error: "Not allowed." };
   if (!UUID.test(planId)) return { error: "Invalid plan." };
 

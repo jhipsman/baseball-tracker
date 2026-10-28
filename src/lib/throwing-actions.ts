@@ -1,5 +1,8 @@
 "use server";
 
+import { after } from "next/server";
+import { dispatchPush } from "@/lib/push";
+
 import { revalidatePath } from "next/cache";
 import { requireActiveOrg } from "@/lib/org";
 import { INTENSITIES, PITCH_TYPES, THROW_TYPES } from "@/constants/throwing";
@@ -21,6 +24,8 @@ const ARM = new Set(["great", "good", "okay", "tired", "sore", "pain"]);
 
 export async function logThrowing(input: ThrowingInput): Promise<{ error?: string; ok?: true }> {
   const { supabase, user, org, isStaff, membership } = await requireActiveOrg();
+  // Push any notifications this action's DB triggers create (no-op without push keys).
+  after(() => dispatchPush());
   let playerId = input.playerId && isStaff ? input.playerId : user.id;
   // Parents log for a linked child (e.g. a travel-ball pitch count). RLS enforces this too.
   if (membership.role === "parent") {

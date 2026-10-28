@@ -1,5 +1,8 @@
 "use server";
 
+import { after } from "next/server";
+import { dispatchPush } from "@/lib/push";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { FormState } from "@/lib/auth/actions";
@@ -136,6 +139,8 @@ export async function deleteProgram(formData: FormData) {
 
 export async function assignProgram(_prev: FormState, formData: FormData): Promise<FormState> {
   const { supabase, user, isStaff } = await requireActiveOrg();
+  // Push any notifications this action's DB triggers create (no-op without push keys).
+  after(() => dispatchPush());
   if (!isStaff) return { error: "Not allowed." };
 
   const programId = String(formData.get("program_id") ?? "");
