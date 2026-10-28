@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { requireActiveOrg } from "@/lib/org";
+import { loadPractices } from "@/lib/practices";
 import { buildEntries, type CalendarAssignment, type CalendarEntry } from "@/lib/calendar";
 
 type Client = SupabaseClient<Database>;
@@ -188,4 +189,22 @@ export async function loadParentsOf(supabase: Client, orgId: string, playerId: s
     invitedBy: i.invited_by,
   }));
   return { parents, pending };
+}
+
+/** Published practices in [from, to] that apply to this child (team-wide or one of their groups). */
+export async function loadChildPractices(
+  supabase: SupabaseClient<Database>,
+  orgId: string,
+  childId: string,
+  from: string,
+  to: string | null,
+  limit?: number,
+) {
+  const [{ data: groups }, practices] = await Promise.all([
+    supabase.from("player_group_members").select("group_id").eq("profile_id", childId),
+    loadPractices(supabase, orgId, from, to, { publishedOnly: true }),
+  ]);
+  const mine = new Set((groups ?? []).map((g) => g.group_id));
+  const list = practices.filter((p) => !p.groupId || mine.has(p.groupId));
+  return limit ? list.slice(0, limit) : list;
 }

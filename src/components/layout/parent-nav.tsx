@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -29,6 +29,10 @@ const ITEMS = [
 
 export function ParentNav() {
   const pathname = usePathname();
+  // Keep the selected child (?player=) when switching tabs.
+  const player = useSearchParams().get("player");
+  const withPlayer = (href: string) =>
+    player ? `${href}?player=${encodeURIComponent(player)}` : href;
   return (
     <nav
       aria-label="Parent"
@@ -41,7 +45,7 @@ export function ParentNav() {
           return (
             <li key={item.href} className="flex-1">
               <Link
-                href={item.href}
+                href={withPlayer(item.href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex h-16 flex-col items-center justify-center gap-0.5 text-xs font-medium",

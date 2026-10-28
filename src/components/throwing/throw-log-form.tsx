@@ -110,7 +110,9 @@ export function ThrowLogForm({
       ) : null}
 
       <fieldset>
-        <legend className="text-sm font-medium text-zinc-800">What did you do?</legend>
+        <legend className="text-sm font-medium text-zinc-800">
+          {forPlayerId || players ? "Session type" : "What did you do?"}
+        </legend>
         <div
           className={cn("mt-2 grid gap-2", compact ? "grid-cols-3" : "grid-cols-2 sm:grid-cols-3")}
         >
@@ -264,8 +266,9 @@ export function ThrowLogForm({
         </div>
         {armFeel === "pain" ? (
           <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-800">
-            Your coach will be alerted. Stop throwing and talk to your coach or athletic trainer
-            before your next session.
+            {forPlayerId
+              ? "The coach will be alerted. Hold off on throwing and talk to the coach or an athletic trainer before the next session."
+              : "Your coach will be alerted. Stop throwing and talk to your coach or athletic trainer before your next session."}
           </p>
         ) : null}
       </fieldset>
