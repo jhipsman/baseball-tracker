@@ -6,6 +6,8 @@ import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
 import { ROLE_LABELS } from "@/constants";
+import { NotificationBell } from "@/components/notifications/bell";
+import { redirect } from "next/navigation";
 
 const NAV: NavItem[] = [
   { href: "/", label: "Dashboard" },
@@ -15,10 +17,13 @@ const NAV: NavItem[] = [
   { href: "/calendar", label: "Calendar" },
   { href: "/throwing", label: "Throwing" },
   { href: "/videos", label: "Videos" },
+  { href: "/practices", label: "Practices" },
+  { href: "/messages", label: "Messages" },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, org, membership, memberships, isStaff } = await requireActiveOrg();
+  if (membership.role === "parent") redirect("/parent");
   const { tz } = await playerToday();
 
   return (
@@ -32,7 +37,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <p className="truncate text-sm font-semibold">{org.name}</p>
               <p className="text-xs text-zinc-500">{ROLE_LABELS[membership.role]}</p>
             </div>
-            <form action={signOut} className="ml-auto md:hidden">
+            <NotificationBell className="ml-auto" />
+            <form action={signOut} className="md:hidden">
               <button type="submit" className="text-sm font-medium text-zinc-700">
                 Sign out
               </button>

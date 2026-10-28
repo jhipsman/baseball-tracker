@@ -3,6 +3,97 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      announcement_reads: {
+        Row: {
+          announcement_id: string;
+          profile_id: string;
+          read_at: string;
+        };
+        Insert: {
+          announcement_id: string;
+          profile_id: string;
+          read_at?: string;
+        };
+        Update: {
+          announcement_id?: string;
+          profile_id?: string;
+          read_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "announcement_reads_announcement_id_fkey";
+            columns: ["announcement_id"];
+            isOneToOne: false;
+            referencedRelation: "announcements";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "announcement_reads_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      announcements: {
+        Row: {
+          author_id: string | null;
+          body: string;
+          created_at: string;
+          group_id: string | null;
+          id: string;
+          include_parents: boolean;
+          org_id: string;
+          pinned: boolean;
+          title: string;
+        };
+        Insert: {
+          author_id?: string | null;
+          body: string;
+          created_at?: string;
+          group_id?: string | null;
+          id?: string;
+          include_parents?: boolean;
+          org_id: string;
+          pinned?: boolean;
+          title: string;
+        };
+        Update: {
+          author_id?: string | null;
+          body?: string;
+          created_at?: string;
+          group_id?: string | null;
+          id?: string;
+          include_parents?: boolean;
+          org_id?: string;
+          pinned?: boolean;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "announcements_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "announcements_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "player_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "announcements_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       assessments: {
         Row: {
           assessed_by: string | null;
@@ -126,6 +217,7 @@ export type Database = {
           muscle_groups: string[];
           name: string;
           org_id: string | null;
+          tracking_type: Database["public"]["Enums"]["tracking_type"];
           video_demo_url: string | null;
         };
         Insert: {
@@ -140,6 +232,7 @@ export type Database = {
           muscle_groups?: string[];
           name: string;
           org_id?: string | null;
+          tracking_type?: Database["public"]["Enums"]["tracking_type"];
           video_demo_url?: string | null;
         };
         Update: {
@@ -154,6 +247,7 @@ export type Database = {
           muscle_groups?: string[];
           name?: string;
           org_id?: string | null;
+          tracking_type?: Database["public"]["Enums"]["tracking_type"];
           video_demo_url?: string | null;
         };
         Relationships: [
@@ -173,6 +267,70 @@ export type Database = {
           },
         ];
       };
+      notifications: {
+        Row: {
+          actor_id: string | null;
+          body: string | null;
+          created_at: string;
+          href: string | null;
+          id: string;
+          kind: string;
+          org_id: string;
+          profile_id: string;
+          pushed_at: string | null;
+          read_at: string | null;
+          title: string;
+        };
+        Insert: {
+          actor_id?: string | null;
+          body?: string | null;
+          created_at?: string;
+          href?: string | null;
+          id?: string;
+          kind: string;
+          org_id: string;
+          profile_id: string;
+          pushed_at?: string | null;
+          read_at?: string | null;
+          title: string;
+        };
+        Update: {
+          actor_id?: string | null;
+          body?: string | null;
+          created_at?: string;
+          href?: string | null;
+          id?: string;
+          kind?: string;
+          org_id?: string;
+          profile_id?: string;
+          pushed_at?: string | null;
+          read_at?: string | null;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       org_invitations: {
         Row: {
           accepted_at: string | null;
@@ -183,6 +341,7 @@ export type Database = {
           id: string;
           invited_by: string | null;
           org_id: string;
+          player_id: string | null;
           role: Database["public"]["Enums"]["org_role"];
           token: string;
         };
@@ -195,6 +354,7 @@ export type Database = {
           id?: string;
           invited_by?: string | null;
           org_id: string;
+          player_id?: string | null;
           role: Database["public"]["Enums"]["org_role"];
           token?: string;
         };
@@ -207,6 +367,7 @@ export type Database = {
           id?: string;
           invited_by?: string | null;
           org_id?: string;
+          player_id?: string | null;
           role?: Database["public"]["Enums"]["org_role"];
           token?: string;
         };
@@ -230,6 +391,13 @@ export type Database = {
             columns: ["org_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "org_invitations_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
             referencedColumns: ["id"];
           },
         ];
@@ -326,6 +494,52 @@ export type Database = {
           },
         ];
       };
+      parent_links: {
+        Row: {
+          created_at: string;
+          id: string;
+          org_id: string;
+          parent_id: string;
+          player_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          org_id: string;
+          parent_id: string;
+          player_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          org_id?: string;
+          parent_id?: string;
+          player_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "parent_links_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "parent_links_parent_id_fkey";
+            columns: ["parent_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "parent_links_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       player_group_members: {
         Row: {
           group_id: string;
@@ -395,6 +609,117 @@ export type Database = {
           },
         ];
       };
+      practice_blocks: {
+        Row: {
+          details: string | null;
+          duration_min: number;
+          id: string;
+          kind: Database["public"]["Enums"]["practice_block_kind"];
+          plan_id: string;
+          sort_order: number;
+          stations: NonNullable<Json>;
+          title: string;
+        };
+        Insert: {
+          details?: string | null;
+          duration_min: number;
+          id?: string;
+          kind?: Database["public"]["Enums"]["practice_block_kind"];
+          plan_id: string;
+          sort_order?: number;
+          stations?: NonNullable<Json>;
+          title: string;
+        };
+        Update: {
+          details?: string | null;
+          duration_min?: number;
+          id?: string;
+          kind?: Database["public"]["Enums"]["practice_block_kind"];
+          plan_id?: string;
+          sort_order?: number;
+          stations?: NonNullable<Json>;
+          title?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "practice_blocks_plan_id_fkey";
+            columns: ["plan_id"];
+            isOneToOne: false;
+            referencedRelation: "practice_plans";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      practice_plans: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          date: string | null;
+          group_id: string | null;
+          id: string;
+          is_template: boolean;
+          location: string | null;
+          notes: string | null;
+          org_id: string;
+          published: boolean;
+          start_time: string | null;
+          title: string;
+          updated_at: string;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          date?: string | null;
+          group_id?: string | null;
+          id?: string;
+          is_template?: boolean;
+          location?: string | null;
+          notes?: string | null;
+          org_id: string;
+          published?: boolean;
+          start_time?: string | null;
+          title: string;
+          updated_at?: string;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          date?: string | null;
+          group_id?: string | null;
+          id?: string;
+          is_template?: boolean;
+          location?: string | null;
+          notes?: string | null;
+          org_id?: string;
+          published?: boolean;
+          start_time?: string | null;
+          title?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "practice_plans_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_plans_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "player_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "practice_plans_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -403,6 +728,7 @@ export type Database = {
           email: string;
           full_name: string | null;
           id: string;
+          push_muted: string[];
         };
         Insert: {
           avatar_url?: string | null;
@@ -411,6 +737,7 @@ export type Database = {
           email: string;
           full_name?: string | null;
           id: string;
+          push_muted?: string[];
         };
         Update: {
           avatar_url?: string | null;
@@ -419,6 +746,7 @@ export type Database = {
           email?: string;
           full_name?: string | null;
           id?: string;
+          push_muted?: string[];
         };
         Relationships: [];
       };
@@ -657,6 +985,158 @@ export type Database = {
           },
           {
             foreignKeyName: "programs_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      push_subscriptions: {
+        Row: {
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          p256dh: string;
+          profile_id: string;
+          user_agent: string | null;
+        };
+        Insert: {
+          auth: string;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          p256dh: string;
+          profile_id: string;
+          user_agent?: string | null;
+        };
+        Update: {
+          auth?: string;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          p256dh?: string;
+          profile_id?: string;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      thread_members: {
+        Row: {
+          last_read_at: string | null;
+          profile_id: string;
+          thread_id: string;
+        };
+        Insert: {
+          last_read_at?: string | null;
+          profile_id: string;
+          thread_id: string;
+        };
+        Update: {
+          last_read_at?: string | null;
+          profile_id?: string;
+          thread_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "thread_members_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "thread_members_thread_id_fkey";
+            columns: ["thread_id"];
+            isOneToOne: false;
+            referencedRelation: "threads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      thread_messages: {
+        Row: {
+          author_id: string | null;
+          body: string;
+          created_at: string;
+          id: string;
+          thread_id: string;
+        };
+        Insert: {
+          author_id?: string | null;
+          body: string;
+          created_at?: string;
+          id?: string;
+          thread_id: string;
+        };
+        Update: {
+          author_id?: string | null;
+          body?: string;
+          created_at?: string;
+          id?: string;
+          thread_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "thread_messages_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "thread_messages_thread_id_fkey";
+            columns: ["thread_id"];
+            isOneToOne: false;
+            referencedRelation: "threads";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      threads: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          id: string;
+          last_message_at: string;
+          org_id: string;
+          subject: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          last_message_at?: string;
+          org_id: string;
+          subject?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          id?: string;
+          last_message_at?: string;
+          org_id?: string;
+          subject?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "threads_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "threads_org_id_fkey";
             columns: ["org_id"];
             isOneToOne: false;
             referencedRelation: "organizations";
@@ -1027,6 +1507,7 @@ export type Database = {
           is_accepted: boolean;
           is_expired: boolean;
           org_name: string;
+          player_name: string;
           role: Database["public"]["Enums"]["org_role"];
         }[];
       };
@@ -1039,6 +1520,7 @@ export type Database = {
           token: string;
         }[];
       };
+      save_practice_blocks: { Args: { p_blocks: Json; p_plan_id: string }; Returns: undefined };
       save_program_structure: { Args: { p_program_id: string; p_weeks: Json }; Returns: string };
       save_workout_log: {
         Args: {
@@ -1061,6 +1543,10 @@ export type Database = {
         Args: { p_birth_date: string; p_org_id: string; p_player_id: string };
         Returns: undefined;
       };
+      start_thread: {
+        Args: { p_body: string; p_member_ids: string[]; p_org_id: string; p_subject: string };
+        Returns: string;
+      };
     };
     Enums: {
       annotation_kind: "note" | "line" | "arrow" | "angle" | "circle" | "freehand";
@@ -1081,12 +1567,23 @@ export type Database = {
       org_role: "admin" | "coach" | "trainer" | "player" | "parent";
       plan_tier: "free" | "pro" | "enterprise";
       player_position: "P" | "C" | "1B" | "2B" | "SS" | "3B" | "OF" | "DH" | "UTIL";
+      practice_block_kind:
+        | "warmup"
+        | "throwing"
+        | "defense"
+        | "hitting"
+        | "pitching"
+        | "baserunning"
+        | "conditioning"
+        | "team"
+        | "other";
       program_type: "strength" | "throwing" | "arm_care" | "hitting" | "conditioning" | "hybrid";
       season_phase: "off_season" | "pre_season" | "in_season" | "post_season";
       session_type:
         "strength" | "throwing" | "hitting" | "conditioning" | "recovery" | "practice" | "off";
       throwing_intensity: "low" | "moderate" | "high" | "max_effort";
       throwing_type: "long_toss" | "flat_ground" | "bullpen" | "live_abs" | "game" | "check_in";
+      tracking_type: "weight_reps" | "reps" | "time" | "distance" | "distance_time";
       video_status: "pending" | "reviewed";
       video_type: "hitting" | "pitching" | "fielding" | "catching" | "exercise_form" | "other";
       workout_status: "completed" | "partial" | "skipped";
@@ -1220,6 +1717,17 @@ export const Constants = {
       org_role: ["admin", "coach", "trainer", "player", "parent"],
       plan_tier: ["free", "pro", "enterprise"],
       player_position: ["P", "C", "1B", "2B", "SS", "3B", "OF", "DH", "UTIL"],
+      practice_block_kind: [
+        "warmup",
+        "throwing",
+        "defense",
+        "hitting",
+        "pitching",
+        "baserunning",
+        "conditioning",
+        "team",
+        "other",
+      ],
       program_type: ["strength", "throwing", "arm_care", "hitting", "conditioning", "hybrid"],
       season_phase: ["off_season", "pre_season", "in_season", "post_season"],
       session_type: [
@@ -1233,6 +1741,7 @@ export const Constants = {
       ],
       throwing_intensity: ["low", "moderate", "high", "max_effort"],
       throwing_type: ["long_toss", "flat_ground", "bullpen", "live_abs", "game", "check_in"],
+      tracking_type: ["weight_reps", "reps", "time", "distance", "distance_time"],
       video_status: ["pending", "reviewed"],
       video_type: ["hitting", "pitching", "fielding", "catching", "exercise_form", "other"],
       workout_status: ["completed", "partial", "skipped"],
