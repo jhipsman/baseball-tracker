@@ -267,6 +267,283 @@ export type Database = {
           },
         ];
       };
+      game_batting: {
+        Row: {
+          ab: number;
+          batting_order: number | null;
+          bb: number;
+          cs: number;
+          doubles: number;
+          e: number;
+          game_id: string;
+          h: number;
+          hbp: number;
+          hr: number;
+          id: string;
+          org_id: string;
+          player_id: string;
+          position: string | null;
+          r: number;
+          rbi: number;
+          sac: number;
+          sb: number;
+          sf: number;
+          so: number;
+          triples: number;
+        };
+        Insert: {
+          ab?: number;
+          batting_order?: number | null;
+          bb?: number;
+          cs?: number;
+          doubles?: number;
+          e?: number;
+          game_id: string;
+          h?: number;
+          hbp?: number;
+          hr?: number;
+          id?: string;
+          org_id: string;
+          player_id: string;
+          position?: string | null;
+          r?: number;
+          rbi?: number;
+          sac?: number;
+          sb?: number;
+          sf?: number;
+          so?: number;
+          triples?: number;
+        };
+        Update: {
+          ab?: number;
+          batting_order?: number | null;
+          bb?: number;
+          cs?: number;
+          doubles?: number;
+          e?: number;
+          game_id?: string;
+          h?: number;
+          hbp?: number;
+          hr?: number;
+          id?: string;
+          org_id?: string;
+          player_id?: string;
+          position?: string | null;
+          r?: number;
+          rbi?: number;
+          sac?: number;
+          sb?: number;
+          sf?: number;
+          so?: number;
+          triples?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_batting_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_batting_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_batting_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      game_pitching: {
+        Row: {
+          bb: number;
+          decision: string | null;
+          er: number;
+          game_id: string;
+          h: number;
+          hbp: number;
+          hr: number;
+          id: string;
+          org_id: string;
+          outs: number;
+          pitches: number | null;
+          player_id: string;
+          r: number;
+          so: number;
+          sort_order: number;
+          strikes: number | null;
+        };
+        Insert: {
+          bb?: number;
+          decision?: string | null;
+          er?: number;
+          game_id: string;
+          h?: number;
+          hbp?: number;
+          hr?: number;
+          id?: string;
+          org_id: string;
+          outs?: number;
+          pitches?: number | null;
+          player_id: string;
+          r?: number;
+          so?: number;
+          sort_order?: number;
+          strikes?: number | null;
+        };
+        Update: {
+          bb?: number;
+          decision?: string | null;
+          er?: number;
+          game_id?: string;
+          h?: number;
+          hbp?: number;
+          hr?: number;
+          id?: string;
+          org_id?: string;
+          outs?: number;
+          pitches?: number | null;
+          player_id?: string;
+          r?: number;
+          so?: number;
+          sort_order?: number;
+          strikes?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_pitching_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_pitching_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_pitching_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      games: {
+        Row: {
+          address: string | null;
+          arrival_time: string | null;
+          created_at: string;
+          created_by: string | null;
+          current_inning: number | null;
+          date: string;
+          group_id: string | null;
+          home_away: Database["public"]["Enums"]["home_away"];
+          id: string;
+          innings_scheduled: number;
+          kind: Database["public"]["Enums"]["game_kind"];
+          line_score: NonNullable<Json>;
+          location: string | null;
+          notes: string | null;
+          opponent: string;
+          opponent_score: number | null;
+          org_id: string;
+          start_time: string | null;
+          status: Database["public"]["Enums"]["game_status"];
+          team_score: number | null;
+          tournament_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          address?: string | null;
+          arrival_time?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          current_inning?: number | null;
+          date: string;
+          group_id?: string | null;
+          home_away?: Database["public"]["Enums"]["home_away"];
+          id?: string;
+          innings_scheduled?: number;
+          kind?: Database["public"]["Enums"]["game_kind"];
+          line_score?: NonNullable<Json>;
+          location?: string | null;
+          notes?: string | null;
+          opponent: string;
+          opponent_score?: number | null;
+          org_id: string;
+          start_time?: string | null;
+          status?: Database["public"]["Enums"]["game_status"];
+          team_score?: number | null;
+          tournament_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          address?: string | null;
+          arrival_time?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          current_inning?: number | null;
+          date?: string;
+          group_id?: string | null;
+          home_away?: Database["public"]["Enums"]["home_away"];
+          id?: string;
+          innings_scheduled?: number;
+          kind?: Database["public"]["Enums"]["game_kind"];
+          line_score?: NonNullable<Json>;
+          location?: string | null;
+          notes?: string | null;
+          opponent?: string;
+          opponent_score?: number | null;
+          org_id?: string;
+          start_time?: string | null;
+          status?: Database["public"]["Enums"]["game_status"];
+          team_score?: number | null;
+          tournament_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "games_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "games_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "player_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "games_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "games_tournament_id_fkey";
+            columns: ["tournament_id"];
+            isOneToOne: false;
+            referencedRelation: "tournaments";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       notifications: {
         Row: {
           actor_id: string | null;
@@ -461,6 +738,7 @@ export type Database = {
           settings: NonNullable<Json>;
           slug: string;
           sport: string;
+          stats_visibility: string;
         };
         Insert: {
           created_at?: string;
@@ -472,6 +750,7 @@ export type Database = {
           settings?: NonNullable<Json>;
           slug: string;
           sport?: string;
+          stats_visibility?: string;
         };
         Update: {
           created_at?: string;
@@ -483,6 +762,7 @@ export type Database = {
           settings?: NonNullable<Json>;
           slug?: string;
           sport?: string;
+          stats_visibility?: string;
         };
         Relationships: [
           {
@@ -1149,6 +1429,7 @@ export type Database = {
           arm_feel: Database["public"]["Enums"]["arm_feel"] | null;
           created_at: string;
           date: string;
+          game_id: string | null;
           id: string;
           intensity: Database["public"]["Enums"]["throwing_intensity"] | null;
           logged_by: string | null;
@@ -1164,6 +1445,7 @@ export type Database = {
           arm_feel?: Database["public"]["Enums"]["arm_feel"] | null;
           created_at?: string;
           date?: string;
+          game_id?: string | null;
           id?: string;
           intensity?: Database["public"]["Enums"]["throwing_intensity"] | null;
           logged_by?: string | null;
@@ -1179,6 +1461,7 @@ export type Database = {
           arm_feel?: Database["public"]["Enums"]["arm_feel"] | null;
           created_at?: string;
           date?: string;
+          game_id?: string | null;
           id?: string;
           intensity?: Database["public"]["Enums"]["throwing_intensity"] | null;
           logged_by?: string | null;
@@ -1191,6 +1474,13 @@ export type Database = {
           throwing_type?: Database["public"]["Enums"]["throwing_type"];
         };
         Relationships: [
+          {
+            foreignKeyName: "throwing_logs_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "throwing_logs_logged_by_fkey";
             columns: ["logged_by"];
@@ -1210,6 +1500,73 @@ export type Database = {
             columns: ["player_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      tournaments: {
+        Row: {
+          address: string | null;
+          created_at: string;
+          created_by: string | null;
+          end_date: string;
+          group_id: string | null;
+          id: string;
+          location: string | null;
+          name: string;
+          notes: string | null;
+          org_id: string;
+          start_date: string;
+          url: string | null;
+        };
+        Insert: {
+          address?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          end_date: string;
+          group_id?: string | null;
+          id?: string;
+          location?: string | null;
+          name: string;
+          notes?: string | null;
+          org_id: string;
+          start_date: string;
+          url?: string | null;
+        };
+        Update: {
+          address?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          end_date?: string;
+          group_id?: string | null;
+          id?: string;
+          location?: string | null;
+          name?: string;
+          notes?: string | null;
+          org_id?: string;
+          start_date?: string;
+          url?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tournaments_group_id_fkey";
+            columns: ["group_id"];
+            isOneToOne: false;
+            referencedRelation: "player_groups";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tournaments_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
             referencedColumns: ["id"];
           },
         ];
@@ -1487,6 +1844,7 @@ export type Database = {
           settings: NonNullable<Json>;
           slug: string;
           sport: string;
+          stats_visibility: string;
         };
         SetofOptions: {
           from: "*";
@@ -1519,6 +1877,10 @@ export type Database = {
           role: Database["public"]["Enums"]["org_role"];
           token: string;
         }[];
+      };
+      save_box_score: {
+        Args: { p_batting: Json; p_game_id: string; p_pitching: Json };
+        Returns: undefined;
       };
       save_practice_blocks: { Args: { p_blocks: Json; p_plan_id: string }; Returns: undefined };
       save_program_structure: { Args: { p_program_id: string; p_weeks: Json }; Returns: string };
@@ -1563,6 +1925,9 @@ export type Database = {
         | "throwing"
         | "hitting";
       exercise_group_type: "superset" | "circuit" | "emom" | "amrap";
+      game_kind: "league" | "non_league" | "scrimmage" | "tournament" | "playoff";
+      game_status: "scheduled" | "live" | "final" | "postponed" | "canceled";
+      home_away: "home" | "away" | "neutral";
       member_status: "active" | "inactive" | "injured";
       org_role: "admin" | "coach" | "trainer" | "player" | "parent";
       plan_tier: "free" | "pro" | "enterprise";
@@ -1713,6 +2078,9 @@ export const Constants = {
         "hitting",
       ],
       exercise_group_type: ["superset", "circuit", "emom", "amrap"],
+      game_kind: ["league", "non_league", "scrimmage", "tournament", "playoff"],
+      game_status: ["scheduled", "live", "final", "postponed", "canceled"],
+      home_away: ["home", "away", "neutral"],
       member_status: ["active", "inactive", "injured"],
       org_role: ["admin", "coach", "trainer", "player", "parent"],
       plan_tier: ["free", "pro", "enterprise"],

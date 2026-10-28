@@ -9,6 +9,7 @@ export const NOTIFICATION_KINDS = [
   { key: "arm_pain", label: "Arm pain alerts" },
   { key: "practice", label: "Practice plans" },
   { key: "program_assigned", label: "New programs" },
+  { key: "game", label: "Game changes & final scores" },
 ] as const;
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number]["key"];
@@ -19,8 +20,8 @@ export const isNotificationKind = (v: unknown): v is NotificationKind =>
 
 const ROLE_KINDS: Record<"staff" | "player" | "parent", readonly NotificationKind[]> = {
   staff: ["announcement", "message", "video_uploaded", "arm_pain"],
-  player: ["announcement", "message", "video_reviewed", "practice", "program_assigned"],
-  parent: ["announcement", "message", "video_reviewed", "arm_pain", "practice"],
+  player: ["announcement", "message", "video_reviewed", "practice", "program_assigned", "game"],
+  parent: ["announcement", "message", "video_reviewed", "arm_pain", "practice", "game"],
 };
 
 /** The kinds a role can actually receive (for the push mute list). */
@@ -65,6 +66,7 @@ export function hrefForRole(href: string | null | undefined, role: OrgRole): str
   if (role === "player") {
     if (under(href, "/messages")) return `/player${href}`;
     if (under(href, "/practices")) return `/player${href}`;
+    if (under(href, "/games")) return `/player${href}`;
     if (under(href, "/parent/videos")) return href.replace("/parent/videos", "/player/videos");
     if (under(href, "/parent")) return "/player";
     return href;
@@ -73,6 +75,7 @@ export function hrefForRole(href: string | null | undefined, role: OrgRole): str
   if (role === "parent") {
     if (under(href, "/messages")) return `/parent${href}`;
     if (under(href, "/practices")) return `/parent${href}`;
+    if (under(href, "/games")) return `/parent${href}`;
     if (under(href, "/player/videos")) return href.replace("/player/videos", "/parent/videos");
     if (under(href, "/player")) return "/parent";
     return href;

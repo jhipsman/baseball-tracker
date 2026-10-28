@@ -11,6 +11,12 @@ const ITEMS = [
     icon: "M3 10.5 12 4l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
   },
   {
+    href: "/player/games",
+    label: "Games",
+    // scoreboard
+    icon: "M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 4v16M7 10h1M16 10h1M7 14h1M16 14h1",
+  },
+  {
     href: "/player/throwing",
     label: "Throwing",
     // a baseball: circle with two seams

@@ -65,4 +65,11 @@ describe("helpers", () => {
     expect(kindsForRole("player").map((k) => k.key)).not.toContain("video_uploaded");
     expect(kindsForRole("parent").map((k) => k.key)).toContain("arm_pain");
   });
+
+  it("maps game links per role", () => {
+    expect(hrefForRole("/games/abc", "player")).toBe("/player/games/abc");
+    expect(hrefForRole("/games/abc", "parent")).toBe("/parent/games/abc");
+    expect(hrefForRole("/games/abc", "coach")).toBe("/games/abc");
+    expect(hrefForRole("/gamesx", "player")).toBe("/gamesx");
+  });
 });

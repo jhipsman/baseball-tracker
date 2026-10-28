@@ -15,6 +15,8 @@ const NAV: NavItem[] = [
   { href: "/programs", label: "Programs" },
   { href: "/roster", label: "Roster" },
   { href: "/calendar", label: "Calendar" },
+  { href: "/games", label: "Games" },
+  { href: "/stats", label: "Stats" },
   { href: "/throwing", label: "Throwing" },
   { href: "/videos", label: "Videos" },
   { href: "/practices", label: "Practices" },

@@ -16,6 +16,11 @@ const ITEMS = [
     icon: "M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M8 2v4M16 2v4",
   },
   {
+    href: "/parent/games",
+    label: "Games",
+    icon: "M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 4v16M7 10h1M16 10h1M7 14h1M16 14h1",
+  },
+  {
     href: "/parent/videos",
     label: "Videos",
     icon: "M3 7a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 10l5-3v10l-5-3",
