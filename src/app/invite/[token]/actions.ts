@@ -1,7 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { setActiveOrgCookie } from "@/lib/org";
+import { ACTIVE_ORG_COOKIE, setActiveOrgCookie } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
 
 export async function acceptInvitation(formData: FormData) {
@@ -26,4 +27,16 @@ export async function acceptInvitation(formData: FormData) {
         .maybeSingle()
     : { data: null };
   redirect(membership?.role === "parent" ? "/parent" : "/");
+}
+
+/**
+ * "Wrong account" on an invite: sign out, then come straight back to this
+ * invitation (via sign-in / create account) instead of a plain sign-in page.
+ */
+export async function switchAccountForInvite(formData: FormData) {
+  const token = String(formData.get("token") ?? "");
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  (await cookies()).delete(ACTIVE_ORG_COOKIE);
+  redirect(`/login?next=${encodeURIComponent(`/invite/${encodeURIComponent(token)}`)}`);
 }

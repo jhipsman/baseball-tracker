@@ -12,7 +12,9 @@ export default async function SignupPage({ searchParams }: PageProps<"/signup">)
     <>
       <h1 className="text-xl font-semibold">Create your account</h1>
       <p className="mt-1 mb-6 text-sm text-zinc-600">
-        Coaches, trainers, and players all start here.
+        {nextPath?.startsWith("/invite/")
+          ? "Use the email address your invitation was sent to. You'll accept it on the next screen."
+          : "Coaches, players, and parents all start here."}
       </p>
       <SignupForm next={nextPath} />
       <p className="mt-6 text-center text-sm text-zinc-600">
