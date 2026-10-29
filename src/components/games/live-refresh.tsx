@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 /** While a game is live, re-fetch the page every `seconds` (and when the tab comes back). */
-export function LiveRefresh({ live, seconds = 20 }: { live: boolean; seconds?: number }) {
+export function LiveRefresh({ live, seconds = 10 }: { live: boolean; seconds?: number }) {
   const router = useRouter();
   useEffect(() => {
     if (!live) return;

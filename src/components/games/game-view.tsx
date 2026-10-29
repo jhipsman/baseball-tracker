@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BoxScore } from "./box-score";
+import { LiveFeed } from "@/components/live/live-feed";
 import {
   formatGameDate,
   gameResult,
@@ -111,6 +112,7 @@ export function GameView({
           <CalendarFileLink id={g.id} />
         </div>
       </section>
+      <LiveFeed gameId={g.id} orgId={g.orgId} live={g.status === "live"} />
       <BoxScore gameId={g.id} />
     </div>
   );

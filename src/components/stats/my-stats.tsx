@@ -1,4 +1,5 @@
 import { playerToday } from "@/lib/player";
+import { RecentAtBats } from "@/components/live/recent-at-bats";
 import {
   loadPlayerGameLog,
   loadPlayerNames,
@@ -73,6 +74,8 @@ export async function MyStats({
           includeScrimmages={includeScrimmages}
         />
       </section>
+
+      <RecentAtBats playerId={playerId} gameHref={gameHref} />
 
       <section className="space-y-2">
         <h2 className="font-semibold">Game log</h2>

@@ -440,6 +440,114 @@ export type Database = {
           },
         ];
       };
+      game_plays: {
+        Row: {
+          batter_id: string | null;
+          created_at: string;
+          created_by: string | null;
+          game_id: string;
+          half: string;
+          id: string;
+          inning: number;
+          kind: string;
+          note: string | null;
+          org_id: string;
+          outs: number;
+          pitcher_id: string | null;
+          pitches: number;
+          rbi: number;
+          result: string | null;
+          runs: number;
+          scored: string[];
+          seq: number;
+          slot: number | null;
+          unearned: number;
+          we_bat: boolean;
+        };
+        Insert: {
+          batter_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          game_id: string;
+          half: string;
+          id?: string;
+          inning: number;
+          kind: string;
+          note?: string | null;
+          org_id: string;
+          outs?: number;
+          pitcher_id?: string | null;
+          pitches?: number;
+          rbi?: number;
+          result?: string | null;
+          runs?: number;
+          scored?: string[];
+          seq: number;
+          slot?: number | null;
+          unearned?: number;
+          we_bat: boolean;
+        };
+        Update: {
+          batter_id?: string | null;
+          created_at?: string;
+          created_by?: string | null;
+          game_id?: string;
+          half?: string;
+          id?: string;
+          inning?: number;
+          kind?: string;
+          note?: string | null;
+          org_id?: string;
+          outs?: number;
+          pitcher_id?: string | null;
+          pitches?: number;
+          rbi?: number;
+          result?: string | null;
+          runs?: number;
+          scored?: string[];
+          seq?: number;
+          slot?: number | null;
+          unearned?: number;
+          we_bat?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "game_plays_batter_id_fkey";
+            columns: ["batter_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_plays_created_by_fkey";
+            columns: ["created_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_plays_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_plays_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "game_plays_pitcher_id_fkey";
+            columns: ["pitcher_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       games: {
         Row: {
           address: string | null;
@@ -454,6 +562,7 @@ export type Database = {
           innings_scheduled: number;
           kind: Database["public"]["Enums"]["game_kind"];
           line_score: NonNullable<Json>;
+          live_state: Json | null;
           location: string | null;
           notes: string | null;
           opponent: string;
@@ -478,6 +587,7 @@ export type Database = {
           innings_scheduled?: number;
           kind?: Database["public"]["Enums"]["game_kind"];
           line_score?: NonNullable<Json>;
+          live_state?: Json | null;
           location?: string | null;
           notes?: string | null;
           opponent: string;
@@ -502,6 +612,7 @@ export type Database = {
           innings_scheduled?: number;
           kind?: Database["public"]["Enums"]["game_kind"];
           line_score?: NonNullable<Json>;
+          live_state?: Json | null;
           location?: string | null;
           notes?: string | null;
           opponent?: string;

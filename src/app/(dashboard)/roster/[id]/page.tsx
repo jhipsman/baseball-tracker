@@ -21,6 +21,7 @@ import { loadVideos } from "@/lib/videos";
 import { VideoGrid } from "@/components/video/video-grid";
 import { formatSets } from "@/lib/sets-format";
 import { PlayerSeasonLine } from "@/components/stats/player-season-line";
+import { RecentAtBats } from "@/components/live/recent-at-bats";
 import {
   AlertList,
   AvailabilityBadge,
@@ -274,6 +275,7 @@ export default async function PlayerProfilePage({
       <section id="game-stats" className="space-y-3">
         <h2 className="text-lg font-semibold">Game stats</h2>
         <PlayerSeasonLine playerId={id} orgId={org.id} href="/stats" />
+        <RecentAtBats playerId={id} gameHref={(gid) => `/games/${gid}`} />
       </section>
 
       <ParentsSection supabase={supabase} orgId={org.id} playerId={id} />

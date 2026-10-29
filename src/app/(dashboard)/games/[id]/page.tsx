@@ -27,6 +27,7 @@ import {
   StatusControls,
 } from "@/components/games/game-forms";
 import { LiveScoring } from "@/components/games/live-scoring";
+import { LiveFeed } from "@/components/live/live-feed";
 
 export const metadata: Metadata = { title: "Game" };
 
@@ -38,6 +39,8 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
   if (!game || game.orgId !== org.id) notFound();
   const { today } = await playerToday();
   const { groups, tournaments } = await loadGameFormOptions(supabase, org.id);
+  const { data: liveRow } = await supabase.from("games").select("live_state").eq("id", id).single();
+  const liveLogged = !!liveRow?.live_state;
   const g = game;
 
   const defaults = {
@@ -96,18 +99,42 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
       <div className="mt-5 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-x-6">
         <div className="space-y-4">
           <OffBanner status={g.status} />
-          <LiveScoring
-            key={g.status}
-            id={g.id}
-            status={g.status}
-            opponent={g.opponent}
-            teamName={org.name}
-            lineScore={g.lineScore}
-            currentInning={g.currentInning}
-            inningsScheduled={g.inningsScheduled}
-            teamScore={g.teamScore}
-            opponentScore={g.opponentScore}
-          />
+          {liveLogged ? (
+            <Link
+              href={`/games/${g.id}/live`}
+              className="flex items-center justify-between rounded-xl bg-zinc-900 px-4 py-3 text-white"
+            >
+              <span className="font-semibold">
+                {g.status === "final" ? "Open the game log" : "Open live scorer"}
+              </span>
+              <span aria-hidden>→</span>
+            </Link>
+          ) : (
+            <LiveScoring
+              key={g.status}
+              id={g.id}
+              status={g.status}
+              opponent={g.opponent}
+              teamName={org.name}
+              lineScore={g.lineScore}
+              currentInning={g.currentInning}
+              inningsScheduled={g.inningsScheduled}
+              teamScore={g.teamScore}
+              opponentScore={g.opponentScore}
+            />
+          )}
+          {!liveLogged && g.status !== "final" ? (
+            <Link
+              href={`/games/${g.id}/live`}
+              className="block rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-zinc-200 hover:bg-zinc-50"
+            >
+              <span className="font-semibold text-brand-800">Score at-bat by at-bat →</span>
+              <span className="block text-zinc-600">
+                Live pitch counts with Pitch Smart warnings, and the box score fills itself in.
+              </span>
+            </Link>
+          ) : null}
+          <LiveFeed gameId={g.id} orgId={org.id} live={g.status === "live"} />
           <BoxScore gameId={g.id} />
 
           {g.notes ? (
