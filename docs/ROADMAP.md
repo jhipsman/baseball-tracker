@@ -33,6 +33,27 @@ Still to do:
 - **Demo videos on exercises** (built): coaches add a YouTube or Vimeo link to a custom exercise. Players watch it in a pop-up during the workout; it also shows in the library, the builder, and program pages. Exercises without a video get a "Find a demo" YouTube search.
 - Still open: curated demo links for the built-in library (needs someone to pick and vet real videos), and letting coaches set a tracking type or video on a global exercise for their org only.
 
+## Health section (grows out of Arm care)
+
+"Arm care" becomes a **Health** section: throwing workload and arm check-ins are its first parts. Other parts aren't decided yet. Ideas to choose from:
+
+- **Daily readiness check-in** (10 seconds): sleep, energy, soreness, stress → a readiness score the coach sees before practice.
+- **Soreness body map:** tap where it hurts (shoulder, elbow, back, hamstring…); repeated spots raise an alert.
+- **Injury log and return-to-play:** who's injured, what, since when, cleared by whom; a step-by-step return-to-throw plan (e.g. long-toss distances by week) with the player's status shown on the roster and Throwing board.
+- **Arm health testing:** shoulder internal/external rotation range, grip strength, and other screens tracked over the season (fits the existing testing/assessments feature).
+- **Multi-sport and outside load:** other sports' practices and games so total workload is honest.
+- **Concussion protocol tracking.**
+- **Athletic trainer notes** with tighter privacy (medical info visible only to staff the player or parent allows; check FERPA/HIPAA implications before storing medical detail).
+- **Sleep, hydration, nutrition** habits (light-touch, optional).
+
+Keep the tone "talk to your coach or athletic trainer," never diagnostic.
+
+## Live game scoring (next)
+
+- **Live pitch counter** for our pitcher (ball / strike / in play), feeding Pitch Smart in real time with dugout warnings before limits.
+- **At-bat-by-at-bat scoring** (result per plate appearance, outs, auto-advancing lineup) that fills in the box score automatically; parents follow live with a last-play feed.
+- Later, if asked: full runner-by-runner scoring, or importing GameChanger stats.
+
 ## From the Phase 5 product review
 
 See [PRODUCT_REVIEW.md](PRODUCT_REVIEW.md) for the full list. Highlights:
