@@ -9,6 +9,9 @@ import { complianceByPlayer, needsAttention, type Compliance } from "@/lib/compl
 import { latestByPlayer, loadAssessments } from "@/lib/assessments";
 import { formatMetric, METRIC_BY_KEY, ROSTER_METRICS } from "@/constants/metrics";
 import { cn } from "@/lib/utils";
+import { hasModule } from "@/constants/modules";
+import { loadBirthDates, loadThrowing } from "@/lib/throwing";
+import { throwingAlerts } from "@/lib/workload";
 
 export const metadata: Metadata = { title: "Roster" };
 
@@ -21,9 +24,12 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
 
   const from28 = addDays(today, -27);
   const from7 = addDays(today, -6);
-  const [team, assessments] = await Promise.all([
+  const health = hasModule(org.modules, "health");
+  const [team, assessments, throwRows, births] = await Promise.all([
     loadTeam(supabase, org.id, from28, today, today),
     loadAssessments(supabase, org.id),
+    health ? loadThrowing(supabase, org.id, addDays(today, -60)) : Promise.resolve([]),
+    health ? loadBirthDates(supabase, org.id) : Promise.resolve(new Map<string, string | null>()),
   ]);
 
   const group = team.groups.find((g) => g.id === groupId);
@@ -41,34 +47,44 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
     }
   }
 
+  // Arm pain / over-limit throwing: the most urgent thing a coach scans for.
+  const armAlert = new Map<string, string>();
+  for (const p of players) {
+    const a = throwingAlerts(
+      throwRows.filter((r) => r.playerId === p.id),
+      births.get(p.id) ?? null,
+      today,
+    ).find((x) => x.level === "critical");
+    if (a) armAlert.set(p.id, a.message);
+  }
+
   const team7 = sum([...c7.values()]);
   const attention = players.filter((p) => needsAttention(c7.get(p.id)));
   const noProgram = players.filter((p) => !activePrograms.get(p.id));
-  // Needs-attention players first, then by name.
+  // Arm alerts first, then needs-attention players, then by name.
   const rows = players.toSorted(
     (a, b) =>
+      Number(armAlert.has(b.id)) - Number(armAlert.has(a.id)) ||
       Number(needsAttention(c7.get(b.id))) - Number(needsAttention(c7.get(a.id))) ||
       a.name.localeCompare(b.name),
   );
 
   return (
     <div className="max-w-7xl space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
-        <p className="mt-1 text-sm text-zinc-600">
-          {players.length} player{players.length === 1 ? "" : "s"}
-          {group ? ` in ${group.name}` : ""}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
+          <p className="mt-1 text-sm text-zinc-600">
+            {players.length} player{players.length === 1 ? "" : "s"}
+            {group ? ` in ${group.name}` : ""}
+          </p>
+        </div>
+        {membership.role === "admin" && team.players.length > 0 ? (
+          <Link href="/imports" className="text-sm font-medium text-brand-700 hover:underline">
+            Bring over a roster, schedule, or historical stats →
+          </Link>
+        ) : null}
       </div>
-
-      {membership.role === "admin" && (
-        <Link
-          href="/imports"
-          className="block rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800"
-        >
-          Bring over a roster, schedule, or historical stats →
-        </Link>
-      )}
 
       {team.groups.length > 0 ? (
         <div className="flex flex-wrap gap-2 text-sm">
@@ -89,43 +105,73 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <p className="text-sm text-zinc-600">Team compliance, last 7 days</p>
-          <p className="mt-1 text-5xl font-semibold text-zinc-900">
-            {team7.rate == null ? "—" : `${Math.round(team7.rate * 100)}%`}
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">
-            {team7.logged} of {team7.due} due workouts logged
-          </p>
+      {players.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-3 [&>*]:min-w-0">
+          <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+            <p className="text-sm text-zinc-600">Team compliance, last 7 days</p>
+            <p className="mt-1 text-5xl font-semibold text-zinc-900">
+              {team7.rate == null ? "—" : `${Math.round(team7.rate * 100)}%`}
+            </p>
+            <p className="mt-1 text-xs text-zinc-500">
+              {team7.logged} of {team7.due} due workouts logged
+            </p>
+          </div>
+          <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+            <p className="text-sm text-zinc-600">Need attention</p>
+            <p className="mt-1 text-3xl font-semibold text-zinc-900">{attention.length}</p>
+            <p className="mt-1 truncate text-xs text-zinc-500">
+              {attention.length
+                ? attention.map((p) => p.name).join(", ")
+                : "Everyone is keeping up"}
+            </p>
+          </div>
+          <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+            <p className="text-sm text-zinc-600">No active program</p>
+            <p className="mt-1 text-3xl font-semibold text-zinc-900">{noProgram.length}</p>
+            <p className="mt-1 truncate text-xs text-zinc-500">
+              {noProgram.length
+                ? noProgram.map((p) => p.name).join(", ")
+                : "Everyone has a program"}
+            </p>
+          </div>
         </div>
-        <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <p className="text-sm text-zinc-600">Need attention</p>
-          <p className="mt-1 text-3xl font-semibold text-zinc-900">{attention.length}</p>
-          <p className="mt-1 truncate text-xs text-zinc-500">
-            {attention.length ? attention.map((p) => p.name).join(", ") : "Everyone is keeping up"}
-          </p>
-        </div>
-        <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <p className="text-sm text-zinc-600">No active program</p>
-          <p className="mt-1 text-3xl font-semibold text-zinc-900">{noProgram.length}</p>
-          <p className="mt-1 truncate text-xs text-zinc-500">
-            {noProgram.length ? noProgram.map((p) => p.name).join(", ") : "Everyone has a program"}
-          </p>
-        </div>
-      </div>
+      ) : null}
 
       {players.length === 0 ? (
-        <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
-          No players yet. Invite them from{" "}
-          <Link href="/roster/manage" className="font-semibold text-brand-700">
-            Members &amp; invites
-          </Link>
-          .
-        </p>
+        group ? (
+          <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+            No players in {group.name} yet. Add them from{" "}
+            <Link href="/roster/manage" className="font-semibold text-brand-700">
+              Members &amp; invites
+            </Link>
+            .
+          </p>
+        ) : (
+          <div className="rounded-xl bg-white p-8 text-center ring-1 ring-zinc-200">
+            <p className="font-semibold">No players yet</p>
+            <p className="mx-auto mt-1 max-w-md text-sm text-zinc-600">
+              Once players join, this page shows who&apos;s keeping up with workouts, who has no
+              program, and their latest testing numbers.
+            </p>
+            <Link
+              href="/roster/manage"
+              className="mt-4 inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+            >
+              Invite your players
+            </Link>
+            {membership.role === "admin" ? (
+              <p className="mt-3 text-sm text-zinc-600">
+                Roster in a spreadsheet?{" "}
+                <Link href="/imports" className="font-semibold text-brand-700 hover:underline">
+                  Import it →
+                </Link>
+              </p>
+            ) : null}
+          </div>
+        )
       ) : (
-        <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
-          <table className="w-full min-w-[60rem] text-sm">
+        <div className="relative overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+          <table className="w-full min-w-[60rem] text-sm [&_td]:whitespace-nowrap">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-500">
                 <th className="px-4 py-2.5">Player</th>
@@ -150,27 +196,38 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
                     className="border-b border-zinc-100 last:border-0 hover:bg-zinc-50"
                   >
                     <td className="px-4 py-2.5">
-                      <Link href={`/roster/${p.id}`} className="font-medium hover:underline">
-                        {p.name}
-                      </Link>
-                      <span className="ml-2 text-xs text-zinc-500">{p.detail}</span>
-                      {p.status !== "active" ? (
-                        <span
-                          className={cn(
-                            "ml-2 rounded px-1.5 py-0.5 text-[11px] font-medium",
-                            p.status === "injured"
-                              ? "bg-red-50 text-red-800"
-                              : "bg-zinc-100 text-zinc-600",
-                          )}
-                        >
-                          {p.status === "injured" ? "Injured" : "Inactive"}
-                        </span>
-                      ) : null}
-                      {flag ? (
-                        <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[11px] font-medium text-amber-900">
-                          ⚠ Needs attention
-                        </span>
-                      ) : null}
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-normal">
+                        <Link href={`/roster/${p.id}`} className="font-medium hover:underline">
+                          {p.name}
+                        </Link>
+                        <span className="text-xs text-zinc-500">{p.detail}</span>
+                        {p.status !== "active" ? (
+                          <span
+                            className={cn(
+                              "rounded px-1.5 py-0.5 text-xs font-medium whitespace-nowrap",
+                              p.status === "injured"
+                                ? "bg-red-50 text-red-800"
+                                : "bg-zinc-100 text-zinc-600",
+                            )}
+                          >
+                            {p.status === "injured" ? "Injured" : "Inactive"}
+                          </span>
+                        ) : null}
+                        {armAlert.has(p.id) ? (
+                          <Link
+                            href={`/roster/${p.id}#throwing`}
+                            title={armAlert.get(p.id)}
+                            className="rounded bg-red-50 px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-red-800 hover:bg-red-100"
+                          >
+                            ⛔ Arm alert
+                          </Link>
+                        ) : null}
+                        {flag ? (
+                          <span className="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-medium whitespace-nowrap text-amber-900">
+                            ⚠ Needs attention
+                          </span>
+                        ) : null}
+                      </div>
                     </td>
                     <td className="px-3 py-2.5">
                       <Meter c={c7.get(p.id)} />

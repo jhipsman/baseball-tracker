@@ -76,7 +76,7 @@ export default async function RosterPage() {
   return (
     <div className="max-w-5xl space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Members &amp; invites</h1>
         <p className="mt-1 text-sm text-zinc-600">
           {members.length} member{members.length === 1 ? "" : "s"} in {org.name}
         </p>

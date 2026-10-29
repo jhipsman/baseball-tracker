@@ -45,7 +45,7 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
   return (
     <div className="max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Testing day</h1>
         <p className="mt-1 text-sm text-zinc-600">
           Enter a whole team&apos;s results at once. Leave a box blank to skip it.
         </p>
@@ -101,7 +101,10 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
 
       {players.length === 0 ? (
         <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
-          No active players{group ? ` in ${group.name}` : ""}.
+          No active players{group ? ` in ${group.name}` : ""} yet.{" "}
+          <Link href="/roster/manage" className="font-semibold text-brand-700 hover:underline">
+            Invite your players →
+          </Link>
         </p>
       ) : (
         <TestingForm

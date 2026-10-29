@@ -95,7 +95,6 @@ export function WorkoutBuilder({
   const saving = useRef(false);
   const queued = useRef(false);
   const dragging = useRef(false);
-  const firstRender = useRef(true);
   // Bumped on every edit so we know whether the last save covered everything.
   const version = useRef(0);
 
@@ -130,11 +129,10 @@ export function WorkoutBuilder({
   }, [programId, save]);
 
   useEffect(() => {
+    // Nothing changed (first render, or React re-running the effect in dev):
+    // don't flash "Unsaved changes" or save again.
+    if (latestWeeks.current === weeks) return;
     latestWeeks.current = weeks;
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
     version.current += 1;
     setStatus((s) => (s === "saving" ? s : "dirty"));
     if (dragging.current) return; // save once the drag finishes

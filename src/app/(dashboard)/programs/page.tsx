@@ -111,37 +111,40 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
         </form>
       ) : null}
 
-      <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-        {[undefined, ...PROGRAM_TYPES].map((t) => (
-          <Link
-            key={t ?? "all"}
-            href={href({ type: t })}
-            className={cn(
-              "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
-              t === type
-                ? "bg-brand-700 text-white ring-brand-700"
-                : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
-            )}
-          >
-            {t ? PROGRAM_TYPE_LABELS[t] : "All types"}
-          </Link>
-        ))}
-        <span className="mx-1 h-5 w-px bg-zinc-300" aria-hidden />
-        {[undefined, ...SEASON_PHASES].map((ph) => (
-          <Link
-            key={ph ?? "any"}
-            href={href({ phase: ph })}
-            className={cn(
-              "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
-              ph === phase
-                ? "bg-zinc-900 text-white ring-zinc-900"
-                : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
-            )}
-          >
-            {ph ? SEASON_PHASE_LABELS[ph] : "Any season"}
-          </Link>
-        ))}
-      </div>
+      {/* Filters only earn their space once there's something to filter. */}
+      {programs.length > 1 || type || phase ? (
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+          {[undefined, ...PROGRAM_TYPES].map((t) => (
+            <Link
+              key={t ?? "all"}
+              href={href({ type: t })}
+              className={cn(
+                "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
+                t === type
+                  ? "bg-brand-700 text-white ring-brand-700"
+                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+              )}
+            >
+              {t ? PROGRAM_TYPE_LABELS[t] : "All types"}
+            </Link>
+          ))}
+          <span className="mx-1 h-5 w-px bg-zinc-300" aria-hidden />
+          {[undefined, ...SEASON_PHASES].map((ph) => (
+            <Link
+              key={ph ?? "any"}
+              href={href({ phase: ph })}
+              className={cn(
+                "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
+                ph === phase
+                  ? "bg-zinc-900 text-white ring-zinc-900"
+                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+              )}
+            >
+              {ph ? SEASON_PHASE_LABELS[ph] : "Any season"}
+            </Link>
+          ))}
+        </div>
+      ) : null}
 
       {filtered.length === 0 ? (
         <div className="mt-10 rounded-xl border-2 border-dashed border-zinc-300 p-10 text-center">
@@ -155,12 +158,25 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
                   : "Nothing assigned yet"}
           </p>
           <p className="mt-1 text-sm text-zinc-500">
-            {templates
-              ? "Open any program and choose “Save as template” to reuse it."
-              : isStaff
-                ? "Create your first training program to get started."
-                : "Your coach will assign programs here."}
+            {type || phase
+              ? "Try a different type or season."
+              : templates
+                ? "Open any program and choose “Save as template” to reuse it."
+                : isStaff
+                  ? "Build a week once, then copy it forward. Choose New program to start."
+                  : "Your coach will assign programs here."}
           </p>
+          {isStaff && !templates && !type && !phase ? (
+            <p className="mt-3 text-sm text-zinc-600">
+              Short on time?{" "}
+              <Link
+                href={href({ view: "templates" })}
+                className="font-semibold text-brand-700 hover:underline"
+              >
+                Start from a ready-made arm care template →
+              </Link>
+            </p>
+          ) : null}
         </div>
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -185,7 +201,7 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
                         className={cn(
                           "rounded px-1.5 py-0.5",
                           p.season_phase === season
-                            ? "bg-amber-100 font-medium text-amber-900"
+                            ? "bg-brand-100 font-medium text-brand-900"
                             : "bg-zinc-100 text-zinc-700",
                         )}
                       >
@@ -200,7 +216,9 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
                     ) : null}
                     {isStaff && !p.is_template ? (
                       <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-zinc-700">
-                        {assigned} assignment{assigned === 1 ? "" : "s"}
+                        {assigned
+                          ? `${assigned} player${assigned === 1 ? "" : "s"} assigned`
+                          : "Not assigned yet"}
                       </span>
                     ) : null}
                   </div>

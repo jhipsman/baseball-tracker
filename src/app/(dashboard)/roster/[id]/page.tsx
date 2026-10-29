@@ -11,6 +11,8 @@ import { formatMetric, METRICS } from "@/constants/metrics";
 import { MetricChart } from "@/components/charts/metric-chart";
 import { MetricTile } from "@/components/charts/stat-tile";
 import { cn } from "@/lib/utils";
+import { hasModule } from "@/constants/modules";
+import { formatPracticeDate } from "@/lib/practices";
 import { AssessmentForm } from "../assessment-form";
 import { deleteAssessment } from "../assess-actions";
 import { ParentsSection } from "../parents-section";
@@ -102,6 +104,12 @@ export default async function PlayerProfilePage({
   const trackingOf = new Map((exNames ?? []).map((e) => [e.id, e.tracking_type]));
 
   const name = member.profile.full_name || member.profile.email;
+  const showHealth = hasModule(org.modules, "health");
+  const showGames = hasModule(org.modules, "games");
+  const showVideos = hasModule(org.modules, "videos");
+  const alerts = showHealth ? throwingAlerts(throwing, birth, today) : [];
+  const critical = alerts.filter((a) => a.level === "critical");
+  const lastLog = team.lastLogDate.get(id);
   const pct = (c: { rate: number | null; logged: number; due: number }) =>
     c.rate == null ? "—" : `${Math.round(c.rate * 100)}%`;
 
@@ -145,9 +153,31 @@ export default async function PlayerProfilePage({
           ))}
         </div>
         <p className="mt-1 text-sm text-zinc-500">
-          {member.profile.email} · joined {member.created_at.slice(0, 10)}
+          {member.profile.email} · joined{" "}
+          {formatPracticeDate(member.created_at.slice(0, 10), {
+            year: "numeric",
+            weekday: undefined,
+          })}
         </p>
       </div>
+
+      {critical.length > 0 ? (
+        <a
+          href="#throwing"
+          className="block rounded-xl bg-red-50 p-4 text-sm text-red-900 ring-1 ring-red-200 hover:bg-red-100"
+        >
+          <p className="font-semibold">⛔ Arm check needed</p>
+          <ul className="mt-1 space-y-0.5">
+            {critical.map((a, i) => (
+              <li key={i}>{a.message}</li>
+            ))}
+          </ul>
+          <p className="mt-2 text-red-800">
+            Talk with {name.split(" ")[0]} (and a trainer if needed) before the next throwing day.
+            See throwing log ↓
+          </p>
+        </a>
+      ) : null}
 
       <dl className="grid gap-3 sm:grid-cols-4">
         {[
@@ -159,8 +189,8 @@ export default async function PlayerProfilePage({
           },
           {
             label: "Last workout",
-            value: team.lastLogDate.get(id) ?? "Never",
-            sub: "most recent log",
+            value: lastLog ? formatPracticeDate(lastLog, { weekday: undefined }) : "Never",
+            sub: lastLog ? daysAgo(lastLog, today) : "no workouts logged",
           },
           {
             label: "Active programs",
@@ -175,6 +205,96 @@ export default async function PlayerProfilePage({
           </div>
         ))}
       </dl>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Recent workouts</h2>
+        {!logs || logs.length === 0 ? (
+          <p className="rounded-xl bg-white p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
+            No workouts logged yet.
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {logs.map((l) => (
+              <li key={l.id} className="rounded-xl bg-white ring-1 ring-zinc-200">
+                <details>
+                  <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
+                    <span className="font-medium">{l.day_name || "Workout"}</span>
+                    <span className="text-sm text-zinc-500">{l.assignment.program.name}</span>
+                    <span
+                      className={cn("rounded px-1.5 py-0.5 text-xs font-medium", STATUS[l.status])}
+                    >
+                      {l.status}
+                    </span>
+                    <span className="ml-auto text-sm text-zinc-500 tabular-nums">
+                      {formatPracticeDate(l.date_completed)}
+                      {l.overall_rpe != null ? ` · RPE ${l.overall_rpe}` : ""}
+                      {l.duration_minutes != null ? ` · ${l.duration_minutes} min` : ""}
+                    </span>
+                  </summary>
+                  <div className="space-y-2 border-t border-zinc-100 px-4 py-3 text-sm">
+                    {l.notes ? <p className="text-zinc-700 italic">“{l.notes}”</p> : null}
+                    {l.exercise_logs
+                      .toSorted((a, b) => a.sort_order - b.sort_order)
+                      .map((e, i) => {
+                        const summary = formatSets(
+                          e.sets_completed,
+                          trackingOf.get(e.exercise_id),
+                          { rpe: true, notDone: true },
+                        );
+                        return (
+                          <div key={i}>
+                            <span className="font-medium">
+                              {nameOf.get(e.exercise_id) ?? "Exercise"}
+                            </span>
+                            <span className="ml-2 text-zinc-600 tabular-nums">
+                              {summary || "—"}
+                            </span>
+                            {e.notes ? (
+                              <span className="ml-2 text-zinc-500 italic">“{e.notes}”</span>
+                            ) : null}
+                          </div>
+                        );
+                      })}
+                  </div>
+                </details>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {showHealth ? (
+        <section id="throwing" className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-lg font-semibold">Throwing</h2>
+            <AvailabilityBadge a={availability(throwing, birth, today)} />
+            {birth ? (
+              <span className="text-sm text-zinc-500">
+                Age {ageOn(birth, today)} · Pitch Smart max{" "}
+                {pitchSmartBand(ageOn(birth, today)).dailyMax}/day
+              </span>
+            ) : null}
+          </div>
+          <AlertList alerts={alerts} />
+          <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+            <ThrowsChart
+              days={dailySeries(throwing, from28, today)}
+              dailyMax={birth ? pitchSmartBand(ageOn(birth, today)).dailyMax : null}
+            />
+          </div>
+          <ThrowingList rows={throwing.slice(0, 10)} canDelete={() => true} />
+          <details className="rounded-xl bg-white p-4 ring-1 ring-zinc-200" open={!birth}>
+            <summary className="cursor-pointer text-sm font-semibold">Birthdate</summary>
+            <div className="mt-3">
+              <BirthDateForm
+                playerId={id}
+                current={birth}
+                label="Birthdate (for Pitch Smart limits)"
+              />
+            </div>
+          </details>
+        </section>
+      ) : null}
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Metrics</h2>
@@ -272,114 +392,35 @@ export default async function PlayerProfilePage({
         </details>
       </section>
 
-      <section id="game-stats" className="space-y-3">
-        <h2 className="text-lg font-semibold">Game stats</h2>
-        <PlayerSeasonLine playerId={id} orgId={org.id} href="/stats" />
-        <RecentAtBats playerId={id} gameHref={(gid) => `/games/${gid}`} />
-      </section>
+      {showGames ? (
+        <section id="game-stats" className="space-y-3">
+          <h2 className="text-lg font-semibold">Game stats</h2>
+          <PlayerSeasonLine playerId={id} orgId={org.id} href="/stats" />
+          <RecentAtBats playerId={id} gameHref={(gid) => `/games/${gid}`} />
+        </section>
+      ) : null}
+
+      {showVideos ? (
+        <section id="videos" className="space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 className="text-lg font-semibold">Videos</h2>
+            <Link
+              href={`/videos?tab=all&player=${id}`}
+              className="text-sm text-brand-700 hover:underline"
+            >
+              All videos / upload →
+            </Link>
+          </div>
+          <VideoGrid videos={videos} hrefBase="/videos" showPlayer={false} empty="No videos yet." />
+        </section>
+      ) : null}
 
       <ParentsSection supabase={supabase} orgId={org.id} playerId={id} />
-
-      <section id="videos" className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-lg font-semibold">Videos</h2>
-          <Link
-            href={`/videos?tab=all&player=${id}`}
-            className="text-sm text-brand-700 hover:underline"
-          >
-            All videos / upload →
-          </Link>
-        </div>
-        <VideoGrid videos={videos} hrefBase="/videos" showPlayer={false} empty="No videos yet." />
-      </section>
-
-      <section id="throwing" className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 className="text-lg font-semibold">Throwing</h2>
-          <AvailabilityBadge a={availability(throwing, birth, today)} />
-          {birth ? (
-            <span className="text-sm text-zinc-500">
-              Age {ageOn(birth, today)} · Pitch Smart max{" "}
-              {pitchSmartBand(ageOn(birth, today)).dailyMax}/day
-            </span>
-          ) : null}
-        </div>
-        <AlertList alerts={throwingAlerts(throwing, birth, today)} />
-        <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
-          <ThrowsChart
-            days={dailySeries(throwing, from28, today)}
-            dailyMax={birth ? pitchSmartBand(ageOn(birth, today)).dailyMax : null}
-          />
-        </div>
-        <ThrowingList rows={throwing.slice(0, 10)} canDelete={() => true} />
-        <details className="rounded-xl bg-white p-4 ring-1 ring-zinc-200" open={!birth}>
-          <summary className="cursor-pointer text-sm font-semibold">Birthdate</summary>
-          <div className="mt-3">
-            <BirthDateForm
-              playerId={id}
-              current={birth}
-              label="Birthdate (for Pitch Smart limits)"
-            />
-          </div>
-        </details>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Recent workouts</h2>
-        {!logs || logs.length === 0 ? (
-          <p className="rounded-xl bg-white p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
-            No workouts logged yet.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {logs.map((l) => (
-              <li key={l.id} className="rounded-xl bg-white ring-1 ring-zinc-200">
-                <details>
-                  <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
-                    <span className="font-medium">{l.day_name || "Workout"}</span>
-                    <span className="text-sm text-zinc-500">{l.assignment.program.name}</span>
-                    <span
-                      className={cn("rounded px-1.5 py-0.5 text-xs font-medium", STATUS[l.status])}
-                    >
-                      {l.status}
-                    </span>
-                    <span className="ml-auto text-sm text-zinc-500 tabular-nums">
-                      {l.date_completed}
-                      {l.overall_rpe != null ? ` · RPE ${l.overall_rpe}` : ""}
-                      {l.duration_minutes != null ? ` · ${l.duration_minutes} min` : ""}
-                    </span>
-                  </summary>
-                  <div className="space-y-2 border-t border-zinc-100 px-4 py-3 text-sm">
-                    {l.notes ? <p className="text-zinc-700 italic">“{l.notes}”</p> : null}
-                    {l.exercise_logs
-                      .toSorted((a, b) => a.sort_order - b.sort_order)
-                      .map((e, i) => {
-                        const summary = formatSets(
-                          e.sets_completed,
-                          trackingOf.get(e.exercise_id),
-                          { rpe: true, notDone: true },
-                        );
-                        return (
-                          <div key={i}>
-                            <span className="font-medium">
-                              {nameOf.get(e.exercise_id) ?? "Exercise"}
-                            </span>
-                            <span className="ml-2 text-zinc-600 tabular-nums">
-                              {summary || "—"}
-                            </span>
-                            {e.notes ? (
-                              <span className="ml-2 text-zinc-500 italic">“{e.notes}”</span>
-                            ) : null}
-                          </div>
-                        );
-                      })}
-                  </div>
-                </details>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   );
+}
+
+function daysAgo(date: string, today: string) {
+  const days = Math.round((Date.parse(today) - Date.parse(date)) / 86_400_000);
+  return days <= 0 ? "today" : days === 1 ? "yesterday" : `${days} days ago`;
 }
