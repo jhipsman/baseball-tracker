@@ -30,8 +30,10 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
   const { saved } = await searchParams;
   const [assignments, nextPractice, nextGame] = await Promise.all([
     loadPlayerAssignments(supabase, user.id, org.id, today),
-    loadNextPractice(supabase, org.id, today),
-    loadNextGame(supabase, org.id, today),
+    hasModule(org.modules, "practices")
+      ? loadNextPractice(supabase, org.id, today)
+      : Promise.resolve(null),
+    hasModule(org.modules, "games") ? loadNextGame(supabase, org.id, today) : Promise.resolve(null),
   ]);
 
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];

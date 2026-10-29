@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { NavigationPending } from "./navigation-pending";
 import { usePathname, useSearchParams } from "next/navigation";
 import { isUnder } from "@/constants/sections";
 import { cn } from "@/lib/utils";
@@ -76,6 +77,7 @@ export function TabBar({
                   <path d={item.icon} />
                 </svg>
                 {item.label}
+                <NavigationPending />
               </Link>
             </li>
           );

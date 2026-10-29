@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { NavigationPending } from "./navigation-pending";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isUnder } from "@/constants/sections";
@@ -38,6 +39,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
             )}
           >
             {item.label}
+            <NavigationPending />
           </Link>
         );
       })}

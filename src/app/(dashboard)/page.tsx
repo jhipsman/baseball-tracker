@@ -1,17 +1,16 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { loadDashboard } from "@/lib/dashboard";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { playerToday } from "@/lib/player";
-import { addDays } from "@/lib/schedule";
-import { loadTeam } from "@/lib/team";
 import { complianceByPlayer, complianceOf, needsAttention } from "@/lib/compliance";
 import { cn } from "@/lib/utils";
-import { loadBirthDates, loadThrowing } from "@/lib/throwing";
 import { throwingAlerts } from "@/lib/workload";
-import { pendingVideoCount } from "@/lib/videos";
 import { hasModule } from "@/constants/modules";
-import { formatPracticeDate, loadPractices, practiceRange } from "@/lib/practices";
+import { formatPracticeDate, practiceRange } from "@/lib/practices";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -20,25 +19,38 @@ export default async function DashboardPage() {
   // Players get the phone-first player app.
   if (membership.role === "player") redirect("/player");
 
+  const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
+  return (
+    <div className="max-w-5xl">
+      <h1 className="text-2xl font-semibold tracking-tight">
+        {firstName ? `Welcome, ${firstName}` : "Welcome"}
+      </h1>
+      <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
+      <Suspense fallback={<PageSkeleton compact />}>
+        <DashboardContent supabase={supabase} org={org} />
+      </Suspense>
+    </div>
+  );
+}
+
+async function DashboardContent({
+  supabase,
+  org,
+}: Pick<Awaited<ReturnType<typeof requireActiveOrg>>, "supabase" | "org">) {
   const { today } = await playerToday();
-  const from7 = addDays(today, -6);
-  const [team, { data: recent }] = await Promise.all([
-    loadTeam(supabase, org.id, from7, today, today),
-    supabase
-      .from("workout_logs")
-      .select(
-        `id, date_completed, status, overall_rpe, notes, day_name, player_id,
-         player:profiles!workout_logs_player_id_fkey (full_name, email),
-         assignment:program_assignments!inner (program:programs!inner (name, org_id))`,
-      )
-      .eq("assignment.program.org_id", org.id)
-      .order("created_at", { ascending: false })
-      .limit(8),
-  ]);
-  const [throwRows, births] = await Promise.all([
-    loadThrowing(supabase, org.id, addDays(today, -60)),
-    loadBirthDates(supabase, org.id),
-  ]);
+  const {
+    team,
+    recent,
+    throwRows,
+    births,
+    exercises,
+    members,
+    programs,
+    videosToReview,
+    nextPractice,
+    assignmentCount,
+    assessmentCount,
+  } = await loadDashboard(supabase, org, today);
   const armAlerts = team.players.flatMap((p) =>
     throwingAlerts(
       throwRows.filter((r) => r.playerId === p.id),
@@ -52,24 +64,6 @@ export default async function DashboardPage() {
   const perPlayer = complianceByPlayer(team.entries);
   const attention = team.players.filter((p) => needsAttention(perPlayer.get(p.id)));
 
-  const [exercises, members, programs, videosToReview, [nextPractice]] = await Promise.all([
-    supabase.from("exercises").select("id", { count: "exact", head: true }),
-    supabase
-      .from("org_memberships")
-      .select("id", { count: "exact", head: true })
-      .eq("org_id", org.id),
-    supabase.from("programs").select("id", { count: "exact", head: true }).eq("org_id", org.id),
-    pendingVideoCount(supabase, org.id),
-    loadPractices(supabase, org.id, today, null, { limit: 1 }),
-  ]);
-
-  const [{ count: assignmentCount }, { count: assessmentCount }] = await Promise.all([
-    supabase
-      .from("program_assignments")
-      .select("id, program:programs!inner (org_id)", { count: "exact", head: true })
-      .eq("program.org_id", org.id),
-    supabase.from("assessments").select("id", { count: "exact", head: true }).eq("org_id", org.id),
-  ]);
   const steps = [
     { done: team.players.length > 0, label: "Invite your players", href: "/roster/manage" },
     { done: (programs.count ?? 0) > 0, label: "Build your first program", href: "/programs/new" },
@@ -82,7 +76,6 @@ export default async function DashboardPage() {
   ];
   const remaining = steps.filter((st) => !st.done).length;
 
-  const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   const stats = [
     ...(hasModule(org.modules, "videos")
       ? [{ label: "Videos to review", value: videosToReview, href: "/videos" }]
@@ -93,11 +86,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="max-w-5xl">
-      <h1 className="text-2xl font-semibold tracking-tight">
-        {firstName ? `Welcome, ${firstName}` : "Welcome"}
-      </h1>
-      <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
+    <>
       {hasModule(org.modules, "practices") && nextPractice?.date ? (
         <Link
           href={`/practices/${nextPractice.id}`}
@@ -272,6 +261,6 @@ export default async function DashboardPage() {
           )}
         </section>
       </div>
-    </div>
+    </>
   );
 }

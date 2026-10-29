@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { NavigationPending } from "./navigation-pending";
 import { usePathname } from "next/navigation";
 import { activeTab, COACH_SECTIONS, visibleTabs } from "@/constants/sections";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ export function SectionTabs({ section, modules }: { section: string; modules: st
           )}
         >
           {t.label}
+          <NavigationPending />
         </Link>
       ))}
     </nav>

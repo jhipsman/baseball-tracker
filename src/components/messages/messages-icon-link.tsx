@@ -1,11 +1,24 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
 import { countUnreadThreads } from "@/lib/messages";
 
 /** Header chat icon with a dot when a conversation has unread messages. */
-export async function MessagesIconLink({ href }: { href: string }) {
+async function UnreadMessagesLink({ href }: { href: string }) {
   const { supabase, user, org } = await requireActiveOrg();
   const unread = await countUnreadThreads(supabase, user.id, org.id);
+  return <MessageLink href={href} unread={unread} />;
+}
+
+export function MessagesIconLink({ href }: { href: string }) {
+  return (
+    <Suspense fallback={<MessageLink href={href} />}>
+      <UnreadMessagesLink href={href} />
+    </Suspense>
+  );
+}
+
+function MessageLink({ href, unread = 0 }: { href: string; unread?: number }) {
   return (
     <Link
       href={href}

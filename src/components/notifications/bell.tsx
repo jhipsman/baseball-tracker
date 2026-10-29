@@ -1,15 +1,29 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 
 /** Bell with the unread notification count; links to the notification list. */
-export async function NotificationBell({ className }: { className?: string }) {
+async function UnreadBell({ className }: { className?: string }) {
   const supabase = await createClient();
   const { count } = await supabase
     .from("notifications")
     .select("id", { count: "exact", head: true })
     .is("read_at", null);
   const unread = count ?? 0;
+  return <BellLink className={className} unread={unread} />;
+}
+
+/** Show the usable link immediately; the optional count streams in afterward. */
+export function NotificationBell({ className }: { className?: string }) {
+  return (
+    <Suspense fallback={<BellLink className={className} />}>
+      <UnreadBell className={className} />
+    </Suspense>
+  );
+}
+
+function BellLink({ className, unread = 0 }: { className?: string; unread?: number }) {
   return (
     <Link
       href="/notifications"

@@ -33,6 +33,7 @@ export async function loadTeam(
   from: string,
   to: string,
   today: string,
+  options: { includeGroups?: boolean; includeLastLog?: boolean } = {},
 ): Promise<TeamData> {
   const [{ data: assignmentRows, error }, { data: playerRows }, { data: groupRows }] =
     await Promise.all([
@@ -50,11 +51,13 @@ export async function loadTeam(
         .select("profile_id, position, jersey_number, status, profile:profiles (full_name, email)")
         .eq("org_id", orgId)
         .eq("role", "player"),
-      supabase
-        .from("player_groups")
-        .select("id, name, player_group_members (profile_id)")
-        .eq("org_id", orgId)
-        .order("name"),
+      options.includeGroups === false
+        ? Promise.resolve({ data: [] })
+        : supabase
+            .from("player_groups")
+            .select("id, name, player_group_members (profile_id)")
+            .eq("org_id", orgId)
+            .order("name"),
     ]);
   if (error) throw error;
 
@@ -88,13 +91,15 @@ export async function loadTeam(
           .in("program_assignment_id", assignmentIds)
           .gte("date_completed", from)
           .lte("date_completed", to),
-        supabase
-          .from("workout_logs")
-          .select("player_id, date_completed")
-          .in("program_assignment_id", assignmentIds)
-          .neq("status", "skipped")
-          .order("date_completed", { ascending: false })
-          .limit(1000),
+        options.includeLastLog === false
+          ? Promise.resolve({ data: [] })
+          : supabase
+              .from("workout_logs")
+              .select("player_id, date_completed")
+              .in("program_assignment_id", assignmentIds)
+              .neq("status", "skipped")
+              .order("date_completed", { ascending: false })
+              .limit(1000),
       ])
     : [{ data: [] }, { data: [] }];
 
