@@ -3,7 +3,19 @@ import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/types/database";
 
 // Routes reachable without a session.
-const PUBLIC_PATHS = ["/login", "/signup", "/forgot-password", "/auth"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/auth",
+  // Marketing and legal pages.
+  "/home",
+  "/pricing",
+  "/privacy",
+  "/terms",
+  // Stripe calls this with its own signature, not a user session.
+  "/api/billing/webhook",
+];
 
 function isPublicPath(pathname: string) {
   return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
@@ -40,6 +52,13 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isSignedIn = Boolean(data?.claims);
   const { pathname } = request.nextUrl;
+
+  if (!isSignedIn && pathname === "/") {
+    // Signed-out visitors to the site's address see the landing page.
+    const url = request.nextUrl.clone();
+    url.pathname = "/home";
+    return NextResponse.redirect(url);
+  }
 
   if (!isSignedIn && !isPublicPath(pathname)) {
     const url = request.nextUrl.clone();

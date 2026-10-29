@@ -267,6 +267,57 @@ export type Database = {
           },
         ];
       };
+      feedback: {
+        Row: {
+          created_at: string;
+          id: string;
+          kind: string;
+          message: string;
+          org_id: string | null;
+          path: string | null;
+          profile_id: string | null;
+          role: string | null;
+          user_agent: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          message: string;
+          org_id?: string | null;
+          path?: string | null;
+          profile_id?: string | null;
+          role?: string | null;
+          user_agent?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          kind?: string;
+          message?: string;
+          org_id?: string | null;
+          path?: string | null;
+          profile_id?: string | null;
+          role?: string | null;
+          user_agent?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "feedback_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "feedback_profile_id_fkey";
+            columns: ["profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       game_batting: {
         Row: {
           ab: number;
@@ -846,11 +897,15 @@ export type Database = {
           modules: string[];
           name: string;
           owner_id: string;
+          plan_renews_at: string | null;
+          plan_status: string | null;
           plan_tier: Database["public"]["Enums"]["plan_tier"];
           settings: NonNullable<Json>;
           slug: string;
           sport: string;
           stats_visibility: string;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
           team_type: string | null;
         };
         Insert: {
@@ -860,11 +915,15 @@ export type Database = {
           modules?: string[];
           name: string;
           owner_id: string;
+          plan_renews_at?: string | null;
+          plan_status?: string | null;
           plan_tier?: Database["public"]["Enums"]["plan_tier"];
           settings?: NonNullable<Json>;
           slug: string;
           sport?: string;
           stats_visibility?: string;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           team_type?: string | null;
         };
         Update: {
@@ -874,11 +933,15 @@ export type Database = {
           modules?: string[];
           name?: string;
           owner_id?: string;
+          plan_renews_at?: string | null;
+          plan_status?: string | null;
           plan_tier?: Database["public"]["Enums"]["plan_tier"];
           settings?: NonNullable<Json>;
           slug?: string;
           sport?: string;
           stats_visibility?: string;
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
           team_type?: string | null;
         };
         Relationships: [
@@ -931,6 +994,57 @@ export type Database = {
           {
             foreignKeyName: "parent_links_player_id_fkey";
             columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      parental_consents: {
+        Row: {
+          child_id: string;
+          consented_at: string | null;
+          id: string;
+          parent_email: string;
+          parent_id: string | null;
+          parent_name: string | null;
+          requested_at: string;
+          revoked_at: string | null;
+          token: string;
+        };
+        Insert: {
+          child_id: string;
+          consented_at?: string | null;
+          id?: string;
+          parent_email: string;
+          parent_id?: string | null;
+          parent_name?: string | null;
+          requested_at?: string;
+          revoked_at?: string | null;
+          token?: string;
+        };
+        Update: {
+          child_id?: string;
+          consented_at?: string | null;
+          id?: string;
+          parent_email?: string;
+          parent_id?: string | null;
+          parent_name?: string | null;
+          requested_at?: string;
+          revoked_at?: string | null;
+          token?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "parental_consents_child_id_fkey";
+            columns: ["child_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "parental_consents_parent_id_fkey";
+            columns: ["parent_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -1949,6 +2063,7 @@ export type Database = {
     };
     Functions: {
       accept_invitation: { Args: { p_token: string }; Returns: string };
+      consent_status: { Args: Record<PropertyKey, never>; Returns: string };
       create_organization: {
         Args: { p_name: string; p_slug: string };
         Returns: {
@@ -1958,11 +2073,15 @@ export type Database = {
           modules: string[];
           name: string;
           owner_id: string;
+          plan_renews_at: string | null;
+          plan_status: string | null;
           plan_tier: Database["public"]["Enums"]["plan_tier"];
           settings: NonNullable<Json>;
           slug: string;
           sport: string;
           stats_visibility: string;
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
           team_type: string | null;
         };
         SetofOptions: {
@@ -1972,9 +2091,22 @@ export type Database = {
           isSetofReturn: false;
         };
       };
+      delete_my_account: { Args: Record<PropertyKey, never>; Returns: undefined };
       duplicate_program: {
         Args: { p_is_template: boolean; p_name: string; p_program_id: string };
         Returns: string;
+      };
+      get_consent_request: {
+        Args: { p_token: string };
+        Returns: {
+          child_email: string;
+          child_name: string;
+          consented: boolean;
+          email_matches: boolean;
+          parent_email: string;
+          revoked: boolean;
+          teams: string[];
+        }[];
       };
       get_invitation: {
         Args: { p_token: string };
@@ -1988,6 +2120,10 @@ export type Database = {
           role: Database["public"]["Enums"]["org_role"];
         }[];
       };
+      give_parental_consent: {
+        Args: { p_parent_name: string; p_token: string };
+        Returns: undefined;
+      };
       my_pending_invitations: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -1997,6 +2133,8 @@ export type Database = {
           token: string;
         }[];
       };
+      request_parental_consent: { Args: { p_parent_email: string }; Returns: string };
+      revoke_parental_consent: { Args: { p_child: string }; Returns: undefined };
       save_box_score: {
         Args: { p_batting: Json; p_game_id: string; p_pitching: Json };
         Returns: undefined;
