@@ -261,4 +261,10 @@ Box scores and season stats, built on `game_batting` / `game_pitching` (see `sup
 - **Add to calendar:** `/games/[id]/ics` returns a single-event `.ics` for anyone who can see the game (floating local time, two-hour event or all-day without a time, escaped text, arrival time and notes in the description, a link to the viewer's game page).
 - Helpers (`src/lib/games.ts`: results, records, line-score validation and totals, labels, times, `.ics`) are unit-tested; actions are in `src/lib/game-actions.ts`.
 
+## Navigation & team features
+
+- **Coach sidebar (7 sections):** Dashboard · Schedule (Calendar, Games, Practices) · Training (Programs, Exercise library) · Team (Roster, Members & invites, Testing day, Stats) · Player Health (throwing & arm care; more health tools later) · Videos · Messages, plus **Settings** for admins. Sections share a tab bar (`src/constants/sections.ts`, `src/components/layout/section-tabs.tsx`).
+- **Features per team** (`organizations.modules`): Player Health, Games & stats, Practice plans, Video review, Messages can each be turned off in Settings. Off sections vanish from every menu and their pages return 404 (segment layouts call `requireModule`); nothing is deleted. Setup asks the team type (high school, college, travel, youth, facility) and picks sensible defaults (`src/constants/modules.ts`).
+- **Phone tabs:** players get Today · Schedule · Health · Videos · Me (profile, workout history, stats); parents get Home · Schedule (next 2 weeks, games & results) · Progress (stats, videos) · Messages.
+
 See the project brief for the full roadmap. Phases 1–7 are complete. Phone push notifications are optional and need the keys described in docs/DEPLOY.md.
