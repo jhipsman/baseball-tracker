@@ -53,13 +53,6 @@ export async function updateSession(request: NextRequest) {
   const isSignedIn = Boolean(data?.claims);
   const { pathname } = request.nextUrl;
 
-  if (!isSignedIn && pathname === "/") {
-    // Signed-out visitors to the site's address see the landing page.
-    const url = request.nextUrl.clone();
-    url.pathname = "/home";
-    return NextResponse.redirect(url);
-  }
-
   if (!isSignedIn && !isPublicPath(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
