@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { formatPracticeDate } from "@/lib/practices";
 import { notFound } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { loadProgramTree } from "@/lib/programs";
@@ -160,6 +161,99 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
         ) : null}
       </div>
 
+      {isStaff && !program.is_template ? (
+        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <h2 className="mb-4 font-semibold">Assign to players</h2>
+          <AssignForm
+            programId={id}
+            today={today}
+            players={(players ?? []).map((p) => ({
+              id: p.profile_id,
+              name: p.profile.full_name || p.profile.email,
+              detail: [p.position, p.jersey_number != null ? `#${p.jersey_number}` : null]
+                .filter(Boolean)
+                .join(" "),
+              position: p.position,
+              assigned: activeIds.has(p.profile_id),
+            }))}
+            groups={(groups ?? []).map((g) => ({
+              id: g.id,
+              name: g.name,
+              memberIds: g.player_group_members.map((m) => m.profile_id),
+            }))}
+          />
+
+          {assignments && assignments.length > 0 ? (
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-zinc-700">Assignments</h3>
+              <ul className="mt-2 divide-y divide-zinc-100">
+                {assignments.map((a) => (
+                  <li key={a.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
+                    <span className="min-w-0 flex-1 truncate">
+                      {a.player.full_name || a.player.email}
+                    </span>
+                    <span className="text-zinc-500">
+                      from {formatPracticeDate(a.start_date, { weekday: undefined })}
+                    </span>
+                    <span className="text-zinc-500 tabular-nums">
+                      {progress.get(a.id)?.done ?? 0}/{totalDays} logged
+                      {progress.get(a.id)?.last
+                        ? ` · last ${formatPracticeDate(progress.get(a.id)!.last!, { weekday: undefined })}`
+                        : ""}
+                    </span>
+                    <span
+                      className={cn(
+                        "rounded px-1.5 py-0.5 text-xs font-medium",
+                        STATUS_STYLE[a.status],
+                      )}
+                    >
+                      {a.status}
+                    </span>
+                    <form action={updateAssignment} className="flex gap-1">
+                      <input type="hidden" name="id" value={a.id} />
+                      <input type="hidden" name="program_id" value={id} />
+                      {a.status !== "active" ? (
+                        <button
+                          name="intent"
+                          value="active"
+                          className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
+                        >
+                          Resume
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            name="intent"
+                            value="paused"
+                            className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
+                          >
+                            Pause
+                          </button>
+                          <button
+                            name="intent"
+                            value="completed"
+                            className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
+                          >
+                            Complete
+                          </button>
+                        </>
+                      )}
+                      <button
+                        name="intent"
+                        value="remove"
+                        className="ml-3 text-xs font-semibold text-zinc-400 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       {/* Structure */}
       <section className="space-y-4">
         {program.program_weeks.map((w) => (
@@ -246,95 +340,6 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
           </div>
         ))}
       </section>
-
-      {isStaff && !program.is_template ? (
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
-          <h2 className="mb-4 font-semibold">Assign to players</h2>
-          <AssignForm
-            programId={id}
-            today={today}
-            players={(players ?? []).map((p) => ({
-              id: p.profile_id,
-              name: p.profile.full_name || p.profile.email,
-              detail: [p.position, p.jersey_number != null ? `#${p.jersey_number}` : null]
-                .filter(Boolean)
-                .join(" "),
-              position: p.position,
-              assigned: activeIds.has(p.profile_id),
-            }))}
-            groups={(groups ?? []).map((g) => ({
-              id: g.id,
-              name: g.name,
-              memberIds: g.player_group_members.map((m) => m.profile_id),
-            }))}
-          />
-
-          {assignments && assignments.length > 0 ? (
-            <div className="mt-6">
-              <h3 className="text-sm font-semibold text-zinc-700">Assignments</h3>
-              <ul className="mt-2 divide-y divide-zinc-100">
-                {assignments.map((a) => (
-                  <li key={a.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                    <span className="min-w-0 flex-1 truncate">
-                      {a.player.full_name || a.player.email}
-                    </span>
-                    <span className="text-zinc-500">from {a.start_date}</span>
-                    <span className="text-zinc-500 tabular-nums">
-                      {progress.get(a.id)?.done ?? 0}/{totalDays} logged
-                      {progress.get(a.id)?.last ? ` · last ${progress.get(a.id)!.last}` : ""}
-                    </span>
-                    <span
-                      className={cn(
-                        "rounded px-1.5 py-0.5 text-xs font-medium",
-                        STATUS_STYLE[a.status],
-                      )}
-                    >
-                      {a.status}
-                    </span>
-                    <form action={updateAssignment} className="flex gap-1">
-                      <input type="hidden" name="id" value={a.id} />
-                      <input type="hidden" name="program_id" value={id} />
-                      {a.status !== "active" ? (
-                        <button
-                          name="intent"
-                          value="active"
-                          className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
-                        >
-                          Resume
-                        </button>
-                      ) : (
-                        <>
-                          <button
-                            name="intent"
-                            value="paused"
-                            className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
-                          >
-                            Pause
-                          </button>
-                          <button
-                            name="intent"
-                            value="completed"
-                            className="text-xs font-semibold text-zinc-600 hover:text-zinc-900"
-                          >
-                            Complete
-                          </button>
-                        </>
-                      )}
-                      <button
-                        name="intent"
-                        value="remove"
-                        className="text-xs font-semibold text-zinc-400 hover:text-red-600"
-                      >
-                        Remove
-                      </button>
-                    </form>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-        </section>
-      ) : null}
 
       {isStaff ? (
         <details className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
