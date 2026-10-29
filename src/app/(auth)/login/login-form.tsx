@@ -7,7 +7,14 @@ import { Field } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { SubmitButton } from "@/components/ui/submit-button";
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({
+  next,
+  variant = "primary",
+}: {
+  next?: string;
+  /** "secondary" when signing in is the alternative to creating an account. */
+  variant?: "primary" | "secondary";
+}) {
   const [state, action] = useActionState<FormState, FormData>(login, {});
 
   return (
@@ -34,7 +41,7 @@ export function LoginForm({ next }: { next?: string }) {
         </Link>
       </p>
       <FormMessage state={state} />
-      <SubmitButton className="w-full" pendingLabel="Signing in…">
+      <SubmitButton className="w-full" variant={variant} pendingLabel="Signing in…">
         Sign in
       </SubmitButton>
     </form>

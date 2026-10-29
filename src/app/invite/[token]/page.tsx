@@ -1,13 +1,26 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireUser } from "@/lib/org";
-import { signOut } from "@/lib/auth/actions";
 import { ROLE_LABELS } from "@/constants";
+import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
-import { acceptInvitation } from "./actions";
+import { acceptInvitation, switchAccountForInvite } from "./actions";
 
 export const metadata: Metadata = { title: "Invitation" };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Next step for an invite that can't be used: go to the app (which routes to the right home). */
+function ContinueLink() {
+  return (
+    <Link
+      href="/"
+      className="flex h-11 w-full items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-300 ring-inset hover:bg-zinc-50"
+    >
+      Continue to Diamond Program
+    </Link>
+  );
+}
 
 export default async function InvitePage({ params, searchParams }: PageProps<"/invite/[token]">) {
   const { token } = await params;
@@ -19,44 +32,75 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
     : { data: [] };
   const invite = data?.[0];
 
+  let title: string;
   let body: React.ReactNode;
   if (!invite) {
-    body = <p className="text-sm text-zinc-600">This invitation link isn&apos;t valid.</p>;
-  } else if (invite.is_accepted) {
-    body = <p className="text-sm text-zinc-600">This invitation has already been used.</p>;
-  } else if (invite.is_expired) {
+    title = "This link doesn't work";
     body = (
-      <p className="text-sm text-zinc-600">
-        This invitation has expired. Ask {invite.org_name}&apos;s admin to send a new one.
-      </p>
-    );
-  } else if (!invite.email_matches) {
-    body = (
-      <div className="space-y-3 text-sm text-zinc-600">
+      <div className="space-y-4 text-sm text-zinc-600">
         <p>
-          This invitation was sent to <strong>{invite.email}</strong>, but you&apos;re signed in as{" "}
-          <strong>{user.email}</strong>.
+          The invitation link isn&apos;t valid. It may have been copied only partly. Ask your coach
+          to send it again.
         </p>
-        <form action={signOut}>
-          <button type="submit" className="font-semibold text-brand-700 hover:underline">
-            Sign out and switch accounts
-          </button>
-        </form>
+        <ContinueLink />
       </div>
     );
+  } else if (invite.is_accepted) {
+    title = "Invitation already accepted";
+    body = (
+      <div className="space-y-4 text-sm text-zinc-600">
+        <p>
+          This invitation to <strong>{invite.org_name}</strong> has already been used. If it was
+          you, you&apos;re all set.
+        </p>
+        <ContinueLink />
+      </div>
+    );
+  } else if (invite.is_expired) {
+    title = "Invitation expired";
+    body = (
+      <div className="space-y-4 text-sm text-zinc-600">
+        <p>
+          This invitation to <strong>{invite.org_name}</strong> has expired. Ask your coach to send
+          you a new one.
+        </p>
+        <ContinueLink />
+      </div>
+    );
+  } else if (!invite.email_matches) {
+    title = "Use the invited email";
+    body = (
+      <form action={switchAccountForInvite} className="space-y-4 text-sm text-zinc-600">
+        <input type="hidden" name="token" value={token} />
+        <p>
+          This invitation was sent to <strong className="break-all">{invite.email}</strong>, but
+          you&apos;re signed in as <strong className="break-all">{user.email}</strong>.
+        </p>
+        <p>Sign out, then sign in or create an account with the invited email.</p>
+        <Button type="submit" variant="secondary" className="w-full">
+          Sign out and switch accounts
+        </Button>
+      </form>
+    );
   } else {
+    title =
+      invite.role === "parent"
+        ? `Follow ${invite.player_name ?? "your player"}`
+        : `Join ${invite.org_name}`;
     body = (
       <form action={acceptInvitation} className="space-y-4">
         <input type="hidden" name="token" value={token} />
         {invite.role === "parent" ? (
-          <div className="space-y-2 text-sm text-zinc-600">
+          <div className="space-y-3 text-sm text-zinc-600">
             <p>
               You&apos;re invited to follow <strong>{invite.player_name ?? "your player"}</strong>{" "}
-              on <strong>{invite.org_name}</strong> as a parent/guardian.
+              on <strong>{invite.org_name}</strong> as a parent or guardian.
             </p>
             <p>
-              You&apos;ll see their workouts, throwing, testing numbers, and coach-reviewed videos.
-              It&apos;s read-only, and you only see your own player.
+              You&apos;ll see their schedule, how they&apos;re doing, and updates from the coach.
+            </p>
+            <p className="text-xs text-zinc-500">
+              🔒 You only see your own player. Teammates&apos; information stays private.
             </p>
           </div>
         ) : (
@@ -79,14 +123,12 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+      <p className="mb-8 flex items-center gap-2 text-lg font-bold tracking-tight">
+        <span aria-hidden className="inline-block size-6 rotate-45 rounded-sm bg-brand-700" />
+        Diamond Program
+      </p>
       <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
-        <h1 className="mb-4 text-xl font-semibold">
-          {invite
-            ? invite.role === "parent"
-              ? `Follow ${invite.player_name ?? "your player"}`
-              : `Join ${invite.org_name}`
-            : "Invitation"}
-        </h1>
+        <h1 className="mb-4 text-xl font-semibold">{title}</h1>
         {body}
       </div>
     </main>

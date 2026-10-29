@@ -16,8 +16,8 @@ export default async function ParentPracticePage({ params }: PageProps<"/parent/
 
   return (
     <div className="space-y-4">
-      <Link href="/parent" className="text-sm text-zinc-500">
-        ← Home
+      <Link href="/parent/schedule" className="text-sm font-medium text-brand-700 hover:underline">
+        ← Schedule
       </Link>
       <PracticeView plan={plan} />
     </div>

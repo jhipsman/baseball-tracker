@@ -22,7 +22,10 @@ export default async function ParentLayout({ children }: { children: React.React
           <div className="ml-auto flex items-center gap-1">
             <NotificationBell />
             <form action={signOut}>
-              <button type="submit" className="px-2 text-sm font-medium text-zinc-600">
+              <button
+                type="submit"
+                className="inline-flex h-11 items-center rounded-lg px-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
+              >
                 Sign out
               </button>
             </form>

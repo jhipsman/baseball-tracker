@@ -5,7 +5,7 @@ import { NewThreadForm } from "./new-thread-form";
 
 /** "New message" for any role: coaches pick anyone; players and parents pick a coach. */
 export async function NewThreadPage({ base, to }: { base: string; to?: string | string[] }) {
-  const { supabase, user, org, isStaff } = await requireActiveOrg();
+  const { supabase, user, org, isStaff, membership } = await requireActiveOrg();
   const dir = await loadDirectory(supabase, org.id);
   const recipients = recipientsFor(dir, user.id, isStaff);
   const ids = new Set(recipients.map((r) => r.id));
@@ -33,6 +33,7 @@ export async function NewThreadPage({ base, to }: { base: string; to?: string | 
           groups={isStaff ? dir.groups : []}
           defaultSelected={defaultSelected}
           staffView={isStaff}
+          parentView={membership.role === "parent"}
         />
       </div>
     </div>

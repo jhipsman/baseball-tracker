@@ -27,12 +27,15 @@ export function NewThreadForm({
   groups = [],
   defaultSelected = [],
   staffView,
+  parentView = false,
 }: {
   recipients: Recipient[];
   groups?: { id: string; name: string; memberIds: string[] }[];
   defaultSelected?: string[];
   /** Coaches pick anyone; players and parents pick among staff. */
   staffView: boolean;
+  /** Parents get their own note: their messages don't copy their player. */
+  parentView?: boolean;
 }) {
   const { state, onSubmit, pending } = useFormAction<MessageFormState>(startThread, {});
   const [selected, setSelected] = useState(() => new Set(defaultSelected));
@@ -155,7 +158,9 @@ export function NewThreadForm({
       <p className="rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-900">
         {staffView
           ? "Parents are automatically copied on messages with their player, and every conversation includes a coach."
-          : "Messages always go to a coach. Linked parents are copied on conversations with their player."}
+          : parentView
+            ? "Only the coaches you pick see this message. Your player isn't added to it."
+            : "Messages always go to a coach. Linked parents are copied on conversations with their player."}
       </p>
 
       <Field label="Subject (optional)" name="subject" maxLength={140} />
