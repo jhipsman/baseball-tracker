@@ -111,11 +111,7 @@ export function GameView({
           <CalendarFileLink id={g.id} />
         </div>
       </section>
-
-      <section className="space-y-2 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
-        <h2 className="font-semibold">Box score</h2>
-        <BoxScore gameId={g.id} />
-      </section>
+      <BoxScore gameId={g.id} />
     </div>
   );
 }

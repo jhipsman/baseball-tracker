@@ -108,11 +108,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
             teamScore={g.teamScore}
             opponentScore={g.opponentScore}
           />
-
-          <section className="space-y-2 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
-            <h2 className="font-semibold">Box score</h2>
-            <BoxScore gameId={g.id} />
-          </section>
+          <BoxScore gameId={g.id} />
 
           {g.notes ? (
             <section className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
