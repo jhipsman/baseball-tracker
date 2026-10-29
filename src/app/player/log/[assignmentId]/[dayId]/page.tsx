@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
+import { formatGameDate } from "@/lib/games";
 import { blockLabels } from "@/components/workout-builder/reducer";
 import { summarize } from "@/components/workout-builder/format";
 import { SESSION_LABELS } from "@/constants";
@@ -153,8 +154,8 @@ export default async function LogWorkoutPage({
         <p className="text-sm text-zinc-500">{SESSION_LABELS[day.session_type]}</p>
         {existing ? (
           <p className="mt-2 rounded-lg bg-zinc-100 px-3 py-2 text-sm text-zinc-700">
-            Logged on {existing.date} as <strong>{existing.status}</strong>. Changes update that
-            log.
+            Logged on {formatGameDate(existing.date)} as <strong>{existing.status}</strong>. Changes
+            update that log.
           </p>
         ) : null}
         {day.notes ? <p className="mt-2 text-sm text-zinc-600">{day.notes}</p> : null}

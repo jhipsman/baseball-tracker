@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
 import { formatSets } from "@/lib/sets-format";
+import { formatGameDate } from "@/lib/games";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "History" };
@@ -34,7 +35,10 @@ export default async function HistoryPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">History</h1>
+        <Link href="/player/profile" className="text-sm font-medium text-zinc-500">
+          ← Me
+        </Link>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">History</h1>
         <p className="text-sm text-zinc-500">
           {logs.length} workout{logs.length === 1 ? "" : "s"} logged · {completedCount} completed
         </p>
@@ -42,7 +46,7 @@ export default async function HistoryPage() {
 
       {logs.length === 0 ? (
         <p className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
-          Workouts you log will show up here.
+          Workouts you log will show up here. Start one from the Today tab.
         </p>
       ) : (
         <ul className="space-y-2">
@@ -76,7 +80,7 @@ export default async function HistoryPage() {
                   </span>
                 </div>
                 <p className="mt-2 text-xs text-zinc-500 tabular-nums">
-                  {l.date_completed}
+                  {formatGameDate(l.date_completed)}
                   {l.status !== "skipped" ? ` · ${doneSets} sets` : ""}
                   {l.duration_minutes != null ? ` · ${l.duration_minutes} min` : ""}
                   {l.overall_rpe != null ? ` · RPE ${l.overall_rpe}` : ""}

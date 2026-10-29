@@ -13,7 +13,7 @@ export function ProfileForm({ fullName }: { fullName: string }) {
     <form onSubmit={onSubmit} className="space-y-3">
       <Field label="Name" name="full_name" defaultValue={fullName} autoComplete="name" required />
       <FormMessage state={state} />
-      <SubmitButton pending={pending} className="w-full" pendingLabel="Saving…">
+      <SubmitButton pending={pending} variant="secondary" className="w-full" pendingLabel="Saving…">
         Save
       </SubmitButton>
     </form>

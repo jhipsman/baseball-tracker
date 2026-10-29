@@ -3,6 +3,7 @@ import { deleteThrowing, setBirthDate } from "@/lib/throwing-actions";
 import type { ThrowingRow } from "@/lib/throwing";
 import type { Alert, Availability } from "@/lib/workload";
 import { cn } from "@/lib/utils";
+import { DeleteThrowButton } from "./delete-throw-button";
 
 const fmt = (d: string) =>
   new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", {
@@ -108,7 +109,7 @@ export function ThrowingList({
   return (
     <ul className="divide-y divide-zinc-100 rounded-xl bg-white ring-1 ring-zinc-200">
       {rows.map((r) => (
-        <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 text-sm">
+        <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm">
           <span className="w-24 shrink-0 text-zinc-500 tabular-nums">{fmt(r.date)}</span>
           <span className="font-medium">{THROW_TYPE_LABEL[r.type]}</span>
           {r.type !== "check_in" ? (
@@ -133,12 +134,9 @@ export function ThrowingList({
           {canDelete(r) ? (
             <form action={deleteThrowing} className="ml-auto">
               <input type="hidden" name="id" value={r.id} />
-              <button
-                type="submit"
-                className="text-xs font-semibold text-zinc-400 hover:text-red-600"
-              >
-                Delete
-              </button>
+              <DeleteThrowButton
+                what={`${THROW_TYPE_LABEL[r.type].toLowerCase()} on ${fmt(r.date)}`}
+              />
             </form>
           ) : null}
         </li>

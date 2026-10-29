@@ -109,7 +109,7 @@ export async function RecentAtBats({
                       : ON.has(p.result)
                         ? "bg-sky-100 text-sky-900"
                         : K.has(p.result)
-                          ? "bg-rose-100 text-rose-900"
+                          ? "bg-zinc-200 text-zinc-900"
                           : "bg-zinc-100 text-zinc-700",
                   )}
                 >

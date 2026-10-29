@@ -14,8 +14,8 @@ export default async function PlayerStatsPage({ searchParams }: PageProps<"/play
   return (
     <div className="space-y-4">
       <div>
-        <Link href="/player/profile" className="text-xs font-medium text-zinc-500">
-          ← Profile
+        <Link href="/player/profile" className="text-sm font-medium text-zinc-500">
+          ← Me
         </Link>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight">My stats</h1>
       </div>

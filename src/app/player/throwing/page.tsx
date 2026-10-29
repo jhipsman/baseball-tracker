@@ -53,11 +53,16 @@ export default async function PlayerThrowingPage() {
         <dl className="grid grid-cols-2 gap-3 text-sm">
           <div>
             <dt className="text-zinc-500">Throws this week</dt>
-            <dd className="text-2xl font-semibold">{week}</dd>
+            <dd className="text-2xl font-semibold tabular-nums">{week}</dd>
           </div>
           <div>
             <dt className="text-zinc-500">vs your usual week</dt>
-            <dd className="text-2xl font-semibold">{acwr ? `${acwr.ratio.toFixed(1)}×` : "—"}</dd>
+            <dd className="text-2xl font-semibold tabular-nums">
+              {acwr ? `${acwr.ratio.toFixed(1)}×` : "—"}
+            </dd>
+            {acwr ? null : (
+              <dd className="text-xs text-zinc-500">Shows after 3 weeks of logging</dd>
+            )}
           </div>
         </dl>
         {!birth ? (

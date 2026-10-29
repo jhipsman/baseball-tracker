@@ -19,6 +19,7 @@ import {
   parseDistance,
   type LoggedSet,
 } from "@/lib/sets-format";
+import { formatGameDate } from "@/lib/games";
 import { cn } from "@/lib/utils";
 import { saveWorkoutLog } from "./actions";
 
@@ -378,14 +379,15 @@ export function LogForm({
                     <p className="mt-1 text-sm text-zinc-500 italic">“{it.coachNotes}”</p>
                   ) : null}
                   {it.lastTime && last ? (
-                    <p className="mt-1 text-xs text-zinc-500">
-                      Last time ({it.lastTime.date}): {last}
+                    <p className="mt-1 text-sm text-zinc-600 tabular-nums">
+                      <span className="font-medium text-zinc-800">Last time</span> (
+                      {formatGameDate(it.lastTime.date)}): {last}
                     </p>
                   ) : null}
                   {it.instructions ? (
-                    <details className="mt-1 text-xs text-zinc-500">
-                      <summary className="cursor-pointer">How to</summary>
-                      <p className="mt-1">{it.instructions}</p>
+                    <details className="mt-1 text-sm text-zinc-600">
+                      <summary className="w-fit cursor-pointer py-3 font-medium">How to</summary>
+                      <p className="mb-1">{it.instructions}</p>
                     </details>
                   ) : null}
                 </div>
@@ -468,10 +470,10 @@ export function LogForm({
                 </p>
               ) : null}
 
-              <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
+              <div className="mt-2 flex flex-wrap items-center gap-x-1 text-sm">
                 <button
                   type="button"
-                  className="font-semibold text-brand-700"
+                  className="-ml-2 h-11 rounded-lg px-2 font-semibold text-brand-700 active:bg-brand-50"
                   onClick={() => {
                     const prev = ex.sets.at(-1);
                     updateEx(it.programExerciseId, {
@@ -490,22 +492,23 @@ export function LogForm({
                 >
                   + Add set
                 </button>
+                <button
+                  type="button"
+                  className="h-11 rounded-lg px-2 font-medium text-zinc-600 active:bg-zinc-100"
+                  onClick={() => updateEx(it.programExerciseId, { showNotes: !ex.showNotes })}
+                >
+                  {ex.showNotes ? "Hide note" : "Add note"}
+                </button>
+                {/* Kept apart from "+ Add set" so a sweaty thumb doesn't drop a set. */}
                 {ex.sets.length > 1 ? (
                   <button
                     type="button"
-                    className="font-medium text-zinc-500"
+                    className="-mr-2 ml-auto h-11 rounded-lg px-2 font-medium text-zinc-500 active:bg-zinc-100"
                     onClick={() => updateEx(it.programExerciseId, { sets: ex.sets.slice(0, -1) })}
                   >
                     Remove set
                   </button>
                 ) : null}
-                <button
-                  type="button"
-                  className="ml-auto font-medium text-zinc-500"
-                  onClick={() => updateEx(it.programExerciseId, { showNotes: !ex.showNotes })}
-                >
-                  {ex.showNotes ? "Hide note" : "Add note"}
-                </button>
               </div>
               {ex.showNotes ? (
                 <textarea
@@ -579,7 +582,11 @@ export function LogForm({
             {total > 0 ? `${done}/${total} sets done` : "Session"}
           </span>
           <span className="text-zinc-500">
-            {finishStatus === "completed" ? "Ready to finish" : "Will save as partial"}
+            {finishStatus === "completed"
+              ? "Ready to finish"
+              : done === 0
+                ? "Tap ✓ after each set"
+                : "Will save as partial"}
           </span>
         </div>
         <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">

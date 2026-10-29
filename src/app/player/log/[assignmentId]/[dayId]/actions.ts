@@ -83,7 +83,14 @@ export async function saveWorkoutLog(input: WorkoutLogInput): Promise<{ error?: 
     p_notes: String(input.notes ?? "").slice(0, 4000),
     p_exercises: exercises as unknown as Json,
   });
-  if (error) return { error: error.message };
+  if (error) {
+    // Players never see raw database text; the details go to the server log.
+    console.error("save_workout_log failed", error);
+    return {
+      error:
+        "We couldn't save your workout. Your sets are still here on this phone — check your signal and try again.",
+    };
+  }
 
   revalidatePath("/player");
   revalidatePath("/player/history");

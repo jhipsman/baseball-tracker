@@ -228,7 +228,7 @@ function TodayWorkout({
       </p>
       <Link
         href={href}
-        className="mt-4 flex h-14 items-center justify-center rounded-xl bg-brand-500 text-base font-semibold text-white active:bg-brand-600"
+        className="mt-4 flex h-14 items-center justify-center rounded-xl bg-brand-700 text-lg font-semibold text-white active:bg-brand-900"
       >
         {day.log ? "View / edit log" : "Start workout"}
       </Link>

@@ -49,15 +49,7 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
 
   return (
     <div className="space-y-4">
-      <div className="flex items-baseline justify-between gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Me</h1>
-        <div className="flex gap-3 text-sm font-semibold text-brand-700">
-          <Link href="/player/history">Workout history →</Link>
-          {membership.role === "player" && hasModule(org.modules, "games") ? (
-            <Link href="/player/stats">My stats →</Link>
-          ) : null}
-        </div>
-      </div>
+      <h1 className="text-2xl font-semibold tracking-tight">Me</h1>
 
       <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
         <p className="text-sm text-zinc-500">Consistency, last 28 days</p>
@@ -68,6 +60,20 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
           {c28.due ? `${c28.logged} of ${c28.due} workouts logged` : "No workouts due yet"}
         </p>
       </section>
+
+      <nav
+        aria-label="My records"
+        className="divide-y divide-zinc-100 rounded-2xl bg-white ring-1 ring-zinc-200"
+      >
+        <MeLink href="/player/history" hint="Every workout you've logged">
+          Workout history →
+        </MeLink>
+        {membership.role === "player" && hasModule(org.modules, "games") ? (
+          <MeLink href="/player/stats" hint="Your season line and game log">
+            My stats →
+          </MeLink>
+        ) : null}
+      </nav>
 
       {withData.length > 0 ? (
         <section className="space-y-3">
@@ -120,5 +126,15 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
         </button>
       </form>
     </div>
+  );
+}
+
+/** A full-width row link (≥ 44px) so records are easy to find and tap. */
+function MeLink({ href, hint, children }: { href: string; hint: string; children: string }) {
+  return (
+    <Link href={href} className="block min-h-14 px-4 py-3 active:bg-zinc-50">
+      <span className="block font-semibold text-zinc-900">{children}</span>
+      <span className="block text-xs text-zinc-500">{hint}</span>
+    </Link>
   );
 }
