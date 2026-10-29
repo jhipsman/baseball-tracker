@@ -48,11 +48,12 @@ Still to do:
 
 Keep the tone "talk to your coach or athletic trainer," never diagnostic.
 
-## Live game scoring (next)
+## Live game scoring (built)
 
 - **Live pitch counter** for our pitcher (ball / strike / in play), feeding Pitch Smart in real time with dugout warnings before limits.
 - **At-bat-by-at-bat scoring** (result per plate appearance, outs, auto-advancing lineup) that fills in the box score automatically; parents follow live with a last-play feed.
-- Later, if asked: full runner-by-runner scoring, or importing GameChanger stats.
+- Built: live pitch counter with Pitch Smart, at-bat scoring that fills the box score, parent live feed, recent at-bats on profiles.
+- Later, if asked: full runner-by-runner scoring (base state, earned-run logic), spray charts, importing GameChanger stats, tournament-weekend pitcher availability planner.
 
 ## From the Phase 5 product review
 

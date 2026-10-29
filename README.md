@@ -261,6 +261,15 @@ Box scores and season stats, built on `game_batting` / `game_pitching` (see `sup
 - **Add to calendar:** `/games/[id]/ics` returns a single-event `.ics` for anyone who can see the game (floating local time, two-hour event or all-day without a time, escaped text, arrival time and notes in the description, a link to the viewer's game page).
 - Helpers (`src/lib/games.ts`: results, records, line-score validation and totals, labels, times, `.ics`) are unit-tested; actions are in `src/lib/game-actions.ts`.
 
+## Live game log
+
+- **Scorer** (`/games/[id]/live`, coach, phone-first): set the batting order (defaults to the last game's) and starting pitcher, then tap the result of each at-bat (1B…HR, BB, HBP, K / Ꝁ, GO/FO/LO/PO, E, FC, SAC, SF, DP). Runs, RBI, who scored, and extra outs on the bases are steppers above the buttons. Also: stolen bases, caught stealing, substitutions, pitching changes, "End this half" with a run total (for innings you didn't log), undo last play, end game.
+- **Pitch-by-pitch is optional** (our pitcher only): Ball / Called strike / Swinging strike / Foul; ball four and strike three record the walk or strikeout automatically.
+- **Pitch Smart live:** the pitcher card shows pitches, how many are left today for his age, the rest he needs if pulled now, and how many pitches until the next rest day kicks in (amber within 5, red over the max).
+- **One source of truth:** plays live in `game_plays`; situation, line score, score, box score (`save_box_score`), season stats, and Throwing pitch counts are derived from them (`src/lib/live/engine.ts`, unit-tested), so undo is just deleting the last play. Ending the game sends players and parents the final.
+- **Everyone follows along:** game pages show a live game log (situation + play-by-play, refreshing every 10 s). The feed respects the team's stats privacy (`game_plays` RLS).
+- **Development:** player profiles and stats pages show **Recent at-bats** (results by game, on-base and strikeout rates vs the 20 before).
+
 ## Navigation & team features
 
 - **Coach sidebar (7 sections):** Dashboard · Schedule (Calendar, Games, Practices) · Training (Programs, Exercise library) · Team (Roster, Members & invites, Testing day, Stats) · Player Health (throwing & arm care; more health tools later) · Videos · Messages, plus **Settings** for admins. Sections share a tab bar (`src/constants/sections.ts`, `src/components/layout/section-tabs.tsx`).
