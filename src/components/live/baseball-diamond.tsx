@@ -189,9 +189,9 @@ export function BaseballDiamond({
             data-testid={`base-${base}`}
           >
             <span className={styles.baseBag} />
-            <span className={styles.runnerLabel}>
-              {id ? name(id).split(" ")[0] : known ? `${base}B` : "?"}
-            </span>
+            {id || !known ? (
+              <span className={styles.runnerLabel}>{id ? name(id).split(" ")[0] : "?"}</span>
+            ) : null}
           </button>
         );
       })}

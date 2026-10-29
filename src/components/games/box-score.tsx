@@ -40,7 +40,7 @@ export async function BoxScore({ gameId }: { gameId: string }) {
         {isStaff ? (
           <Link
             href={enterHref}
-            className="mt-3 inline-flex h-10 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+            className="mt-3 inline-flex h-11 items-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-300 hover:bg-zinc-50"
           >
             Enter box score
           </Link>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { playerToday } from "@/lib/player";
+import { formatGameDate } from "@/lib/games";
 import { addDays } from "@/lib/schedule";
 import { loadTeam } from "@/lib/team";
 import { loadBirthDates, loadThrowing } from "@/lib/throwing";
@@ -95,8 +96,8 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
-        <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div className="min-w-0 space-y-4">
           <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
             <h2 className="font-semibold">Alerts</h2>
             {urgent.length === 0 ? (
@@ -131,7 +132,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
             <table className="w-full min-w-[52rem] text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-500">
-                  <th className="px-4 py-2.5">Player</th>
+                  <th className="sticky left-0 z-10 bg-white px-4 py-2.5">Player</th>
                   <th className="px-3 py-2.5">Age</th>
                   <th className="px-3 py-2.5">Today</th>
                   <th className="px-3 py-2.5">Last outing</th>
@@ -143,7 +144,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
               <tbody>
                 {sorted.map((s) => (
                   <tr key={s.player.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="px-4 py-2.5">
+                    <td className="sticky left-0 z-10 bg-white px-4 py-2.5">
                       <Link
                         href={`/roster/${s.player.id}#throwing`}
                         className="font-medium hover:underline"
@@ -165,7 +166,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
                     </td>
                     <td className="px-3 py-2.5 text-zinc-600 tabular-nums">
                       {s.lastOuting ? (
-                        `${s.lastOuting[0]} · ${s.lastOuting[1]} pitches`
+                        `${formatGameDate(s.lastOuting[0])} · ${s.lastOuting[1]} pitches`
                       ) : (
                         <span className="text-zinc-400">—</span>
                       )}
@@ -194,7 +195,9 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
                       {s.feel ? (
                         <span className="flex items-center gap-1.5">
                           <ArmFeelChip feel={s.feel.armFeel} />
-                          <span className="text-xs text-zinc-500">{s.feel.date.slice(5)}</span>
+                          <span className="text-xs whitespace-nowrap text-zinc-500">
+                            {formatGameDate(s.feel.date, { weekday: undefined })}
+                          </span>
                         </span>
                       ) : (
                         <span className="text-zinc-400">—</span>

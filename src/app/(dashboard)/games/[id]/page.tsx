@@ -58,6 +58,18 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
     inningsScheduled: g.inningsScheduled,
   };
 
+  const atBatLink = (
+    <Link
+      href={`/games/${g.id}/live`}
+      className="block rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-zinc-300 hover:bg-zinc-50"
+    >
+      <span className="font-semibold text-brand-700">Score at-bat by at-bat →</span>
+      <span className="block text-zinc-600">
+        Live pitch counts with Pitch Smart warnings, and the box score fills itself in.
+      </span>
+    </Link>
+  );
+
   return (
     <div className="max-w-5xl">
       <Link
@@ -121,19 +133,10 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
               inningsScheduled={g.inningsScheduled}
               teamScore={g.teamScore}
               opponentScore={g.opponentScore}
+              alternative={atBatLink}
             />
           )}
-          {!liveLogged && g.status !== "final" ? (
-            <Link
-              href={`/games/${g.id}/live`}
-              className="block rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-zinc-200 hover:bg-zinc-50"
-            >
-              <span className="font-semibold text-brand-800">Score at-bat by at-bat →</span>
-              <span className="block text-zinc-600">
-                Live pitch counts with Pitch Smart warnings, and the box score fills itself in.
-              </span>
-            </Link>
-          ) : null}
+          {!liveLogged && g.status === "live" ? atBatLink : null}
           <LiveFeed gameId={g.id} orgId={org.id} live={g.status === "live"} />
           <BoxScore gameId={g.id} />
 

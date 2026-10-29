@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { endGame, resumeGame, saveLiveScore, startGame } from "@/lib/game-actions";
 import {
@@ -25,6 +25,8 @@ type Props = {
   inningsScheduled: number;
   teamScore: number | null;
   opponentScore: number | null;
+  /** Shown under Start game before the game begins: the other way to keep score. */
+  alternative?: ReactNode;
 };
 
 /**
@@ -93,6 +95,7 @@ export function LiveScoring(props: Props) {
         <h2 className="font-semibold">Live scoring</h2>
         <p className="text-sm text-zinc-600">
           Keep score from the dugout. Players and parents watching the game page see it update.
+          {props.alternative ? " Pick one way to score:" : null}
         </p>
         <Button
           type="button"
@@ -110,6 +113,12 @@ export function LiveScoring(props: Props) {
         >
           ▶ Start game
         </Button>
+        {props.alternative ? (
+          <>
+            <p className="-mt-1 text-center text-sm text-zinc-600">Runs by inning only</p>
+            {props.alternative}
+          </>
+        ) : null}
         {error ? <p className="text-sm text-red-700">{error}</p> : null}
       </section>
     );
