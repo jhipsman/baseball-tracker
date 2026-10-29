@@ -83,7 +83,10 @@ export async function logThrowing(input: ThrowingInput): Promise<{ error?: strin
         .trim()
         .slice(0, 2000) || null,
   });
-  if (error) return { error: error.message };
+  if (error) {
+    console.error("logThrowing failed", error);
+    return { error: "Couldn't save this session. Check your signal and try again." };
+  }
 
   revalidatePath("/player/throwing");
   revalidatePath("/throwing");

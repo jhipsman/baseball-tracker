@@ -30,6 +30,15 @@ export type PitchSmartBand = {
 const YOUTH: PitchSmartBand["restThresholds"] = [20, 35, 50, 65];
 const TEEN_ADULT: PitchSmartBand["restThresholds"] = [30, 45, 60, 75];
 
+/** "Mon, Oct 26" for a YYYY-MM-DD date (alerts are read by players and parents). */
+const dayLabel = (date: string) =>
+  new Date(`${date}T12:00:00Z`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+
 export function pitchSmartBand(age: number): PitchSmartBand {
   if (age <= 8) return { ages: "7–8", dailyMax: 50, restThresholds: YOUTH };
   if (age <= 10) return { ages: "9–10", dailyMax: 75, restThresholds: YOUTH };
@@ -132,7 +141,10 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
     .filter((l) => l.armFeel && l.date <= today)
     .sort((a, b) => b.date.localeCompare(a.date))[0];
   if (latestFeel?.armFeel === "pain" && latestFeel.date >= addDays(today, -6)) {
-    alerts.push({ level: "critical", message: `Reported arm pain on ${latestFeel.date}` });
+    alerts.push({
+      level: "critical",
+      message: `Reported arm pain on ${dayLabel(latestFeel.date)}`,
+    });
   }
   const sore = week.filter((l) => l.armFeel === "sore" || l.armFeel === "pain").length;
   if (sore >= 2)
@@ -150,7 +162,7 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
       if (pitches > dailyMax) {
         alerts.push({
           level: "critical",
-          message: `${pitches} pitches on ${date}: over the Pitch Smart daily max of ${dailyMax} for age ${age}`,
+          message: `${pitches} pitches on ${dayLabel(date)}: over the Pitch Smart daily max of ${dailyMax} for age ${age}`,
         });
       }
     }
@@ -162,7 +174,7 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
       if (tooSoon) {
         alerts.push({
           level: "critical",
-          message: `Pitched on ${date} before the required rest after ${tooSoon[1]} pitches on ${tooSoon[0]}`,
+          message: `Pitched on ${dayLabel(date)} before the required rest after ${tooSoon[1]} pitches on ${dayLabel(tooSoon[0])}`,
         });
       }
     }
