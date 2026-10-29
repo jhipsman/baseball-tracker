@@ -27,7 +27,7 @@ export default async function DashboardPage() {
       </h1>
       <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
       <Suspense fallback={<PageSkeleton compact />}>
-        <DashboardContent supabase={supabase} org={org} />
+        <DashboardContent supabase={supabase} org={org} isAdmin={membership.role === "admin"} />
       </Suspense>
     </div>
   );
@@ -36,7 +36,8 @@ export default async function DashboardPage() {
 async function DashboardContent({
   supabase,
   org,
-}: Pick<Awaited<ReturnType<typeof requireActiveOrg>>, "supabase" | "org">) {
+  isAdmin,
+}: Pick<Awaited<ReturnType<typeof requireActiveOrg>>, "supabase" | "org"> & { isAdmin: boolean }) {
   const { today } = await playerToday();
   const {
     team,
@@ -152,6 +153,14 @@ async function DashboardContent({
               </li>
             ))}
           </ol>
+          {isAdmin ? (
+            <p className="mt-3 text-sm text-zinc-600">
+              Already have a schedule, roster, or stats in a spreadsheet or a GameChanger export?{" "}
+              <Link href="/imports" className="font-semibold text-brand-700 hover:underline">
+                Import them →
+              </Link>
+            </p>
+          ) : null}
         </section>
       ) : null}
 

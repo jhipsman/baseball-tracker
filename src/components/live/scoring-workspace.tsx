@@ -318,11 +318,35 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
               </p>
             )}
             {p.smart && (
-              <p className={styles.workload}>
-                {p.smart.over
-                  ? "Daily pitch limit reached"
-                  : `${p.smart.left} pitches left in daily limit`}{" "}
-                · Ages {p.smart.ages} · {p.smart.restNow} days rest after today
+              <p
+                className={`${styles.workload} ${styles.smart} ${
+                  p.smart.over
+                    ? styles.smartOver
+                    : p.smart.untilMoreRest != null && p.smart.untilMoreRest <= 5
+                      ? styles.smartNear
+                      : ""
+                }`}
+                data-testid="pitch-smart"
+                role="status"
+              >
+                {p.smart.over ? (
+                  <b>
+                    Over the Pitch Smart daily max ({p.smart.dailyMax}, ages {p.smart.ages}).
+                  </b>
+                ) : (
+                  <>
+                    {p.smart.left} left today (max {p.smart.dailyMax}).{" "}
+                    {p.smart.restNow === 0
+                      ? "No rest needed if he stops now."
+                      : `Stop now: ${p.smart.restNow} day${p.smart.restNow === 1 ? "" : "s"} rest.`}{" "}
+                    {p.smart.untilMoreRest != null ? (
+                      <b>
+                        {p.smart.untilMoreRest} more → {p.smart.restAfterNext} day
+                        {p.smart.restAfterNext === 1 ? "" : "s"} rest.
+                      </b>
+                    ) : null}
+                  </>
+                )}
               </p>
             )}
           </div>

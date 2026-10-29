@@ -93,3 +93,15 @@ Validation: 248 unit/server-action tests, typecheck, and lint; local PostgreSQL 
 ## Production publish preparation (2026-10-29)
 
 User authorized publishing the scorer/import iteration and replacing Google Fonts to unblock the build. Removed `next/font/google` and set native system sans/monospace stacks in the existing Tailwind theme. There are no font downloads at build or runtime. The production branch was fetched again and still matched `f92b422`, preserving Claude's pushed commits. Publishing this change triggers the existing Vercel Git integration and the existing `Deploy database migrations` GitHub workflow. Remote build/migration completion must be verified independently; this environment has no Vercel/Supabase credentials and its network policy excludes the production URL and GitHub API.
+
+## Claude follow-up review (2026-10-29)
+
+Verified the published scorer/import/performance commits end to end: production deploy and the `Deploy database migrations` run for `f4cc337` succeeded; locally all migrations apply, `npm run build` passes, 252 unit tests pass, and 14 browser suites (every phase, games, stats, navigation, and a new diamond-scorer game) pass against a production build.
+
+Changes made on top:
+
+- **New teams land on the dashboard again**, not `/imports`. A brand-new coach usually has nothing to import and the import page had no way forward; the dashboard's Getting started card now links admins to "Import them →".
+- **Pitch Smart in the diamond scorer** shows the forward-looking line again ("N more → D days rest"), larger and color-coded (green / amber within 5 pitches of the next rest day / red over the daily max). This line is a core differentiator.
+- `src/types/database.ts` regenerated from the migrations (it had been hand-edited; contents equivalent).
+
+Note for tests: with the new loading boundaries, a page that calls `notFound()` after streaming starts returns HTTP 200 with the not-found UI (standard Next.js streaming behavior). Access control is unchanged — outsiders see no data — but checks should look at the rendered content, not only the status code.

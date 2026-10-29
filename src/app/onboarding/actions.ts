@@ -36,5 +36,5 @@ export async function createOrganization(_prev: FormState, formData: FormData): 
 
   await setActiveOrgCookie(org.id);
 
-  redirect("/imports");
+  redirect("/");
 }

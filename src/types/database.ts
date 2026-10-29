@@ -3,37 +3,6 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
-      team_import_rows: {
-        Row: {
-          id: string;
-          org_id: string;
-          kind: string;
-          source: string;
-          season: string;
-          identity_key: string;
-          values: Json;
-          player_id: string | null;
-          game_id: string | null;
-          imported_by: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          org_id: string;
-          kind: string;
-          source: string;
-          season: string;
-          identity_key: string;
-          values: Json;
-          player_id?: string | null;
-          game_id?: string | null;
-          imported_by?: string | null;
-          created_at?: string;
-        };
-        Update: { player_id?: string | null };
-        Relationships: [];
-      };
-
       announcement_reads: {
         Row: {
           announcement_id: string;
@@ -524,7 +493,6 @@ export type Database = {
       };
       game_plays: {
         Row: {
-          play_details: Json | null;
           batter_id: string | null;
           created_at: string;
           created_by: string | null;
@@ -538,6 +506,7 @@ export type Database = {
           outs: number;
           pitcher_id: string | null;
           pitches: number;
+          play_details: Json | null;
           rbi: number;
           result: string | null;
           runs: number;
@@ -548,7 +517,6 @@ export type Database = {
           we_bat: boolean;
         };
         Insert: {
-          play_details?: Json | null;
           batter_id?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -562,6 +530,7 @@ export type Database = {
           outs?: number;
           pitcher_id?: string | null;
           pitches?: number;
+          play_details?: Json | null;
           rbi?: number;
           result?: string | null;
           runs?: number;
@@ -572,7 +541,6 @@ export type Database = {
           we_bat: boolean;
         };
         Update: {
-          play_details?: Json | null;
           batter_id?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -586,6 +554,7 @@ export type Database = {
           outs?: number;
           pitcher_id?: string | null;
           pitches?: number;
+          play_details?: Json | null;
           rbi?: number;
           result?: string | null;
           runs?: number;
@@ -1575,6 +1544,77 @@ export type Database = {
           },
         ];
       };
+      team_import_rows: {
+        Row: {
+          created_at: string;
+          game_id: string | null;
+          id: string;
+          identity_key: string;
+          imported_by: string | null;
+          kind: string;
+          org_id: string;
+          player_id: string | null;
+          season: string;
+          source: string;
+          values: NonNullable<Json>;
+        };
+        Insert: {
+          created_at?: string;
+          game_id?: string | null;
+          id?: string;
+          identity_key: string;
+          imported_by?: string | null;
+          kind: string;
+          org_id: string;
+          player_id?: string | null;
+          season: string;
+          source: string;
+          values: NonNullable<Json>;
+        };
+        Update: {
+          created_at?: string;
+          game_id?: string | null;
+          id?: string;
+          identity_key?: string;
+          imported_by?: string | null;
+          kind?: string;
+          org_id?: string;
+          player_id?: string | null;
+          season?: string;
+          source?: string;
+          values?: NonNullable<Json>;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "team_import_rows_game_id_fkey";
+            columns: ["game_id"];
+            isOneToOne: false;
+            referencedRelation: "games";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "team_import_rows_imported_by_fkey";
+            columns: ["imported_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "team_import_rows_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "team_import_rows_player_id_fkey";
+            columns: ["player_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       thread_members: {
         Row: {
           last_read_at: string | null;
@@ -2096,11 +2136,6 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      import_team_rows: {
-        Args: { p_org: string; p_kind: string; p_source: string; p_season: string; p_rows: Json };
-        Returns: Json;
-      };
-
       accept_invitation: { Args: { p_token: string }; Returns: string };
       consent_status: { Args: Record<PropertyKey, never>; Returns: string };
       create_organization: {
@@ -2162,6 +2197,10 @@ export type Database = {
       give_parental_consent: {
         Args: { p_parent_name: string; p_token: string };
         Returns: undefined;
+      };
+      import_team_rows: {
+        Args: { p_kind: string; p_org: string; p_rows: Json; p_season: string; p_source: string };
+        Returns: Json;
       };
       my_pending_invitations: {
         Args: Record<PropertyKey, never>;
