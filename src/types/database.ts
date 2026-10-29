@@ -3,6 +3,37 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      team_import_rows: {
+        Row: {
+          id: string;
+          org_id: string;
+          kind: string;
+          source: string;
+          season: string;
+          identity_key: string;
+          values: Json;
+          player_id: string | null;
+          game_id: string | null;
+          imported_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          org_id: string;
+          kind: string;
+          source: string;
+          season: string;
+          identity_key: string;
+          values: Json;
+          player_id?: string | null;
+          game_id?: string | null;
+          imported_by?: string | null;
+          created_at?: string;
+        };
+        Update: { player_id?: string | null };
+        Relationships: [];
+      };
+
       announcement_reads: {
         Row: {
           announcement_id: string;
@@ -493,6 +524,7 @@ export type Database = {
       };
       game_plays: {
         Row: {
+          play_details: Json | null;
           batter_id: string | null;
           created_at: string;
           created_by: string | null;
@@ -516,6 +548,7 @@ export type Database = {
           we_bat: boolean;
         };
         Insert: {
+          play_details?: Json | null;
           batter_id?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -539,6 +572,7 @@ export type Database = {
           we_bat: boolean;
         };
         Update: {
+          play_details?: Json | null;
           batter_id?: string | null;
           created_at?: string;
           created_by?: string | null;
@@ -2062,6 +2096,11 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      import_team_rows: {
+        Args: { p_org: string; p_kind: string; p_source: string; p_season: string; p_rows: Json };
+        Returns: Json;
+      };
+
       accept_invitation: { Args: { p_token: string }; Returns: string };
       consent_status: { Args: Record<PropertyKey, never>; Returns: string };
       create_organization: {

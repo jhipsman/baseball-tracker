@@ -90,7 +90,7 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
   const name = (pid: string | null) => (pid ? (names.get(pid) ?? "Player").split(" ")[0] : "—");
 
   return (
-    <div className="max-w-2xl">
+    <div className="max-w-6xl">
       {header}
       <Scorer
         gameId={id}
@@ -100,6 +100,12 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
         weBat={s.weBat}
         us={s.us}
         them={s.them}
+        teamName={org.name}
+        weBatFirst={live.weBatFirst}
+        bases={s.bases}
+        basesKnown={s.basesKnown}
+        lastSeq={plays.at(-1)?.seq ?? 0}
+        lineScore={s.lineScore}
         opponent={game.opponent}
         lineup={s.lineup.map(p)}
         batterIdx={s.batterIdx}

@@ -16,6 +16,14 @@ import {
 } from "@/lib/live/engine";
 import { loadPlays, parseLiveState, type LiveState, type LiveSummary } from "@/lib/live/data";
 import { updatePitchCount, type PitchKind } from "@/lib/live/pitch-count";
+import {
+  defaultRbi,
+  opponentBatterId,
+  parsePlayDetails,
+  proposeMoves,
+  resolveRunnerPlay,
+  type PlayDetails,
+} from "@/lib/live/runners";
 import type { Json } from "@/types/database";
 
 export type { PitchKind } from "@/lib/live/pitch-count";
@@ -159,8 +167,7 @@ export async function recordPitch(gameId: string, kind: PitchKind): Promise<R & 
   if (!g.live) return { error: "Set the lineup first." };
   if (g.game.status !== "live") return { error: "Resume live scoring before recording pitches." };
   const s = situation(g.live, await loadPlays(g.supabase, gameId));
-  if (s.weBat) return { error: "Pitch counts are recorded while our team is in the field." };
-  if (!s.pitcherId) return { error: "Choose who's pitching first." };
+  if (!s.weBat && !s.pitcherId) return { error: "Choose who's pitching first." };
   const update = updatePitchCount(g.live, kind);
   if ("error" in update) return update;
   const { live, auto } = update;
@@ -189,12 +196,18 @@ export type PlayInput = {
   slot?: number | null;
   /** Pitches for this at-bat when not tapping pitch by pitch. */
   pitches?: number;
+  details?: PlayDetails;
+  /** Last committed sequence seen when opening the play. Reject stale confirmations. */
+  expectedSeq?: number;
+  /** Add the contact pitch only when the entire guided play is confirmed. */
+  addPitch?: boolean;
 };
 
 export async function recordPlay(gameId: string, input: PlayInput): Promise<R> {
   const g = await staffGame(gameId);
   if ("error" in g) return { error: g.error };
   if (!g.live) return { error: "Set the lineup first." };
+  if (g.game.status !== "live") return { error: "Resume live scoring before recording a play." };
   return insertPlay(g, { ...g.live }, input);
 }
 
@@ -211,6 +224,8 @@ async function insertPlay(
   const plays = await loadPlays(g.supabase, g.game.id);
   const s = situation(live, plays);
   const seq = (plays.at(-1)?.seq ?? 0) + 1;
+  if (input.expectedSeq !== undefined && input.expectedSeq !== seq - 1)
+    return { error: "Another play was recorded. Refresh before confirming this one." };
   const base = {
     game_id: g.game.id,
     org_id: g.org.id,
@@ -225,28 +240,64 @@ async function insertPlay(
   if (input.kind === "pa") {
     const result = input.result ?? null;
     if (!result || !PA.has(result)) return { error: "Pick what happened." };
-    const runs = clamp(input.runs, 0, 4);
-    const scored = s.weBat
+    let runs = clamp(input.runs, 0, 4);
+    let scored = s.weBat
       ? [...new Set((input.scored ?? []).filter((x) => UUID.test(x)))].slice(0, runs)
       : [];
     const batter = s.weBat ? batterUp(s) : null;
     if (s.weBat && !batter) return { error: "Set the lineup first." };
     if (!s.weBat && !s.pitcherId) return { error: "Choose who's pitching first." };
+    let details = input.details;
+    // Automatic walks/strikeouts and legacy callers still get deterministic
+    // runner movement when the current bases are known.
+    if (!details && s.basesKnown && ["BB", "IBB", "HBP", "K", "KL"].includes(result)) {
+      details = {
+        version: 1,
+        moves: proposeMoves(s.bases, batter ?? opponentBatterId(seq), result),
+        thirdOut: "force",
+      };
+    }
+    let resolved: ReturnType<typeof resolveRunnerPlay> | undefined;
+    if (details) {
+      if (!s.basesKnown) return { error: "Set the current bases before tracking this play." };
+      resolved = resolveRunnerPlay({
+        bases: s.bases,
+        batterId: batter ?? opponentBatterId(seq),
+        result,
+        outsBefore: s.outs,
+        details,
+      });
+      if ("error" in resolved) return resolved;
+      runs = resolved.runs;
+      scored = s.weBat ? resolved.scored : [];
+    }
+    const recordedPitches = live.pitches + (input.addPitch ? 1 : 0);
+    if (recordedPitches > 40)
+      return { error: "This at-bat has reached the 40-pitch storage limit." };
     row = {
       ...base,
       kind: "pa",
       result,
       batter_id: batter,
       pitcher_id: s.weBat ? null : s.pitcherId,
-      rbi: s.weBat ? Math.min(clamp(input.rbi, 0, 4), runs) : 0,
+      rbi: s.weBat
+        ? Math.min(
+            input.rbi === undefined && details ? defaultRbi(result, runs) : clamp(input.rbi, 0, 4),
+            runs,
+          )
+        : 0,
       runs,
       unearned: s.weBat ? 0 : Math.min(clamp(input.unearned, 0, 4), runs),
       scored:
         result === "HR" && batter && !scored.includes(batter)
           ? [...scored, batter].slice(0, runs)
           : scored,
-      pitches: s.weBat ? 0 : live.pitches || clamp(input.pitches, 0, 40),
-      outs: Math.min(3 - s.outs, outsFor(result) + clamp(input.extraOuts, 0, 2)),
+      pitches: recordedPitches || clamp(input.pitches, 0, 40),
+      outs:
+        resolved && !("error" in resolved)
+          ? resolved.outs
+          : Math.min(3 - s.outs, outsFor(result) + clamp(input.extraOuts, 0, 2)),
+      play_details: resolved && !("error" in resolved) ? resolved.details : null,
     };
   } else if (input.kind === "steal") {
     const result = input.result === "CS" ? "CS" : "SB";
@@ -263,6 +314,59 @@ async function insertPlay(
       outs: result === "CS" ? 1 : 0,
       pitches: !s.weBat && result === "CS" && s.outs === 2 ? live.pitches : 0,
     };
+  } else if (input.kind === "runner") {
+    if (!s.basesKnown) return { error: "Set the current bases first." };
+    const details = parsePlayDetails(input.details);
+    if (!details?.reason || details.snapshot)
+      return { error: "Choose what happened to the runner." };
+    const resolved = resolveRunnerPlay({
+      bases: s.bases,
+      batterId: null,
+      result: null,
+      outsBefore: s.outs,
+      details,
+    });
+    if ("error" in resolved) return resolved;
+    const changed = details.moves.filter((m) => m.to !== m.from);
+    if (!changed.length) return { error: "Change at least one runner's outcome." };
+    if (
+      ["stolen_base", "caught_stealing"].includes(details.reason) &&
+      (changed.length !== 1 ||
+        (details.reason === "caught_stealing"
+          ? changed[0].to !== "out"
+          : changed[0].to === "out" || changed[0].to === "no_run"))
+    )
+      return { error: "Resolve one runner for a stolen base or caught stealing." };
+    const result =
+      details.reason === "stolen_base" ? "SB" : details.reason === "caught_stealing" ? "CS" : null;
+    row = {
+      ...base,
+      kind: "runner",
+      result,
+      batter_id: s.weBat ? changed[0].id : null,
+      pitcher_id: s.weBat ? null : s.pitcherId,
+      runs: resolved.runs,
+      scored: s.weBat ? resolved.scored : [],
+      outs: resolved.outs,
+      unearned: s.weBat ? 0 : Math.min(clamp(input.unearned, 0, 4), resolved.runs),
+      pitches: resolved.outs + s.outs === 3 ? live.pitches : 0,
+      play_details: resolved.details,
+    };
+  } else if (input.kind === "bases") {
+    const details = parsePlayDetails(input.details);
+    if (!details?.snapshot || details.moves.length) return { error: "Choose the players on base." };
+    if (s.weBat) {
+      const { data: members } = await g.supabase
+        .from("org_memberships")
+        .select("profile_id")
+        .eq("org_id", g.org.id)
+        .eq("role", "player");
+      const players = new Set((members ?? []).map((m) => m.profile_id));
+      if (Object.values(details.snapshot).some((id) => !players.has(id)))
+        return { error: "Select players from this team's roster." };
+    } else if (Object.values(details.snapshot).some((id) => !/^opponent:[a-zA-Z0-9:-]+$/.test(id)))
+      return { error: "Choose the opponent's occupied bases." };
+    row = { ...base, kind: "bases", play_details: details };
   } else if (input.kind === "sub") {
     if (!input.playerId || !UUID.test(input.playerId)) return { error: "Pick the player." };
     if (input.slot) {
@@ -277,8 +381,10 @@ async function insertPlay(
       };
       // Keep the batter's count, bank the outgoing pitches on this change,
       // and start a fresh pitch segment for the incoming pitcher.
-      live.pitches = 0;
-      live.pitchHistory = [];
+      if (!s.weBat) {
+        live.pitches = 0;
+        live.pitchHistory = [];
+      }
     }
   } else if (input.kind === "half_end") {
     row = {
@@ -315,21 +421,27 @@ export async function undoLastPlay(gameId: string): Promise<R> {
   if (!g.live) return {};
   const { data: last } = await g.supabase
     .from("game_plays")
-    .select("id, kind, slot, pitches")
+    .select("id, kind, slot, pitches, we_bat, outs")
     .eq("game_id", gameId)
     .order("seq", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (!last) return { error: "Nothing to undo." };
-  const pitchingChange = last.kind === "sub" && last.slot == null;
+  const pitchingChange = last.kind === "sub" && last.slot == null && !last.we_bat;
+  const preservesCount =
+    last.kind === "bases" ||
+    (last.kind === "sub" && !pitchingChange) ||
+    (last.kind === "runner" && last.pitches === 0);
   if (pitchingChange && g.live.pitches > 0) {
     return { error: "Remove the incoming pitcher's pitches before undoing the pitching change." };
   }
   const { error } = await g.supabase.from("game_plays").delete().eq("id", last.id);
   if (error) return { error: error.message };
-  const live = pitchingChange
-    ? { ...g.live, pitches: last.pitches, pitchHistory: [] }
-    : { ...g.live, balls: 0, strikes: 0, pitches: 0, pitchHistory: [] };
+  const live = preservesCount
+    ? { ...g.live }
+    : pitchingChange
+      ? { ...g.live, pitches: last.pitches, pitchHistory: [] }
+      : { ...g.live, balls: 0, strikes: 0, pitches: 0, pitchHistory: [] };
   const res = await sync(g.supabase, gameId, live);
   refresh(gameId);
   return res;

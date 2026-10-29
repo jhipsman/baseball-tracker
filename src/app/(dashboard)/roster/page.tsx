@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Roster" };
 
 export default async function RosterOverviewPage({ searchParams }: PageProps<"/roster">) {
-  const { supabase, org, isStaff } = await requireActiveOrg();
+  const { supabase, org, isStaff, membership } = await requireActiveOrg();
   if (!isStaff) redirect("/roster/manage");
   const { today } = await playerToday();
   const params = await searchParams;
@@ -60,6 +60,15 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
           {group ? ` in ${group.name}` : ""}
         </p>
       </div>
+
+      {membership.role === "admin" && (
+        <Link
+          href="/imports"
+          className="block rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800"
+        >
+          Bring over a roster, schedule, or historical stats →
+        </Link>
+      )}
 
       {team.groups.length > 0 ? (
         <div className="flex flex-wrap gap-2 text-sm">

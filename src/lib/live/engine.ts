@@ -3,9 +3,10 @@
  * situation (inning, outs, batter up), line score, and box score are all
  * derived from it, so undo is just dropping the last play.
  */
+import type { Bases, PlayDetails } from "./runners";
 
 export type Half = "top" | "bottom";
-export type PlayKind = "pa" | "steal" | "sub" | "half_end";
+export type PlayKind = "pa" | "steal" | "sub" | "half_end" | "runner" | "bases";
 export type Result =
   | "1B"
   | "2B"
@@ -45,6 +46,7 @@ export type Play = {
   /** PA pitches; on a pitching substitution, the outgoing pitcher's pending segment. */
   pitches: number;
   outs: number;
+  details?: PlayDetails | null;
 };
 
 /** Scorer setup plus the in-progress count (stored in games.live_state). */
@@ -117,6 +119,8 @@ export type Situation = {
   us: number;
   them: number;
   lineScore: { us: number; them: number }[];
+  bases: Bases;
+  basesKnown: boolean;
 };
 
 export function situation(setup: LiveSetup, plays: Play[]): Situation {
@@ -131,13 +135,28 @@ export function situation(setup: LiveSetup, plays: Play[]): Situation {
     us: 0,
     them: 0,
     lineScore: [{ us: 0, them: 0 }],
+    bases: {},
+    basesKnown: true,
   };
   const ordered = [...plays].sort((a, b) => a.seq - b.seq);
   for (const p of ordered) {
+    if (p.kind === "bases" && p.details?.snapshot) {
+      s.bases = { ...p.details.snapshot };
+      s.basesKnown = true;
+      continue;
+    }
     if (p.kind === "sub") {
       if (p.slot && p.batterId && p.slot <= s.lineup.length) s.lineup[p.slot - 1] = p.batterId;
       else if (p.pitcherId) s.pitcherId = p.pitcherId;
       continue;
+    }
+    if (p.details) {
+      s.bases = {};
+      for (const move of p.details.moves) {
+        if (typeof move.to === "number") s.bases[move.to] = move.id;
+      }
+    } else if (p.kind === "pa" || p.kind === "steal" || p.kind === "runner") {
+      s.basesKnown = false;
     }
     if (p.kind === "pa" && p.weBat && s.lineup.length) {
       s.batterIdx = (s.batterIdx + 1) % s.lineup.length;
@@ -154,6 +173,8 @@ export function situation(setup: LiveSetup, plays: Play[]): Situation {
     }
     s.outs = p.kind === "half_end" ? 3 : s.outs + p.outs;
     if (s.outs >= 3) {
+      s.bases = {};
+      s.basesKnown = true;
       s.outs = 0;
       s.weBat = !s.weBat;
       if (s.half === "top") s.half = "bottom";
@@ -265,7 +286,7 @@ export function deriveBox(setup: LiveSetup, plays: Play[], inProgressPitches = 0
       for (const id of p.scored) bat(id).r += 1;
       if (!p.batterId) continue;
       const l = bat(p.batterId);
-      if (p.kind === "steal") {
+      if (p.kind === "steal" || p.kind === "runner") {
         if (p.result === "SB") l.sb += 1;
         if (p.result === "CS") l.cs += 1;
         continue;
@@ -313,8 +334,9 @@ export function deriveBox(setup: LiveSetup, plays: Play[], inProgressPitches = 0
     if (sit.outs >= 3) sit.outs = 0;
   }
 
-  const current = situation(setup, plays).pitcherId;
-  if (current && inProgressPitches) pit(current).pitches += inProgressPitches;
+  const current = situation(setup, plays);
+  if (!current.weBat && current.pitcherId && inProgressPitches)
+    pit(current.pitcherId).pitches += inProgressPitches;
 
   return { batting: [...batting.values()], pitching: [...pitching.values()] };
 }
@@ -341,6 +363,25 @@ export function describePlay(p: Play, name: (id: string | null) => string) {
   }
   if (p.kind === "half_end") {
     return `${p.weBat ? "We" : "They"} scored ${p.runs} · side retired`;
+  }
+  if (p.kind === "bases") return "Baserunners updated";
+  if (p.kind === "runner") {
+    const reason = p.details?.reason;
+    const runner = p.details?.moves.find((m) => m.to !== m.from);
+    const who = runner && p.weBat ? name(runner.id) : "Runner";
+    const what =
+      reason === "stolen_base"
+        ? "stole a base"
+        : reason === "caught_stealing"
+          ? "caught stealing"
+          : reason === "wild_pitch"
+            ? "advanced on a wild pitch"
+            : reason === "passed_ball"
+              ? "advanced on a passed ball"
+              : reason === "out"
+                ? "out on the bases"
+                : "advanced";
+    return `${who} ${what}${runs}`;
   }
   if (p.kind === "steal") {
     return p.result === "CS"

@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/types/database";
 import type { Half, LiveSetup, Play, Result } from "./engine";
 import { parsePitchHistory } from "./pitch-count";
+import { parsePlayDetails } from "./runners";
 
 type Client = SupabaseClient<Database>;
 
@@ -44,7 +45,7 @@ export function parseLiveState(raw: Json | null): LiveState | null {
 }
 
 const PLAY_COLUMNS =
-  "seq, inning, half, we_bat, kind, batter_id, pitcher_id, slot, result, rbi, runs, unearned, scored, pitches, outs";
+  "seq, inning, half, we_bat, kind, batter_id, pitcher_id, slot, result, rbi, runs, unearned, scored, pitches, outs, play_details";
 
 type PlayRow = {
   seq: number;
@@ -62,6 +63,7 @@ type PlayRow = {
   scored: string[];
   pitches: number;
   outs: number;
+  play_details?: Json | null;
 };
 
 export const toPlay = (r: PlayRow): Play => ({
@@ -80,6 +82,7 @@ export const toPlay = (r: PlayRow): Play => ({
   scored: r.scored ?? [],
   pitches: r.pitches,
   outs: r.outs,
+  details: parsePlayDetails(r.play_details),
 });
 
 /** The game's plays visible to the viewer (RLS applies the team's stats privacy). */

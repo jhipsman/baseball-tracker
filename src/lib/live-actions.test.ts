@@ -266,12 +266,101 @@ describe("live pitch persistence", () => {
     },
   );
 
-  it("rejects pitches while batting and invalid pitch kinds without changing workload", async () => {
+  it("counts opposing pitches while batting without crediting our pitcher", async () => {
     setCount({ weBatFirst: true });
-    expect(await recordPitch(GAME, "ball")).toHaveProperty("error");
-    setCount({ weBatFirst: false });
+    expect(await recordPitch(GAME, "ball")).toEqual({});
+    expect(db.live.pitches).toBe(1);
+    expect(db.live.balls).toBe(1);
+    expect(db.box.every((p: { pitches: number }) => p.pitches === 0)).toBe(true);
+  });
+  it("rejects invalid pitch kinds without changing workload", async () => {
     expect(await recordPitch(GAME, "invalid" as PitchKind)).toHaveProperty("error");
     expect(db.rpc).not.toHaveBeenCalled();
     expect(db.live.pitches).toBe(0);
+  });
+});
+
+describe("diamond play persistence", () => {
+  it("derives totals from runner outcomes and rejects stale confirmations", async () => {
+    setCount({ weBatFirst: true });
+    expect(
+      await recordPlay(GAME, {
+        kind: "pa",
+        result: "HR",
+        expectedSeq: 0,
+        runs: 4,
+        rbi: 4,
+        details: { version: 1, moves: [{ id: BATTER, from: 0, to: "home" }] },
+      }),
+    ).toEqual({});
+    expect(db.plays[0]).toMatchObject({
+      runs: 1,
+      rbi: 1,
+      scored: [BATTER],
+      play_details: { version: 1, moves: [{ id: BATTER, from: 0, to: "home" }] },
+    });
+    expect(await recordPlay(GAME, { kind: "pa", result: "K", expectedSeq: 0 })).toHaveProperty(
+      "error",
+    );
+    expect(db.plays).toHaveLength(1);
+  });
+  it("counts the contact pitch once on confirmation and not on rejected outcomes", async () => {
+    setCount({ weBatFirst: true, pitches: 5 });
+    expect(
+      await recordPlay(GAME, {
+        kind: "pa",
+        result: "1B",
+        addPitch: true,
+        details: { version: 1, moves: [] },
+      }),
+    ).toHaveProperty("error");
+    expect(db.live.pitches).toBe(5);
+    expect(
+      await recordPlay(GAME, {
+        kind: "pa",
+        result: "1B",
+        addPitch: true,
+        details: { version: 1, moves: [{ id: BATTER, from: 0, to: 1 }] },
+      }),
+    ).toEqual({});
+    expect(db.plays[0].pitches).toBe(6);
+    expect(db.live.pitches).toBe(0);
+    expect(db.box.every((p) => p.pitches === 0)).toBe(true);
+  });
+  it("persists opponent base correction and undo without changing the count", async () => {
+    setCount({ balls: 2, strikes: 1, pitches: 5 });
+    expect(
+      await recordPlay(GAME, {
+        kind: "bases",
+        details: { version: 1, moves: [], snapshot: { 1: "opponent:base:1:1" } },
+      }),
+    ).toEqual({});
+    expect(db.live).toMatchObject({ balls: 2, strikes: 1, pitches: 5 });
+    expect(await undoLastPlay(GAME)).toEqual({});
+    expect(db.live).toMatchObject({ balls: 2, strikes: 1, pitches: 5 });
+    expect(db.plays).toHaveLength(0);
+  });
+  it("records a caught stealing third out and keeps the completed PA pending workload", async () => {
+    setCount({ balls: 2, strikes: 1, pitches: 5 });
+    await recordPlay(GAME, {
+      kind: "bases",
+      details: { version: 1, moves: [], snapshot: { 1: "opponent:runner" } },
+    });
+    await recordPlay(GAME, { kind: "pa", result: "K" });
+    await recordPlay(GAME, { kind: "pa", result: "K" });
+    await recordPitch(GAME, "ball");
+    expect(
+      await recordPlay(GAME, {
+        kind: "runner",
+        details: {
+          version: 1,
+          reason: "caught_stealing",
+          moves: [{ id: "opponent:runner", from: 1, to: "out" }],
+        },
+      }),
+    ).toEqual({});
+    expect(db.plays.at(-1)).toMatchObject({ outs: 1, result: "CS", pitches: 1 });
+    expect(db.live.pitches).toBe(0);
+    expect(db.box.find((p) => p.player_id === P1)?.outs).toBe(3);
   });
 });
