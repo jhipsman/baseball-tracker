@@ -15,7 +15,10 @@ import {
   type Result,
 } from "@/lib/live/engine";
 import { loadPlays, parseLiveState, type LiveState, type LiveSummary } from "@/lib/live/data";
+import { updatePitchCount, type PitchKind } from "@/lib/live/pitch-count";
 import type { Json } from "@/types/database";
+
+export type { PitchKind } from "@/lib/live/pitch-count";
 
 type R = { error?: string };
 
@@ -93,7 +96,7 @@ async function sync(
     .eq("game_id", gameId);
   const decisions = new Map((existing ?? []).map((r) => [r.player_id, r.decision]));
 
-  const box = deriveBox(live, plays, 0);
+  const box = deriveBox(live, plays, live.pitches);
   const { error: boxError } = await supabase.rpc("save_box_score", {
     p_game_id: gameId,
     p_batting: box.batting as unknown as Json,
@@ -149,56 +152,27 @@ export async function startLiveScoring(
   return res;
 }
 
-export type PitchKind = "ball" | "called" | "swinging" | "foul" | "plus" | "minus" | "reset";
-
 /** One pitch to the current batter (when we're in the field). Completes walks and strikeouts. */
 export async function recordPitch(gameId: string, kind: PitchKind): Promise<R & { auto?: Result }> {
   const g = await staffGame(gameId);
   if ("error" in g) return { error: g.error };
   if (!g.live) return { error: "Set the lineup first." };
-  const live = { ...g.live };
-  let auto: Result | undefined;
-  if (kind === "reset") {
-    live.balls = 0;
-    live.strikes = 0;
-    live.pitches = 0;
-  } else if (kind === "minus") {
-    live.pitches = Math.max(0, live.pitches - 1);
-  } else {
-    live.pitches = Math.min(40, live.pitches + 1);
-    if (kind === "ball") {
-      if (live.balls >= 3) auto = "BB";
-      else live.balls += 1;
-    } else if (kind === "called" || kind === "swinging") {
-      if (live.strikes >= 2) auto = kind === "called" ? "KL" : "K";
-      else live.strikes += 1;
-    } else if (kind === "foul") {
-      live.strikes = Math.min(2, live.strikes + 1);
-    }
-  }
+  if (g.game.status !== "live") return { error: "Resume live scoring before recording pitches." };
+  const s = situation(g.live, await loadPlays(g.supabase, gameId));
+  if (s.weBat) return { error: "Pitch counts are recorded while our team is in the field." };
+  if (!s.pitcherId) return { error: "Choose who's pitching first." };
+  const update = updatePitchCount(g.live, kind);
+  if ("error" in update) return update;
+  const { live, auto } = update;
   if (auto) {
     const res = await insertPlay(g, live, { kind: "pa", result: auto });
     return { ...res, auto };
   }
-  const { error } = await g.supabase
-    .from("games")
-    .update({
-      live_state: {
-        ...live,
-        summary: g.live.summary
-          ? {
-              ...g.live.summary,
-              balls: live.balls,
-              strikes: live.strikes,
-              pitcherPitches: g.live.summary.pitcherPitches + (live.pitches - g.live.pitches),
-            }
-          : undefined,
-      } as unknown as Json,
-    })
-    .eq("id", gameId);
-  if (error) return { error: error.message };
+  // The existing box-score RPC feeds throwing_logs, so workload updates on
+  // each pitch rather than waiting until the plate appearance is completed.
+  const res = await sync(g.supabase, gameId, live);
   refresh(gameId);
-  return {};
+  return res;
 }
 
 export type PlayInput = {
@@ -287,6 +261,7 @@ async function insertPlay(
       batter_id: s.weBat ? input.playerId : null,
       pitcher_id: s.weBat ? null : s.pitcherId,
       outs: result === "CS" ? 1 : 0,
+      pitches: !s.weBat && result === "CS" && s.outs === 2 ? live.pitches : 0,
     };
   } else if (input.kind === "sub") {
     if (!input.playerId || !UUID.test(input.playerId)) return { error: "Pick the player." };
@@ -294,10 +269,16 @@ async function insertPlay(
       const slot = clamp(input.slot, 1, s.lineup.length);
       row = { ...base, kind: "sub", slot, batter_id: input.playerId };
     } else {
-      row = { ...base, kind: "sub", pitcher_id: input.playerId };
-      live.balls = 0;
-      live.strikes = 0;
+      row = {
+        ...base,
+        kind: "sub",
+        pitcher_id: input.playerId,
+        pitches: s.weBat ? 0 : live.pitches,
+      };
+      // Keep the batter's count, bank the outgoing pitches on this change,
+      // and start a fresh pitch segment for the incoming pitcher.
       live.pitches = 0;
+      live.pitchHistory = [];
     }
   } else if (input.kind === "half_end") {
     row = {
@@ -305,6 +286,7 @@ async function insertPlay(
       kind: "half_end",
       runs: clamp(input.runs, 0, 30),
       pitcher_id: s.weBat ? null : s.pitcherId,
+      pitches: s.weBat ? 0 : live.pitches,
     };
   } else {
     return { error: "Unknown play." };
@@ -316,10 +298,11 @@ async function insertPlay(
       error: error.code === "23505" ? "Someone else just recorded a play. Refresh." : error.message,
     };
   }
-  if (input.kind !== "sub" && input.kind !== "steal") {
+  if (input.kind === "pa" || input.kind === "half_end" || s.outs + Number(row.outs ?? 0) >= 3) {
     live.balls = 0;
     live.strikes = 0;
     live.pitches = 0;
+    live.pitchHistory = [];
   }
   const res = await sync(g.supabase, g.game.id, live);
   refresh(g.game.id);
@@ -332,15 +315,21 @@ export async function undoLastPlay(gameId: string): Promise<R> {
   if (!g.live) return {};
   const { data: last } = await g.supabase
     .from("game_plays")
-    .select("id")
+    .select("id, kind, slot, pitches")
     .eq("game_id", gameId)
     .order("seq", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (!last) return { error: "Nothing to undo." };
+  const pitchingChange = last.kind === "sub" && last.slot == null;
+  if (pitchingChange && g.live.pitches > 0) {
+    return { error: "Remove the incoming pitcher's pitches before undoing the pitching change." };
+  }
   const { error } = await g.supabase.from("game_plays").delete().eq("id", last.id);
   if (error) return { error: error.message };
-  const live = { ...g.live, balls: 0, strikes: 0, pitches: 0 };
+  const live = pitchingChange
+    ? { ...g.live, pitches: last.pitches, pitchHistory: [] }
+    : { ...g.live, balls: 0, strikes: 0, pitches: 0, pitchHistory: [] };
   const res = await sync(g.supabase, gameId, live);
   refresh(gameId);
   return res;
@@ -352,7 +341,8 @@ export async function finishLiveGame(gameId: string): Promise<R> {
   const g = await staffGame(gameId);
   if ("error" in g) return { error: g.error };
   if (!g.live) return { error: "Nothing has been scored yet." };
-  const res = await sync(g.supabase, gameId, { ...g.live, balls: 0, strikes: 0, pitches: 0 });
+  // Keep an unfinished at-bat's pitches (and count for a later resumption).
+  const res = await sync(g.supabase, gameId, g.live);
   if (res.error) return res;
   const { error } = await g.supabase.from("games").update({ status: "final" }).eq("id", gameId);
   if (error) return { error: error.message };

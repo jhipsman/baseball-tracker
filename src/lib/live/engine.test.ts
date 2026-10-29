@@ -160,6 +160,30 @@ describe("box score", () => {
     expect(pitchCount(live, plays, P)).toBe(7);
     expect(deriveBox(live, plays, 3).pitching[0].pitches).toBe(7);
   });
+
+  it("keeps outgoing pitch segments across multiple changes and pitcher re-entry", () => {
+    seq = 0;
+    const plays = [
+      play(false, "pa", { result: "K", pitches: 4 }),
+      play(false, "sub", { pitcherId: P2, pitches: 3 }),
+      play(false, "sub", { pitcherId: P, pitches: 2 }),
+      play(false, "pa", { result: "GO", pitcherId: P, pitches: 1 }),
+    ];
+    const live = { ...setup, pitches: 2 };
+    expect(pitchCount(live, plays, P)).toBe(10);
+    expect(pitchCount(live, plays, P2)).toBe(2);
+    const box = deriveBox(live, plays, live.pitches);
+    expect(box.pitching.find((p) => p.player_id === P)).toMatchObject({ pitches: 10, outs: 2 });
+    expect(box.pitching.find((p) => p.player_id === P2)).toMatchObject({ pitches: 2, outs: 0 });
+  });
+
+  it("does not credit banked pitches to the incoming pitcher", () => {
+    seq = 0;
+    const plays = [play(false, "sub", { pitcherId: P2, pitches: 6 })];
+    expect(pitchCount({ ...setup, pitches: 2 }, plays, P)).toBe(6);
+    expect(pitchCount({ ...setup, pitches: 2 }, plays, P2)).toBe(2);
+    expect(pitchCount(setup, [], "not-in-game")).toBe(0);
+  });
 });
 
 describe("feed text", () => {

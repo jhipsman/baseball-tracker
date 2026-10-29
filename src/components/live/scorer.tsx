@@ -40,6 +40,7 @@ export type ScorerProps = {
   batterIdx: number;
   pitcher: P | null;
   pitches: number;
+  atBatPitches: number;
   balls: number;
   strikes: number;
   smart: SmartStatus;
@@ -253,7 +254,7 @@ export function Scorer(props: ScorerProps) {
               <button
                 key={k}
                 type="button"
-                disabled={pending || !props.pitcher}
+                disabled={pending || props.final || !props.pitcher}
                 onClick={() => pitch(k)}
                 className={cn(
                   "h-12 rounded-xl text-sm font-semibold disabled:opacity-50",
@@ -264,15 +265,51 @@ export function Scorer(props: ScorerProps) {
               </button>
             ))}
           </div>
+          <div className="grid grid-cols-3 gap-2">
+            {(
+              [
+                ["in_play", "In play"],
+                ["foul_bunt", "Foul bunt"],
+                ["foul_tip", "Foul tip"],
+              ] as const
+            ).map(([kind, label]) => (
+              <button
+                key={kind}
+                type="button"
+                disabled={pending || props.final || !props.pitcher}
+                onClick={() => pitch(kind)}
+                className={cn(
+                  "h-12 rounded-xl text-sm font-semibold disabled:opacity-50",
+                  kind === "in_play" ? "bg-brand-100 text-brand-900" : "bg-rose-100 text-rose-900",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-zinc-500">
+            In play adds a pitch; choose the at-bat result below. A foul bunt or foul tip with two
+            strikes records a strikeout.
+          </p>
           <div className="flex gap-3 text-xs text-zinc-500">
-            <button type="button" onClick={() => pitch("minus")} disabled={pending}>
+            <button
+              type="button"
+              onClick={() => pitch("minus")}
+              disabled={pending || props.final || !props.pitcher || props.atBatPitches === 0}
+            >
               −1 pitch
             </button>
-            <button type="button" onClick={() => pitch("reset")} disabled={pending}>
+            <button
+              type="button"
+              onClick={() => pitch("reset")}
+              disabled={pending || props.final || !props.pitcher}
+            >
               Reset count
             </button>
-            <span>Pitch-by-pitch is optional: you can just tap the result.</span>
           </div>
+          <p className="text-xs text-zinc-500">
+            Reset count keeps the pitches already thrown. Pitch-by-pitch is optional.
+          </p>
         </section>
       )}
 

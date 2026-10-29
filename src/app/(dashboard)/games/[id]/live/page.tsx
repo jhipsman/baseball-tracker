@@ -105,6 +105,7 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
         batterIdx={s.batterIdx}
         pitcher={pitcherId ? p(pitcherId) : null}
         pitches={pitches}
+        atBatPitches={live.pitches}
         balls={live.balls}
         strikes={live.strikes}
         smart={status && band ? { ...status, ages: band.ages, dailyMax: band.dailyMax } : null}

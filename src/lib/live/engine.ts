@@ -42,6 +42,7 @@ export type Play = {
   runs: number;
   unearned: number;
   scored: string[];
+  /** PA pitches; on a pitching substitution, the outgoing pitcher's pending segment. */
   pitches: number;
   outs: number;
 };
@@ -54,7 +55,11 @@ export type LiveSetup = {
   balls: number;
   strikes: number;
   pitches: number;
+  /** Count snapshots for pitches recorded during this pitcher's current at-bat. */
+  pitchHistory?: PitchSnapshot[];
 };
+
+export type PitchSnapshot = { balls: number; strikes: number; pitches: number };
 
 export const PA_RESULTS: { key: Result; label: string; long: string }[] = [
   { key: "1B", label: "1B", long: "single" },
@@ -241,12 +246,19 @@ export function deriveBox(setup: LiveSetup, plays: Play[], inProgressPitches = 0
   };
   if (setup.pitcherId) pit(setup.pitcherId);
 
+  let activePitcher = setup.pitcherId;
   for (const p of ordered) {
     if (p.kind === "sub") {
       if (p.slot && p.batterId) {
         const l = bat(p.batterId);
         l.batting_order ??= p.slot;
-      } else if (p.pitcherId) pit(p.pitcherId);
+      } else if (p.pitcherId) {
+        // A mid-at-bat change banks the outgoing pitcher's pitches on the
+        // change, while the eventual PA carries only the incoming pitches.
+        if (activePitcher && p.pitches) pit(activePitcher).pitches += p.pitches;
+        activePitcher = p.pitcherId;
+        pit(p.pitcherId);
+      }
       continue;
     }
     if (p.weBat) {
@@ -309,11 +321,10 @@ export function deriveBox(setup: LiveSetup, plays: Play[], inProgressPitches = 0
 
 /** Pitches thrown so far by a pitcher in this game (including the current at-bat). */
 export function pitchCount(setup: LiveSetup, plays: Play[], pitcherId: string) {
-  const fromPlays = plays
-    .filter((p) => !p.weBat && p.pitcherId === pitcherId)
-    .reduce((n, p) => n + p.pitches, 0);
-  const current = situation(setup, plays).pitcherId;
-  return fromPlays + (current === pitcherId ? setup.pitches : 0);
+  return (
+    deriveBox(setup, plays, setup.pitches).pitching.find((p) => p.player_id === pitcherId)
+      ?.pitches ?? 0
+  );
 }
 
 export const halfLabel = (s: { half: Half; inning: number }) =>

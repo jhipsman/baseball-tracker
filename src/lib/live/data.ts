@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/types/database";
 import type { Half, LiveSetup, Play, Result } from "./engine";
+import { parsePitchHistory } from "./pitch-count";
 
 type Client = SupabaseClient<Database>;
 
@@ -37,6 +38,7 @@ export function parseLiveState(raw: Json | null): LiveState | null {
     balls: int(r.balls, 3),
     strikes: int(r.strikes, 2),
     pitches: int(r.pitches, 40),
+    pitchHistory: parsePitchHistory(r.pitchHistory),
     summary: (r.summary as LiveSummary | undefined) ?? undefined,
   };
 }
