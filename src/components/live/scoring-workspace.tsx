@@ -272,8 +272,8 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
         {pending ? "Saving…" : notice}
       </div>
       {tab === "score" && (
-        <div className={styles.scoringGrid}>
-          <div>
+        <div className={`${styles.scoringGrid} ${draft ? styles.building : ""}`}>
+          <div className={styles.fieldColumn}>
             <BaseballDiamond
               bases={previewBases}
               known={p.basesKnown}
@@ -331,16 +331,22 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
               >
                 {p.smart.over ? (
                   <b>
+                    <span className={styles.smartIcon} aria-hidden="true">
+                      ⛔
+                    </span>
                     Over the Pitch Smart daily max ({p.smart.dailyMax}, ages {p.smart.ages}).
                   </b>
                 ) : (
                   <>
+                    <span className={styles.smartIcon} aria-hidden="true">
+                      {p.smart.untilMoreRest != null && p.smart.untilMoreRest <= 5 ? "⚠" : "✓"}
+                    </span>
                     {p.smart.left} left today (max {p.smart.dailyMax}).{" "}
                     {p.smart.restNow === 0
-                      ? "No rest needed if he stops now."
+                      ? "Stop now: no rest needed."
                       : `Stop now: ${p.smart.restNow} day${p.smart.restNow === 1 ? "" : "s"} rest.`}{" "}
                     {p.smart.untilMoreRest != null ? (
-                      <b>
+                      <b className={styles.smartNext}>
                         {p.smart.untilMoreRest} more → {p.smart.restAfterNext} day
                         {p.smart.restAfterNext === 1 ? "" : "s"} rest.
                       </b>
@@ -614,9 +620,12 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
                 <div className={styles.atBat}>
                   <small>NOW BATTING{p.weBat ? ` · #${p.batterIdx + 1}` : ""}</small>
                   <h3>{batterName}</h3>
-                  <p>
-                    {p.balls} balls · {p.strikes} strikes{" "}
-                    <span>{p.atBatPitches} pitches this at-bat</span>
+                  <p aria-live="polite">
+                    {p.balls} ball{p.balls === 1 ? "" : "s"} · {p.strikes} strike
+                    {p.strikes === 1 ? "" : "s"} · {p.outs} out{p.outs === 1 ? "" : "s"}{" "}
+                    <span>
+                      {p.atBatPitches} pitch{p.atBatPitches === 1 ? "" : "es"} this at-bat
+                    </span>
                   </p>
                 </div>
                 {!p.basesKnown && (

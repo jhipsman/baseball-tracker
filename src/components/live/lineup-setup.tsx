@@ -55,7 +55,7 @@ export function LineupSetup({
                   type="button"
                   aria-label={`Move ${name(id)} up`}
                   onClick={() => move(i, -1)}
-                  className="size-9 rounded-md text-zinc-600 hover:bg-zinc-100"
+                  className="size-11 rounded-md text-zinc-600 hover:bg-zinc-100"
                 >
                   ↑
                 </button>
@@ -63,7 +63,7 @@ export function LineupSetup({
                   type="button"
                   aria-label={`Move ${name(id)} down`}
                   onClick={() => move(i, 1)}
-                  className="size-9 rounded-md text-zinc-600 hover:bg-zinc-100"
+                  className="size-11 rounded-md text-zinc-600 hover:bg-zinc-100"
                 >
                   ↓
                 </button>
@@ -71,7 +71,7 @@ export function LineupSetup({
                   type="button"
                   aria-label={`Remove ${name(id)}`}
                   onClick={() => setLineup((l) => l.filter((x) => x !== id))}
-                  className="size-9 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700"
+                  className="size-11 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700"
                 >
                   ✕
                 </button>
@@ -86,7 +86,7 @@ export function LineupSetup({
                 key={p.id}
                 type="button"
                 onClick={() => setLineup((l) => [...l, p.id])}
-                className="h-10 rounded-full bg-white px-3 text-sm font-medium ring-1 ring-zinc-300 hover:bg-zinc-50"
+                className="h-11 rounded-full bg-white px-4 text-sm font-medium ring-1 ring-zinc-300 hover:bg-zinc-50"
               >
                 + {p.name}
               </button>
