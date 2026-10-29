@@ -6,27 +6,21 @@ import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
 import { ROLE_LABELS } from "@/constants";
+import { COACH_SECTIONS, visibleTabs } from "@/constants/sections";
 import { NotificationBell } from "@/components/notifications/bell";
 import { redirect } from "next/navigation";
-
-const NAV: NavItem[] = [
-  { href: "/", label: "Dashboard" },
-  { href: "/exercises", label: "Exercises" },
-  { href: "/programs", label: "Programs" },
-  { href: "/roster", label: "Roster" },
-  { href: "/calendar", label: "Calendar" },
-  { href: "/games", label: "Games" },
-  { href: "/stats", label: "Stats" },
-  { href: "/throwing", label: "Throwing" },
-  { href: "/videos", label: "Videos" },
-  { href: "/practices", label: "Practices" },
-  { href: "/messages", label: "Messages" },
-];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, org, membership, memberships, isStaff } = await requireActiveOrg();
   if (membership.role === "parent") redirect("/parent");
   const { tz } = await playerToday();
+  const nav: NavItem[] = COACH_SECTIONS.flatMap((section) => {
+    const tabs = visibleTabs(section, org.modules);
+    return tabs.length
+      ? [{ href: tabs[0].href, label: section.label, match: tabs.map((t) => t.href) }]
+      : [];
+  });
+  if (membership.role === "admin") nav.push({ href: "/settings", label: "Settings" });
 
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
@@ -55,7 +49,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </p>
             <SeasonToggle phase={org.current_season_phase} editable={isStaff} />
           </div>
-          <NavLinks items={NAV} />
+          <NavLinks items={nav} />
           <div className="mt-auto hidden border-t border-zinc-200 pt-4 md:block">
             <p className="truncate text-xs text-zinc-500">{user.email}</p>
             <form action={signOut}>

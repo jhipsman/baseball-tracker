@@ -7,7 +7,6 @@ import { loadTeam } from "@/lib/team";
 import { latestByPlayer, loadAssessments } from "@/lib/assessments";
 import { METRICS, METRIC_BY_KEY } from "@/constants/metrics";
 import { cn } from "@/lib/utils";
-import { RosterTabs } from "../tabs";
 import { TestingForm } from "./testing-form";
 
 export const metadata: Metadata = { title: "Testing day" };
@@ -50,7 +49,6 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
         <p className="mt-1 text-sm text-zinc-600">
           Enter a whole team&apos;s results at once. Leave a box blank to skip it.
         </p>
-        <RosterTabs active="testing" />
       </div>
 
       <div className="space-y-3">

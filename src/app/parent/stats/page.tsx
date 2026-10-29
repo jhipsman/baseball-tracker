@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { pickChild, requireParent } from "@/lib/parent";
 import { MyStats } from "@/components/stats/my-stats";
-import { ChildSwitcher, NoLinkedPlayer } from "../parent-ui";
+import { ChildSwitcher, NoLinkedPlayer, ParentSectionTabs } from "../parent-ui";
 
 export const metadata: Metadata = { title: "Stats" };
 
 export default async function ParentStatsPage({ searchParams }: PageProps<"/parent/stats">) {
   const sp = await searchParams;
-  const { children: kids } = await requireParent();
+  const { org, children: kids } = await requireParent();
   const child = pickChild(kids, sp.player);
   if (!child) return <NoLinkedPlayer />;
 
@@ -16,6 +16,13 @@ export default async function ParentStatsPage({ searchParams }: PageProps<"/pare
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">{child.firstName}&apos;s stats</h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent/stats" />
+        <ParentSectionTabs
+          section="progress"
+          active="/parent/stats"
+          modules={org.modules}
+          kids={kids}
+          child={child}
+        />
       </div>
       <MyStats
         playerId={child.id}

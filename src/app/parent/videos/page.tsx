@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { pickChild, requireParent } from "@/lib/parent";
 import { loadVideos } from "@/lib/videos";
 import { VideoGrid } from "@/components/video/video-grid";
-import { ChildSwitcher, NoLinkedPlayer, PrivacyNote } from "../parent-ui";
+import { ChildSwitcher, NoLinkedPlayer, PrivacyNote, ParentSectionTabs } from "../parent-ui";
 
 export const metadata: Metadata = { title: "Videos" };
 
@@ -23,6 +23,13 @@ export default async function ParentVideosPage({ searchParams }: PageProps<"/par
           Videos the coach has reviewed, with drawings, notes, and feedback.
         </p>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent/videos" />
+        <ParentSectionTabs
+          section="progress"
+          active="/parent/videos"
+          modules={org.modules}
+          kids={kids}
+          child={child}
+        />
       </div>
       <VideoGrid
         videos={videos}

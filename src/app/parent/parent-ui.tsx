@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Child } from "@/lib/parent";
 import { cn } from "@/lib/utils";
+import { hasModule, type ModuleKey } from "@/constants/modules";
+import { PillTabs } from "@/components/layout/pill-tabs";
 
 /** Pill links to switch between linked players (only when there's more than one). */
 export function ChildSwitcher({
@@ -112,5 +114,39 @@ export function StatusChip({ status }: { status: keyof typeof STATUS_CHIP }) {
     >
       {s.label}
     </span>
+  );
+}
+
+/** Sub-tabs inside the parent's Schedule and Progress tabs (keeps ?player=). */
+export function ParentSectionTabs({
+  section,
+  active,
+  modules,
+  kids,
+  child,
+}: {
+  section: "schedule" | "progress";
+  active: string;
+  modules: string[];
+  kids: Child[];
+  child: Child;
+}) {
+  const on = (key: ModuleKey) => hasModule(modules, key);
+  const tabs =
+    section === "schedule"
+      ? [
+          { href: "/parent/schedule", label: "Next 2 weeks" },
+          ...(on("games") ? [{ href: "/parent/games", label: "Games & results" }] : []),
+        ]
+      : [
+          ...(on("games") ? [{ href: "/parent/stats", label: "Stats" }] : []),
+          ...(on("videos") ? [{ href: "/parent/videos", label: "Videos" }] : []),
+        ];
+  return (
+    <PillTabs
+      label={section === "schedule" ? "Schedule" : "Progress"}
+      active={active}
+      tabs={tabs.map((t) => ({ ...t, href: withPlayer(t.href, kids, child) }))}
+    />
   );
 }

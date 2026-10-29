@@ -31,7 +31,7 @@ export default async function ParentLayout({ children }: { children: React.React
       </header>
       <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-24">{children}</main>
       <Suspense>
-        <ParentNav />
+        <ParentNav modules={org.modules} />
       </Suspense>
     </div>
   );

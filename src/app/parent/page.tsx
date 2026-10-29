@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { loadChildEntries, loadChildPractices, pickChild, requireParent } from "@/lib/parent";
+import { hasModule, type ModuleKey } from "@/constants/modules";
 import { NextPracticeCard } from "@/components/practice/next-practice-card";
 import { loadNextGame, loadPlayerGroupIds } from "@/lib/games";
 import { NextGameCard } from "@/components/games/game-ui";
@@ -68,6 +69,7 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
     ),
   ]);
 
+  const has = (key: ModuleKey) => hasModule(org.modules, key);
   const name = child.firstName;
   const c28 = complianceOf(entries.filter((e) => e.date >= from28 && e.date <= today));
   const week = entries.filter((e) => e.date >= weekStart && e.date <= weekEnd);
@@ -95,11 +97,11 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         <ChildSwitcher kids={kids} selected={child} basePath="/parent" />
       </div>
 
-      {nextGame ? (
+      {has("games") && nextGame ? (
         <NextGameCard game={nextGame} today={today} href={href(`/parent/games/${nextGame.id}`)} />
       ) : null}
 
-      {nextPractice ? (
+      {has("practices") && nextPractice ? (
         <NextPracticeCard
           practice={nextPractice}
           today={today}
@@ -107,7 +109,7 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         />
       ) : null}
 
-      {painAlert ? (
+      {has("health") && painAlert ? (
         <section
           role="alert"
           className="rounded-2xl bg-red-50 p-4 text-red-950 ring-1 ring-red-200"
@@ -197,92 +199,100 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         ) : null}
       </Card>
 
-      <Card title="Throwing & arm health">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm text-zinc-600">Pitching today</p>
-          <AvailabilityBadge a={avail} />
-        </div>
-        {avail.state === "unknown_age" ? (
-          <p className="text-xs text-zinc-500">
-            Ask the coach to add {name}&apos;s birthday so pitch limits and rest days can be checked
-            for their age.
-          </p>
-        ) : null}
-        {latestFeel ? (
-          <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
-            Last arm check: <ArmFeelChip feel={latestFeel.armFeel} />
-            <span className="text-xs text-zinc-500">{fmtDay(latestFeel.date)}</span>
-          </p>
-        ) : null}
-        <AlertList alerts={otherAlerts} />
-        {recentPitching.length > 0 ? (
-          <div>
-            <p className="text-sm font-medium text-zinc-700">Recent pitch counts</p>
-            <ul className="mt-1 divide-y divide-zinc-100 text-sm">
-              {recentPitching.map((r) => (
-                <li key={r.id} className="flex items-center gap-3 py-1.5">
-                  <span className="w-24 shrink-0 text-zinc-500 tabular-nums">{fmtDay(r.date)}</span>
-                  <span className="flex-1">{THROW_TYPE_LABEL[r.type]}</span>
-                  <span className="font-semibold tabular-nums">{r.pitches} pitches</span>
+      {has("health") ? (
+        <Card title="Throwing & arm health">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm text-zinc-600">Pitching today</p>
+            <AvailabilityBadge a={avail} />
+          </div>
+          {avail.state === "unknown_age" ? (
+            <p className="text-xs text-zinc-500">
+              Ask the coach to add {name}&apos;s birthday so pitch limits and rest days can be
+              checked for their age.
+            </p>
+          ) : null}
+          {latestFeel ? (
+            <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
+              Last arm check: <ArmFeelChip feel={latestFeel.armFeel} />
+              <span className="text-xs text-zinc-500">{fmtDay(latestFeel.date)}</span>
+            </p>
+          ) : null}
+          <AlertList alerts={otherAlerts} />
+          {recentPitching.length > 0 ? (
+            <div>
+              <p className="text-sm font-medium text-zinc-700">Recent pitch counts</p>
+              <ul className="mt-1 divide-y divide-zinc-100 text-sm">
+                {recentPitching.map((r) => (
+                  <li key={r.id} className="flex items-center gap-3 py-1.5">
+                    <span className="w-24 shrink-0 text-zinc-500 tabular-nums">
+                      {fmtDay(r.date)}
+                    </span>
+                    <span className="flex-1">{THROW_TYPE_LABEL[r.type]}</span>
+                    <span className="font-semibold tabular-nums">{r.pitches} pitches</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p className="text-sm text-zinc-500">No pitching logged in the last 60 days.</p>
+          )}
+
+          <details className="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
+            <summary className="cursor-pointer text-sm font-semibold text-brand-800">
+              Log a game pitch count or arm check-in
+            </summary>
+            <p className="mt-2 text-sm text-zinc-600">
+              Pitched for a travel or other team? Add it here. Pitch Smart limits count{" "}
+              <strong>every</strong> game, so the coach needs the full picture to plan safe rest
+              days. The coach sees what you log.
+            </p>
+            <div className="mt-3">
+              <ThrowLogForm key={child.id} forPlayerId={child.id} defaultType="game" compact />
+            </div>
+          </details>
+          <p className="text-xs text-zinc-500">{PITCH_SMART_NOTE}</p>
+        </Card>
+      ) : null}
+
+      {has("videos") ? (
+        <Card
+          title="Coach feedback on videos"
+          action={
+            <Link href={href("/parent/videos")} className="text-sm font-medium text-brand-700">
+              All videos →
+            </Link>
+          }
+        >
+          {!videos || videos.length === 0 ? (
+            <p className="text-sm text-zinc-600">
+              No reviewed videos yet. When the coach reviews one of {name}&apos;s videos, the
+              feedback shows up here.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {videos.map((v) => (
+                <li key={v.id}>
+                  <Link
+                    href={`/parent/videos/${v.id}`}
+                    className="block rounded-xl p-3 ring-1 ring-zinc-200 hover:ring-brand-500"
+                  >
+                    <p className="font-medium">{v.title}</p>
+                    <p className="text-xs text-zinc-500">
+                      {VIDEO_TYPE_LABEL[v.video_type]} ·{" "}
+                      {fmtDay((v.reviewed_at ?? v.created_at).slice(0, 10))}
+                    </p>
+                    {v.review_summary ? (
+                      <p className="mt-1 line-clamp-3 text-sm text-zinc-700">
+                        “{v.review_summary}”
+                      </p>
+                    ) : null}
+                  </Link>
                 </li>
               ))}
             </ul>
-          </div>
-        ) : (
-          <p className="text-sm text-zinc-500">No pitching logged in the last 60 days.</p>
-        )}
-
-        <details className="rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200">
-          <summary className="cursor-pointer text-sm font-semibold text-brand-800">
-            Log a game pitch count or arm check-in
-          </summary>
-          <p className="mt-2 text-sm text-zinc-600">
-            Pitched for a travel or other team? Add it here. Pitch Smart limits count{" "}
-            <strong>every</strong> game, so the coach needs the full picture to plan safe rest days.
-            The coach sees what you log.
-          </p>
-          <div className="mt-3">
-            <ThrowLogForm key={child.id} forPlayerId={child.id} defaultType="game" compact />
-          </div>
-        </details>
-        <p className="text-xs text-zinc-500">{PITCH_SMART_NOTE}</p>
-      </Card>
-
-      <Card
-        title="Coach feedback on videos"
-        action={
-          <Link href={href("/parent/videos")} className="text-sm font-medium text-brand-700">
-            All videos →
-          </Link>
-        }
-      >
-        {!videos || videos.length === 0 ? (
-          <p className="text-sm text-zinc-600">
-            No reviewed videos yet. When the coach reviews one of {name}&apos;s videos, the feedback
-            shows up here.
-          </p>
-        ) : (
-          <ul className="space-y-2">
-            {videos.map((v) => (
-              <li key={v.id}>
-                <Link
-                  href={`/parent/videos/${v.id}`}
-                  className="block rounded-xl p-3 ring-1 ring-zinc-200 hover:ring-brand-500"
-                >
-                  <p className="font-medium">{v.title}</p>
-                  <p className="text-xs text-zinc-500">
-                    {VIDEO_TYPE_LABEL[v.video_type]} ·{" "}
-                    {fmtDay((v.reviewed_at ?? v.created_at).slice(0, 10))}
-                  </p>
-                  {v.review_summary ? (
-                    <p className="mt-1 line-clamp-3 text-sm text-zinc-700">“{v.review_summary}”</p>
-                  ) : null}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+          )}
+        </Card>
+      ) : null}
 
       <Card title="Testing numbers">
         {metrics.length === 0 ? (

@@ -3,7 +3,7 @@ import { pickChild, requireParent } from "@/lib/parent";
 import { playerToday } from "@/lib/player";
 import { forGroups, loadGames, loadPlayerGroupIds, loadTournaments } from "@/lib/games";
 import { ScheduleView } from "@/components/games/schedule-view";
-import { ChildSwitcher, NoLinkedPlayer, withPlayer } from "../parent-ui";
+import { ChildSwitcher, NoLinkedPlayer, withPlayer, ParentSectionTabs } from "../parent-ui";
 
 export const metadata: Metadata = { title: "Games" };
 
@@ -25,6 +25,13 @@ export default async function ParentGamesPage({ searchParams }: PageProps<"/pare
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">{child.firstName}&apos;s games</h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent/games" />
+        <ParentSectionTabs
+          section="schedule"
+          active="/parent/games"
+          modules={org.modules}
+          kids={kids}
+          child={child}
+        />
       </div>
       <ScheduleView
         games={forGroups(games, groupIds)}

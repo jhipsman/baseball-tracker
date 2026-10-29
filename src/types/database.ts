@@ -732,6 +732,7 @@ export type Database = {
           created_at: string;
           current_season_phase: Database["public"]["Enums"]["season_phase"];
           id: string;
+          modules: string[];
           name: string;
           owner_id: string;
           plan_tier: Database["public"]["Enums"]["plan_tier"];
@@ -739,11 +740,13 @@ export type Database = {
           slug: string;
           sport: string;
           stats_visibility: string;
+          team_type: string | null;
         };
         Insert: {
           created_at?: string;
           current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
+          modules?: string[];
           name: string;
           owner_id: string;
           plan_tier?: Database["public"]["Enums"]["plan_tier"];
@@ -751,11 +754,13 @@ export type Database = {
           slug: string;
           sport?: string;
           stats_visibility?: string;
+          team_type?: string | null;
         };
         Update: {
           created_at?: string;
           current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
+          modules?: string[];
           name?: string;
           owner_id?: string;
           plan_tier?: Database["public"]["Enums"]["plan_tier"];
@@ -763,6 +768,7 @@ export type Database = {
           slug?: string;
           sport?: string;
           stats_visibility?: string;
+          team_type?: string | null;
         };
         Relationships: [
           {
@@ -1838,6 +1844,7 @@ export type Database = {
           created_at: string;
           current_season_phase: Database["public"]["Enums"]["season_phase"];
           id: string;
+          modules: string[];
           name: string;
           owner_id: string;
           plan_tier: Database["public"]["Enums"]["plan_tier"];
@@ -1845,6 +1852,7 @@ export type Database = {
           slug: string;
           sport: string;
           stats_visibility: string;
+          team_type: string | null;
         };
         SetofOptions: {
           from: "*";

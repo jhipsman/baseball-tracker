@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
+import { hasModule } from "@/constants/modules";
 import { playerToday } from "@/lib/player";
 import { addDays, dayOfWeek, weekStartOf } from "@/lib/schedule";
 import type { CalendarEntry, EntryStatus } from "@/lib/calendar";
@@ -62,9 +63,9 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
 
   const [team, allPractices, allGames, allTournaments] = await Promise.all([
     loadTeam(supabase, org.id, from, to, today),
-    loadPractices(supabase, org.id, from, to),
-    loadGames(supabase, org.id, from, to),
-    loadTournaments(supabase, org.id, { from, to }),
+    hasModule(org.modules, "practices") ? loadPractices(supabase, org.id, from, to) : [],
+    hasModule(org.modules, "games") ? loadGames(supabase, org.id, from, to) : [],
+    hasModule(org.modules, "games") ? loadTournaments(supabase, org.id, { from, to }) : [],
   ]);
   const groups = team.groups;
 

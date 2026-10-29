@@ -40,7 +40,10 @@ export default async function PlayerThrowingPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-semibold tracking-tight">Throwing</h1>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Health</h1>
+        <p className="text-sm text-zinc-600">Throwing &amp; arm care</p>
+      </div>
 
       <section className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
         <div className="flex flex-wrap items-center justify-between gap-2">

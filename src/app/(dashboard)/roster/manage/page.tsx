@@ -6,7 +6,6 @@ import { selectClass } from "@/components/ui/select";
 import { INVITABLE_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { InviteForm } from "../invite-form";
-import { RosterTabs } from "../tabs";
 import { CreateGroupForm } from "../group-form";
 import {
   deleteGroup,
@@ -81,7 +80,6 @@ export default async function RosterPage() {
         <p className="mt-1 text-sm text-zinc-600">
           {members.length} member{members.length === 1 ? "" : "s"} in {org.name}
         </p>
-        {isStaff ? <RosterTabs active="manage" /> : null}
       </div>
 
       {isStaff ? (

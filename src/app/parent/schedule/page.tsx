@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { hasModule } from "@/constants/modules";
 import { loadChildEntries, loadChildPractices, pickChild, requireParent } from "@/lib/parent";
 import { practiceRange } from "@/lib/practices";
 import {
@@ -23,6 +24,7 @@ import {
   PrivacyNote,
   StatusChip,
   withPlayer,
+  ParentSectionTabs,
 } from "../parent-ui";
 
 export const metadata: Metadata = { title: "Schedule" };
@@ -42,8 +44,10 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
   const to = addDays(today, DAYS - 1);
   const [{ entries }, practices, allGames, groupIds] = await Promise.all([
     loadChildEntries(supabase, org.id, child.id, today, to, today),
-    loadChildPractices(supabase, org.id, child.id, today, to),
-    loadGames(supabase, org.id, today, to),
+    hasModule(org.modules, "practices")
+      ? loadChildPractices(supabase, org.id, child.id, today, to)
+      : [],
+    hasModule(org.modules, "games") ? loadGames(supabase, org.id, today, to) : [],
     loadPlayerGroupIds(supabase, child.id),
   ]);
   const games = forGroups(allGames, groupIds);
@@ -66,6 +70,13 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
           Games, practices, and workouts for the next two weeks.
         </p>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent/schedule" />
+        <ParentSectionTabs
+          section="schedule"
+          active="/parent/schedule"
+          modules={org.modules}
+          kids={kids}
+          child={child}
+        />
       </div>
 
       {entries.length === 0 && practices.length === 0 && games.length === 0 ? (

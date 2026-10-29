@@ -9,6 +9,7 @@ import {
 } from "@/lib/player";
 import { DAY_OF_WEEK_LABELS, SESSION_LABELS } from "@/constants";
 import { dayOfWeek } from "@/lib/schedule";
+import { hasModule } from "@/constants/modules";
 import { loadNextPractice } from "@/lib/practices";
 import { NextPracticeCard } from "@/components/practice/next-practice-card";
 import { loadNextGame } from "@/lib/games";
@@ -59,11 +60,11 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
         </p>
       ) : null}
 
-      {nextGame ? (
+      {hasModule(org.modules, "games") && nextGame ? (
         <NextGameCard game={nextGame} today={today} href={`/player/games/${nextGame.id}`} />
       ) : null}
 
-      {nextPractice ? (
+      {hasModule(org.modules, "practices") && nextPractice ? (
         <NextPracticeCard
           practice={nextPractice}
           today={today}

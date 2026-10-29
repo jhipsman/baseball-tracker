@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { hasModule } from "@/constants/modules";
 import { PlayerNav } from "@/components/layout/player-nav";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { requireActiveOrg } from "@/lib/org";
@@ -25,13 +27,17 @@ export default async function PlayerLayout({ children }: { children: React.React
                 Coach view
               </Link>
             ) : null}
-            <MessagesIconLink href="/player/messages" />
+            {hasModule(org.modules, "messages") ? (
+              <MessagesIconLink href="/player/messages" />
+            ) : null}
             <NotificationBell />
           </div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-24">{children}</main>
-      <PlayerNav />
+      <Suspense>
+        <PlayerNav modules={org.modules} />
+      </Suspense>
     </div>
   );
 }

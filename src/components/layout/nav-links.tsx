@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { isUnder } from "@/constants/sections";
 
-export type NavItem = { href: string; label: string; soon?: boolean };
+export type NavItem = { href: string; label: string; soon?: boolean; match?: string[] };
 
 export function NavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
@@ -12,7 +13,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
   return (
     <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
       {items.map((item) => {
-        const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        const active = (item.match ?? [item.href]).some((h) => isUnder(pathname, h));
         if (item.soon) {
           return (
             <span

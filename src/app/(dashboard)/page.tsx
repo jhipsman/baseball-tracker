@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { loadBirthDates, loadThrowing } from "@/lib/throwing";
 import { throwingAlerts } from "@/lib/workload";
 import { pendingVideoCount } from "@/lib/videos";
+import { hasModule } from "@/constants/modules";
 import { formatPracticeDate, loadPractices, practiceRange } from "@/lib/practices";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -83,7 +84,9 @@ export default async function DashboardPage() {
 
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   const stats = [
-    { label: "Videos to review", value: videosToReview, href: "/videos" },
+    ...(hasModule(org.modules, "videos")
+      ? [{ label: "Videos to review", value: videosToReview, href: "/videos" }]
+      : []),
     { label: "Members", value: members.count ?? 0, href: "/roster" },
     { label: "Programs", value: programs.count ?? 0, href: "/programs" },
     { label: "Exercises in library", value: exercises.count ?? 0, href: "/exercises" },
@@ -95,7 +98,7 @@ export default async function DashboardPage() {
         {firstName ? `Welcome, ${firstName}` : "Welcome"}
       </h1>
       <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
-      {nextPractice?.date ? (
+      {hasModule(org.modules, "practices") && nextPractice?.date ? (
         <Link
           href={`/practices/${nextPractice.id}`}
           className="mt-2 inline-block text-sm text-zinc-700 hover:underline"
@@ -109,7 +112,7 @@ export default async function DashboardPage() {
         </Link>
       ) : null}
 
-      {armAlerts.length > 0 ? (
+      {hasModule(org.modules, "health") && armAlerts.length > 0 ? (
         <Link
           href="/throwing"
           className="mt-6 block rounded-xl bg-red-50 p-4 text-sm text-red-900 ring-1 ring-red-200 hover:bg-red-100"

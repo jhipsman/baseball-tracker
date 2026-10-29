@@ -5,6 +5,7 @@ import type { FormState } from "@/lib/auth/actions";
 import { setActiveOrgCookie } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
+import { TEAM_TYPES } from "@/constants/modules";
 
 export async function createOrganization(_prev: FormState, formData: FormData): Promise<FormState> {
   const name = String(formData.get("name") ?? "").trim();
@@ -22,6 +23,15 @@ export async function createOrganization(_prev: FormState, formData: FormData): 
   if (error) {
     if (error.code === "23505") return { error: `The URL "${slug}" is already taken.` };
     return { error: error.message };
+  }
+
+  // Start with the features that fit this kind of team (changeable in Settings).
+  const type = TEAM_TYPES.find((t) => t.key === formData.get("team_type"));
+  if (type) {
+    await supabase
+      .from("organizations")
+      .update({ team_type: type.key, modules: type.modules })
+      .eq("id", org.id);
   }
 
   await setActiveOrgCookie(org.id);

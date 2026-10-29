@@ -9,7 +9,6 @@ import { complianceByPlayer, needsAttention, type Compliance } from "@/lib/compl
 import { latestByPlayer, loadAssessments } from "@/lib/assessments";
 import { formatMetric, METRIC_BY_KEY, ROSTER_METRICS } from "@/constants/metrics";
 import { cn } from "@/lib/utils";
-import { RosterTabs } from "./tabs";
 
 export const metadata: Metadata = { title: "Roster" };
 
@@ -60,7 +59,6 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
           {players.length} player{players.length === 1 ? "" : "s"}
           {group ? ` in ${group.name}` : ""}
         </p>
-        <RosterTabs active="overview" />
       </div>
 
       {team.groups.length > 0 ? (
