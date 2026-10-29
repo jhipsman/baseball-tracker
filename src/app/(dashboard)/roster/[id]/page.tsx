@@ -20,6 +20,7 @@ import { ThrowsChart } from "@/components/throwing/throws-chart";
 import { loadVideos } from "@/lib/videos";
 import { VideoGrid } from "@/components/video/video-grid";
 import { formatSets } from "@/lib/sets-format";
+import { PlayerSeasonLine } from "@/components/stats/player-season-line";
 import {
   AlertList,
   AvailabilityBadge,
@@ -268,6 +269,11 @@ export default async function PlayerProfilePage({
             <AssessmentForm playerId={id} today={today} />
           </div>
         </details>
+      </section>
+
+      <section id="game-stats" className="space-y-3">
+        <h2 className="text-lg font-semibold">Game stats</h2>
+        <PlayerSeasonLine playerId={id} orgId={org.id} href="/stats" />
       </section>
 
       <ParentsSection supabase={supabase} orgId={org.id} playerId={id} />

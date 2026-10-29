@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
 import { signOut } from "@/lib/auth/actions";
 import { ROLE_LABELS } from "@/constants";
@@ -47,7 +48,14 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
+      <div className="flex items-baseline justify-between gap-2">
+        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
+        {membership.role === "player" ? (
+          <Link href="/player/stats" className="text-sm font-semibold text-brand-700">
+            My stats →
+          </Link>
+        ) : null}
+      </div>
 
       <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
         <p className="text-sm text-zinc-500">Consistency, last 28 days</p>

@@ -1,0 +1,30 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { requireActiveOrg } from "@/lib/org";
+import { MyStats } from "@/components/stats/my-stats";
+
+export const metadata: Metadata = { title: "My stats" };
+
+export default async function PlayerStatsPage({ searchParams }: PageProps<"/player/stats">) {
+  const { user, isStaff } = await requireActiveOrg();
+  if (isStaff) redirect("/stats");
+  const sp = await searchParams;
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Link href="/player/profile" className="text-xs font-medium text-zinc-500">
+          ← Profile
+        </Link>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">My stats</h1>
+      </div>
+      <MyStats
+        playerId={user.id}
+        basePath="/player/stats"
+        searchParams={sp}
+        gameHref={(id) => `/player/games/${id}`}
+      />
+    </div>
+  );
+}
