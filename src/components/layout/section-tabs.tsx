@@ -7,16 +7,24 @@ import { activeTab, COACH_SECTIONS, visibleTabs } from "@/constants/sections";
 import { cn } from "@/lib/utils";
 
 /** Tab bar shared by the pages of one coach section (hidden when only one tab is on). */
-export function SectionTabs({ section, modules }: { section: string; modules: string[] }) {
+export function SectionTabs({
+  section,
+  modules,
+  isAdmin = false,
+}: {
+  section: string;
+  modules: string[];
+  isAdmin?: boolean;
+}) {
   const pathname = usePathname();
   const def = COACH_SECTIONS.find((s) => s.key === section);
-  const tabs = def ? visibleTabs(def, modules) : [];
+  const tabs = def ? visibleTabs(def, modules, isAdmin) : [];
   if (tabs.length < 2) return null;
   const active = activeTab(pathname, tabs);
   return (
     <nav
       aria-label={def!.label}
-      className="mb-6 flex max-w-7xl gap-1 overflow-x-auto border-b border-zinc-200 print:hidden"
+      className="relative mb-6 flex max-w-7xl gap-1 overflow-x-auto border-b border-zinc-200 print:hidden"
     >
       {tabs.map((t) => (
         <Link

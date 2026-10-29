@@ -12,7 +12,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
+    <nav className="flex flex-wrap gap-1 md:flex-col md:flex-nowrap">
       {items.map((item) => {
         const active = (item.match ?? [item.href]).some((h) => isUnder(pathname, h));
         if (item.soon) {

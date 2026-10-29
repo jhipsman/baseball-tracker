@@ -9,21 +9,18 @@ const variants: Record<Variant, string> = {
   ghost: "text-zinc-700 hover:bg-zinc-100 disabled:opacity-60",
 };
 
+const base =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 disabled:cursor-not-allowed";
+
+/** Button styling for links (`<Link className={buttonClass("primary")}>`). */
+export function buttonClass(variant: Variant = "primary", className?: string) {
+  return cn(base, variants[variant], className);
+}
+
 export function Button({
   variant = "primary",
   className,
   ...props
 }: React.ComponentProps<"button"> & { variant?: Variant }) {
-  return (
-    <button
-      className={cn(
-        "inline-flex h-11 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-colors",
-        "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600",
-        "disabled:cursor-not-allowed",
-        variants[variant],
-        className,
-      )}
-      {...props}
-    />
-  );
+  return <button className={buttonClass(variant, className)} {...props} />;
 }

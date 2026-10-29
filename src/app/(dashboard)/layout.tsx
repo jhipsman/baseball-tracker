@@ -5,7 +5,7 @@ import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
-import { ROLE_LABELS } from "@/constants";
+import { ROLE_LABELS, SEASON_PHASE_LABELS } from "@/constants";
 import { COACH_SECTIONS, visibleTabs } from "@/constants/sections";
 import { NotificationBell } from "@/components/notifications/bell";
 import { redirect } from "next/navigation";
@@ -15,7 +15,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (membership.role === "parent") redirect("/parent");
   const { tz } = await playerToday();
   const nav: NavItem[] = COACH_SECTIONS.flatMap((section) => {
-    const tabs = visibleTabs(section, org.modules);
+    const tabs = visibleTabs(section, org.modules, membership.role === "admin");
     return tabs.length
       ? [{ href: tabs[0].href, label: section.label, match: tabs.map((t) => t.href) }]
       : [];
@@ -43,12 +43,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {memberships.length > 1 ? (
             <OrgSwitcher orgs={memberships.map((m) => m.org)} activeId={org.id} />
           ) : null}
-          <div className="space-y-1">
-            <p className="text-[11px] font-semibold tracking-wide text-zinc-400 uppercase">
-              Season
-            </p>
+          <div className="hidden space-y-1 md:block">
+            <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">Season</p>
             <SeasonToggle phase={org.current_season_phase} editable={isStaff} />
           </div>
+          {/* Phones: the season takes one line until tapped. */}
+          <details className="group md:hidden">
+            <summary className="flex h-11 cursor-pointer list-none items-center justify-between rounded-lg px-3 text-sm ring-1 ring-zinc-200">
+              <span>
+                Season: <strong>{SEASON_PHASE_LABELS[org.current_season_phase]}</strong>
+              </span>
+              <span aria-hidden className="text-zinc-500 group-open:rotate-180">
+                ▾
+              </span>
+            </summary>
+            <div className="pt-2">
+              <SeasonToggle phase={org.current_season_phase} editable={isStaff} />
+            </div>
+          </details>
           <NavLinks items={nav} />
           <div className="mt-auto hidden border-t border-zinc-200 pt-4 md:block">
             <p className="truncate text-xs text-zinc-500">{user.email}</p>

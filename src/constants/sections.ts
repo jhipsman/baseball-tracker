@@ -1,6 +1,6 @@
 import { hasModule, type ModuleKey } from "@/constants/modules";
 
-export type SectionTab = { href: string; label: string; module?: ModuleKey };
+export type SectionTab = { href: string; label: string; module?: ModuleKey; adminOnly?: boolean };
 export type Section = {
   key: string;
   label: string;
@@ -36,6 +36,7 @@ export const COACH_SECTIONS: Section[] = [
       { href: "/roster/manage", label: "Members & invites" },
       { href: "/roster/testing", label: "Testing day" },
       { href: "/stats", label: "Stats", module: "games" },
+      { href: "/imports", label: "Import", adminOnly: true },
     ],
   },
   {
@@ -58,9 +59,15 @@ export const COACH_SECTIONS: Section[] = [
   },
 ];
 
-export function visibleTabs(section: Section, modules: readonly string[] | null | undefined) {
+export function visibleTabs(
+  section: Section,
+  modules: readonly string[] | null | undefined,
+  isAdmin = false,
+) {
   if (section.module && !hasModule(modules, section.module)) return [];
-  return section.tabs.filter((t) => !t.module || hasModule(modules, t.module));
+  return section.tabs.filter(
+    (t) => (!t.module || hasModule(modules, t.module)) && (!t.adminOnly || isAdmin),
+  );
 }
 
 /** Is `path` at `href` or below it (segment boundary)? */
