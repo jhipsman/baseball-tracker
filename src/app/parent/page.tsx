@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { loadChildEntries, loadChildPractices, pickChild, requireParent } from "@/lib/parent";
 import { NextPracticeCard } from "@/components/practice/next-practice-card";
+import { loadNextGame, loadPlayerGroupIds } from "@/lib/games";
+import { NextGameCard } from "@/components/games/game-ui";
 import { playerToday } from "@/lib/player";
 import { addDays, weekStartOf } from "@/lib/schedule";
 import { complianceOf } from "@/lib/compliance";
@@ -39,29 +41,32 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
   const weekEnd = addDays(weekStart, 6);
   const from28 = addDays(today, -27);
 
-  const [{ entries }, throwing, { data: prof }, { data: videos }, assessments, [nextPractice]] =
-    await Promise.all([
-      loadChildEntries(
-        supabase,
-        org.id,
-        child.id,
-        from28,
-        weekEnd > today ? weekEnd : today,
-        today,
-      ),
-      loadThrowing(supabase, org.id, addDays(today, -60), child.id),
-      supabase.from("profiles").select("birth_date").eq("id", child.id).maybeSingle(),
-      supabase
-        .from("videos")
-        .select("id, title, video_type, reviewed_at, review_summary, created_at")
-        .eq("org_id", org.id)
-        .eq("player_id", child.id)
-        .eq("status", "reviewed")
-        .order("reviewed_at", { ascending: false })
-        .limit(3),
-      loadAssessments(supabase, org.id, child.id),
-      loadChildPractices(supabase, org.id, child.id, today, null, 1),
-    ]);
+  const [
+    { entries },
+    throwing,
+    { data: prof },
+    { data: videos },
+    assessments,
+    [nextPractice],
+    nextGame,
+  ] = await Promise.all([
+    loadChildEntries(supabase, org.id, child.id, from28, weekEnd > today ? weekEnd : today, today),
+    loadThrowing(supabase, org.id, addDays(today, -60), child.id),
+    supabase.from("profiles").select("birth_date").eq("id", child.id).maybeSingle(),
+    supabase
+      .from("videos")
+      .select("id, title, video_type, reviewed_at, review_summary, created_at")
+      .eq("org_id", org.id)
+      .eq("player_id", child.id)
+      .eq("status", "reviewed")
+      .order("reviewed_at", { ascending: false })
+      .limit(3),
+    loadAssessments(supabase, org.id, child.id),
+    loadChildPractices(supabase, org.id, child.id, today, null, 1),
+    loadPlayerGroupIds(supabase, child.id).then((groups) =>
+      loadNextGame(supabase, org.id, today, groups),
+    ),
+  ]);
 
   const name = child.firstName;
   const c28 = complianceOf(entries.filter((e) => e.date >= from28 && e.date <= today));
@@ -89,6 +94,10 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         <h1 className="text-2xl font-semibold tracking-tight">How {name} is doing</h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent" />
       </div>
+
+      {nextGame ? (
+        <NextGameCard game={nextGame} today={today} href={href(`/parent/games/${nextGame.id}`)} />
+      ) : null}
 
       {nextPractice ? (
         <NextPracticeCard

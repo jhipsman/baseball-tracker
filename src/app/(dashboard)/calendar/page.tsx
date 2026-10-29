@@ -8,6 +8,15 @@ import type { CalendarEntry, EntryStatus } from "@/lib/calendar";
 import { loadTeam } from "@/lib/team";
 import { formatClock, loadPractices, parseTime, type PracticeSummary } from "@/lib/practices";
 import { DAY_OF_WEEK_LABELS, SEASON_PHASE_LABELS } from "@/constants";
+import {
+  formatGameTime,
+  gameResult,
+  loadGames,
+  loadTournaments,
+  matchupLabel,
+  type Game,
+  type Tournament,
+} from "@/lib/games";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Calendar" };
@@ -51,9 +60,11 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const from = view === "week" ? weekStartOf(anchor) : weekStartOf(monthStart);
   const to = view === "week" ? addDays(from, 6) : addDays(from, 41);
 
-  const [team, allPractices] = await Promise.all([
+  const [team, allPractices, allGames, allTournaments] = await Promise.all([
     loadTeam(supabase, org.id, from, to, today),
     loadPractices(supabase, org.id, from, to),
+    loadGames(supabase, org.id, from, to),
+    loadTournaments(supabase, org.id, { from, to }),
   ]);
   const groups = team.groups;
 
@@ -64,6 +75,9 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const entries = team.entries.filter((e) => rosterIds.has(e.playerId));
   // Team-wide practices always show; group practices only for that group (or "All players").
   const practices = allPractices.filter((p) => !group || !p.groupId || p.groupId === group.id);
+  const games = allGames.filter((g) => !group || !g.groupId || g.groupId === group.id);
+  const tournaments = allTournaments.filter((t) => !group || !t.groupId || t.groupId === group.id);
+  const events: DayEvents = { games, tournaments };
 
   const href = (patch: Record<string, string | undefined>) => {
     const sp = new URLSearchParams();
@@ -95,6 +109,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
             {practices.length > 0
               ? ` · ${practices.length} practice${practices.length === 1 ? "" : "s"}`
               : ""}
+            {games.length > 0 ? ` · ${games.length} game${games.length === 1 ? "" : "s"}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -168,7 +183,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
 
       <Legend />
 
-      {roster.length === 0 && practices.length === 0 ? (
+      {roster.length === 0 && practices.length === 0 && games.length === 0 ? (
         <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           {group ? `No players in ${group.name} yet.` : "No players on the roster yet."}
         </p>
@@ -179,6 +194,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
           roster={roster}
           entries={entries}
           practices={practices}
+          events={events}
         />
       ) : (
         <MonthGrid
@@ -187,6 +203,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
           today={today}
           entries={entries}
           practices={practices}
+          events={events}
           dayHref={(d) => href({ view: "week", date: d })}
         />
       )}
@@ -212,6 +229,8 @@ function Legend() {
       <li className={cn("rounded px-2 py-0.5 font-medium", PRACTICE_DRAFT_STYLE)}>
         Practice (draft)
       </li>
+      <li className={cn("rounded px-2 py-0.5 font-medium", GAME_STYLE)}>🏟️ Game</li>
+      <li className={cn("rounded px-2 py-0.5 font-medium", TOURNAMENT_STYLE)}>🏆 Tournament</li>
     </ul>
   );
 }
@@ -239,6 +258,65 @@ function PracticePill({ p, compact }: { p: PracticeSummary; compact?: boolean })
   );
 }
 
+const GAME_STYLE = "bg-amber-100 text-amber-950 ring-1 ring-inset ring-amber-300";
+const TOURNAMENT_STYLE = "bg-violet-100 text-violet-900 ring-1 ring-inset ring-violet-300";
+
+type DayEvents = { games: Game[]; tournaments: Tournament[] };
+
+const eventsOn = (ev: DayEvents, d: string) => ({
+  games: ev.games.filter((g) => g.date === d),
+  tournaments: ev.tournaments.filter((t) => t.startDate <= d && t.endDate >= d),
+});
+
+function GamePill({ g, compact }: { g: Game; compact?: boolean }) {
+  const result = gameResult(g);
+  const time = formatGameTime(g.startTime);
+  const off = g.status === "canceled" || g.status === "postponed";
+  return (
+    <Link
+      href={`/games/${g.id}`}
+      data-testid="calendar-game"
+      title={`${matchupLabel(g.homeAway, g.opponent)}${g.groupName ? ` · ${g.groupName}` : ""}${off ? ` · ${g.status}` : ""}`}
+      className={cn(
+        "relative z-10 block truncate rounded px-1.5 py-0.5 font-medium",
+        compact ? "text-[11px]" : "text-xs",
+        GAME_STYLE,
+        off && "line-through opacity-70",
+      )}
+    >
+      {result ? (
+        <span className="mr-1 font-bold">
+          {result} {g.teamScore}–{g.opponentScore}
+        </span>
+      ) : g.status === "live" ? (
+        <span className="mr-1 font-bold text-red-700">LIVE</span>
+      ) : time ? (
+        `${time.replace(" ", "").toLowerCase()} `
+      ) : (
+        "🏟️ "
+      )}
+      {matchupLabel(g.homeAway, g.opponent)}
+    </Link>
+  );
+}
+
+function TournamentPill({ t, compact }: { t: Tournament; compact?: boolean }) {
+  return (
+    <Link
+      href={`/games/tournaments/${t.id}`}
+      data-testid="calendar-tournament"
+      title={t.name}
+      className={cn(
+        "relative z-10 block truncate rounded px-1.5 py-0.5 font-medium",
+        compact ? "text-[11px]" : "text-xs",
+        TOURNAMENT_STYLE,
+      )}
+    >
+      🏆 {t.name}
+    </Link>
+  );
+}
+
 function Pill({ e, showProgram }: { e: CalendarEntry; showProgram: boolean }) {
   return (
     <Link
@@ -261,12 +339,14 @@ function WeekGrid({
   roster,
   entries,
   practices,
+  events,
 }: {
   from: string;
   today: string;
   roster: { id: string; name: string; detail: string }[];
   entries: CalendarEntry[];
   practices: PracticeSummary[];
+  events: DayEvents;
 }) {
   const days = Array.from({ length: 7 }, (_, i) => addDays(from, i));
   const byCell = new Map<string, CalendarEntry[]>();
@@ -297,6 +377,32 @@ function WeekGrid({
           </tr>
         </thead>
         <tbody>
+          {events.games.length > 0 || events.tournaments.length > 0 ? (
+            <tr className="border-b border-zinc-200 bg-amber-50/40 align-top">
+              <th
+                scope="row"
+                className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-medium"
+              >
+                Games
+              </th>
+              {days.map((d) => {
+                const ev = eventsOn(events, d);
+                return (
+                  <td
+                    key={d}
+                    className={cn("space-y-1 px-1.5 py-1.5", d === today && "bg-brand-50/50")}
+                  >
+                    {ev.tournaments.map((t) => (
+                      <TournamentPill key={t.id} t={t} />
+                    ))}
+                    {ev.games.map((g) => (
+                      <GamePill key={g.id} g={g} />
+                    ))}
+                  </td>
+                );
+              })}
+            </tr>
+          ) : null}
           {practices.length > 0 ? (
             <tr className="border-b border-zinc-200 bg-sky-50/40 align-top">
               <th
@@ -362,6 +468,7 @@ function MonthGrid({
   today,
   entries,
   practices,
+  events,
   dayHref,
 }: {
   from: string;
@@ -369,6 +476,7 @@ function MonthGrid({
   today: string;
   entries: CalendarEntry[];
   practices: PracticeSummary[];
+  events: DayEvents;
   dayHref: (date: string) => string;
 }) {
   const days = Array.from({ length: 42 }, (_, i) => addDays(from, i));
@@ -395,6 +503,7 @@ function MonthGrid({
           }
           const outside = !d.startsWith(month);
           const dayPractices = practices.filter((p) => p.date === d);
+          const ev = eventsOn(events, d);
           return (
             <div
               key={d}
@@ -414,6 +523,16 @@ function MonthGrid({
                 {Number(d.slice(8))}
               </span>
               <div className="pointer-events-none relative mt-1 space-y-1">
+                {ev.tournaments.map((t) => (
+                  <div key={t.id} className="pointer-events-auto">
+                    <TournamentPill t={t} compact />
+                  </div>
+                ))}
+                {ev.games.map((g) => (
+                  <div key={g.id} className="pointer-events-auto">
+                    <GamePill g={g} compact />
+                  </div>
+                ))}
                 {dayPractices.map((p) => (
                   <div key={p.id} className="pointer-events-auto">
                     <PracticePill p={p} compact />
