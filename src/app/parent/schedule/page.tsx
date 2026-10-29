@@ -1,13 +1,29 @@
 import type { Metadata } from "next";
 import { loadChildEntries, loadChildPractices, pickChild, requireParent } from "@/lib/parent";
 import { practiceRange } from "@/lib/practices";
+import {
+  forGroups,
+  formatGameTime,
+  loadGames,
+  loadPlayerGroupIds,
+  matchupLabel,
+  scoreLabel,
+  STATUS_LABEL,
+} from "@/lib/games";
 import Link from "next/link";
 import { playerToday } from "@/lib/player";
 import { addDays } from "@/lib/schedule";
 import { SESSION_LABELS } from "@/constants";
 import type { Enums } from "@/types/database";
 import type { CalendarEntry } from "@/lib/calendar";
-import { ChildSwitcher, fmtDay, NoLinkedPlayer, PrivacyNote, StatusChip } from "../parent-ui";
+import {
+  ChildSwitcher,
+  fmtDay,
+  NoLinkedPlayer,
+  PrivacyNote,
+  StatusChip,
+  withPlayer,
+} from "../parent-ui";
 
 export const metadata: Metadata = { title: "Schedule" };
 
@@ -24,10 +40,15 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
 
   const { today } = await playerToday();
   const to = addDays(today, DAYS - 1);
-  const [{ entries }, practices] = await Promise.all([
+  const [{ entries }, practices, allGames, groupIds] = await Promise.all([
     loadChildEntries(supabase, org.id, child.id, today, to, today),
     loadChildPractices(supabase, org.id, child.id, today, to),
+    loadGames(supabase, org.id, today, to),
+    loadPlayerGroupIds(supabase, child.id),
   ]);
+  const games = forGroups(allGames, groupIds);
+  const gamesByDate = new Map<string, typeof games>();
+  for (const g of games) gamesByDate.set(g.date, [...(gamesByDate.get(g.date) ?? []), g]);
   const practicesByDate = new Map<string, typeof practices>();
   for (const p of practices) {
     if (p.date) practicesByDate.set(p.date, [...(practicesByDate.get(p.date) ?? []), p]);
@@ -41,11 +62,13 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
     <div className="space-y-4">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">{child.firstName}&apos;s schedule</h1>
-        <p className="text-sm text-zinc-600">Practices and workouts for the next two weeks.</p>
+        <p className="text-sm text-zinc-600">
+          Games, practices, and workouts for the next two weeks.
+        </p>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent/schedule" />
       </div>
 
-      {entries.length === 0 && practices.length === 0 ? (
+      {entries.length === 0 && practices.length === 0 && games.length === 0 ? (
         <p className="rounded-2xl bg-white p-6 text-sm text-zinc-600 ring-1 ring-zinc-200">
           Nothing scheduled for the next two weeks. When the coach assigns {child.firstName} a
           program, the workouts show up here.
@@ -55,6 +78,7 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
           {dates.map((d) => {
             const list = byDate.get(d) ?? [];
             const pr = practicesByDate.get(d) ?? [];
+            const gm = gamesByDate.get(d) ?? [];
             return (
               <li key={d} className="flex gap-3 px-4 py-3">
                 <div className="w-20 shrink-0">
@@ -65,10 +89,41 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
                     {fmtDay(d).split(", ").slice(1).join(", ")}
                   </p>
                 </div>
-                {list.length === 0 && pr.length === 0 ? (
+                {list.length === 0 && pr.length === 0 && gm.length === 0 ? (
                   <p className="text-sm text-zinc-400">Rest day</p>
                 ) : (
                   <ul className="min-w-0 flex-1 space-y-2">
+                    {gm.map((g) => {
+                      const off = g.status === "postponed" || g.status === "canceled";
+                      return (
+                        <li key={g.id} className="text-sm" data-testid="schedule-game">
+                          <Link
+                            href={withPlayer(`/parent/games/${g.id}`, kids, child)}
+                            className={
+                              off
+                                ? "font-medium text-zinc-500 line-through"
+                                : "font-medium text-brand-800 hover:underline"
+                            }
+                          >
+                            🏟️ {matchupLabel(g.homeAway, g.opponent)}
+                          </Link>
+                          {off || g.status === "live" ? (
+                            <span className="ml-2 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
+                              {STATUS_LABEL[g.status]}
+                            </span>
+                          ) : null}
+                          <p className="truncate text-xs text-zinc-500">
+                            {[
+                              scoreLabel(g) ?? formatGameTime(g.startTime) ?? "Game",
+                              g.arrivalTime ? `arrive ${formatGameTime(g.arrivalTime)}` : null,
+                              g.location,
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </p>
+                        </li>
+                      );
+                    })}
                     {pr.map((p) => (
                       <li key={p.id} className="text-sm">
                         <Link

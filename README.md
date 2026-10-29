@@ -45,16 +45,16 @@ In the dashboard, set **Auth → URL Configuration → Redirect URLs** to includ
 
 ## Scripts
 
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | Next.js dev server |
-| `npm run build` | Production build |
-| `npm run lint` / `npm run typecheck` | ESLint / TypeScript |
-| `npm test` | Unit tests (Vitest), e.g. the workout builder's state logic |
-| `npm run format` | Prettier |
-| `npm run db:start` / `db:stop` | Start / stop local Supabase |
-| `npm run db:reset` | Recreate the local DB from migrations + seed |
-| `npm run db:types` | Regenerate `src/types/database.ts` from the local DB |
+| Script                               | What it does                                                |
+| ------------------------------------ | ----------------------------------------------------------- |
+| `npm run dev`                        | Next.js dev server                                          |
+| `npm run build`                      | Production build                                            |
+| `npm run lint` / `npm run typecheck` | ESLint / TypeScript                                         |
+| `npm test`                           | Unit tests (Vitest), e.g. the workout builder's state logic |
+| `npm run format`                     | Prettier                                                    |
+| `npm run db:start` / `db:stop`       | Start / stop local Supabase                                 |
+| `npm run db:reset`                   | Recreate the local DB from migrations + seed                |
+| `npm run db:types`                   | Regenerate `src/types/database.ts` from the local DB        |
 
 ## Database
 
@@ -73,13 +73,13 @@ All schema changes go through migrations in `supabase/migrations/`. After changi
 
 Every table has RLS enabled. Policies call `SECURITY DEFINER` helpers in a `private` schema (not exposed through the API), so they never recurse through `org_memberships`.
 
-| Who | Can do |
-| --- | --- |
-| Any member | See their org, its members, teammates' profiles, global and org exercises |
-| Admin | Update the org; invite, update, and remove members (not the owner) |
+| Who                               | Can do                                                                                                    |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Any member                        | See their org, its members, teammates' profiles, global and org exercises                                 |
+| Admin                             | Update the org; invite, update, and remove members (not the owner)                                        |
 | Admin / coach / trainer ("staff") | Create and edit org exercises and programs (weeks, days, exercises); assign programs to the org's players |
-| Player | See only the programs assigned to them and their own assignments |
-| Anyone | No access to another org's data |
+| Player                            | See only the programs assigned to them and their own assignments                                          |
+| Anyone                            | No access to another org's data                                                                           |
 
 Program exercises may reference only global exercises or the program org's own custom exercises.
 
@@ -134,7 +134,7 @@ Players land on `/player`, a phone-first app with bottom tabs:
   - Weeks run in 7-day blocks from the assignment's start date.
   - Days pinned to a weekday in the builder are scheduled on that weekday. Other days are done in order.
   - "Today" uses the player's own time zone.
-- **Log a workout:** sets are prefilled from the prescription (reps) and from last time (weight), with a "Last time: 185×8, …" hint. Players tap ✓ per set and enter reps, weight and RPE, then add overall RPE, duration and notes. Finishing saves as *completed* or *partial*, or they can *Skip*. In-progress entries survive a page reload. Re-opening a logged day edits it.
+- **Log a workout:** sets are prefilled from the prescription (reps) and from last time (weight), with a "Last time: 185×8, …" hint. Players tap ✓ per set and enter reps, weight and RPE, then add overall RPE, duration and notes. Finishing saves as _completed_ or _partial_, or they can _Skip_. In-progress entries survive a page reload. Re-opening a logged day edits it.
 - **History** and **Profile** (name, team details, sign out).
 - **Install:** the app ships a web manifest and icons, so "Add to Home Screen" gives it an app icon.
 
@@ -145,7 +145,7 @@ Logs are stored in `workout_logs` and `exercise_logs` and saved atomically by `s
 ## Planning views (Phase 3)
 
 - **Calendar** (`/calendar`, coaches):
-  - **Week view:** players × days. Each workout is colored *done / partial / skipped / missed / today / upcoming*, with "3/4 logged" per player.
+  - **Week view:** players × days. Each workout is colored _done / partial / skipped / missed / today / upcoming_, with "3/4 logged" per player.
   - **Month view:** team totals per day, e.g. "Lower ×12 · 9✓ · 2 missed".
   - Filter by group.
   - Weekday-pinned days sit on their weekday. Flexible days are spread evenly through each program week. Logged workouts show on the day they were actually done.
@@ -237,5 +237,16 @@ Also in this pass: **Forgot password** flow, a **Getting started** checklist for
 - **Player `/player/messages`, parent `/parent/messages`:** team announcements (marked read when shown) and conversations, plus **Message a coach**. Threads live at `…/messages/[id]` (read marker updates on view). The player header's chat icon shows a dot for unread conversations.
 - **Notifications:** DB triggers create them; the bell links to `/notifications` (list, "Mark all read"). Each item goes through `/n/[id]`, which marks it read, switches to that team, and redirects to the right page for the viewer's role (`hrefForRole` in `src/lib/notifications.ts`; only relative links).
 - **Web push (optional):** `public/sw.js` + "Turn on phone notifications" on `/notifications`, with per-kind mutes (`profiles.push_muted`). `dispatchPush()` (`src/lib/push.ts`) sends unpushed notifications from the last 15 minutes with `web-push`, using the role-mapped link, and removes expired subscriptions. Call it with `after(() => dispatchPush())` at the end of a server action. Needs `SUPABASE_SECRET_KEY`, `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` (see [docs/DEPLOY.md](docs/DEPLOY.md)); without them it does nothing.
+
+## Games & tournaments
+
+- **Coach `/games`:** season record in the header (W–L–T over final games this year; scrimmages don't count) and Upcoming / Results / Tournaments tabs. **Add game** (opponent, date, start and arrive-by times, home / away / neutral, type: league, non-league, scrimmage, tournament, playoff, whole team or one group, location, address, notes, tournament, innings). **Quick season entry** (`/games/quick`) adds a whole schedule at once: one row per game (date, time, opponent, home/away, location), with type, group, tournament, and "arrive N minutes early" applied to every row.
+- **Game page** (`/games/[id]`): details, **Directions** (Google Maps search from the address or location, new tab), **Add to calendar**, Postpone / Cancel / Back on schedule, **Reschedule** (new date, time, place; the arrival time moves with the start time), Edit, Duplicate to a date, Delete. Postponing, canceling, moving a scheduled game, and going final notify players and parents (`games_after_update` trigger, pushed with `dispatchPush()`).
+- **Live scoring** (phone-sized, in the dugout): Start game → big + / − run buttons for each side in the current inning, previous / next inning, a line score with run totals. Taps show at once and save in the background (taps made during a save are batched). **End game** sets the final score (defaults to the line totals, editable) and marks it final; "Edit final score" and "Resume scoring" fix mistakes. The box score (stats track) plugs in under the scoring panel, with **Enter box score** → `/games/[id]/stats`.
+- **Tournaments** (`/games/tournaments/[id]`): dates (up to 31 days), location / address, bracket link, notes, record within the tournament, and pool / bracket games added inline (they inherit the tournament's place and group).
+- **Players `/player/games`, parents `/parent/games`** (phone-first, read-only): upcoming games with time, arrive-by, opponent, home/away, location; tournaments grouped with their date range and bracket link; postponed / canceled games marked; results with W/L chips. Detail pages show the line score and, while a game is live, a LIVE badge and refresh every 20 seconds. Group-only games are hidden from other players and their parents (RLS; their pages return 404). Parents follow one child at a time (`?player=`).
+- **Next game** cards on the player Today page and the parent Home page; games appear in the parent's 14-day schedule and on the coach **Calendar** (week and month: opponent and time, or W/L and score when final; tournaments span their days).
+- **Add to calendar:** `/games/[id]/ics` returns a single-event `.ics` for anyone who can see the game (floating local time, two-hour event or all-day without a time, escaped text, arrival time and notes in the description, a link to the viewer's game page).
+- Helpers (`src/lib/games.ts`: results, records, line-score validation and totals, labels, times, `.ics`) are unit-tested; actions are in `src/lib/game-actions.ts`.
 
 See the project brief for the full roadmap. Phases 1–7 are complete. Phone push notifications are optional and need the keys described in docs/DEPLOY.md.

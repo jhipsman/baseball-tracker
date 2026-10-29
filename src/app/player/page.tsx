@@ -11,6 +11,8 @@ import { DAY_OF_WEEK_LABELS, SESSION_LABELS } from "@/constants";
 import { dayOfWeek } from "@/lib/schedule";
 import { loadNextPractice } from "@/lib/practices";
 import { NextPracticeCard } from "@/components/practice/next-practice-card";
+import { loadNextGame } from "@/lib/games";
+import { NextGameCard } from "@/components/games/game-ui";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Today" };
@@ -25,9 +27,10 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
   const { supabase, user, org } = await requireActiveOrg();
   const { today } = await playerToday();
   const { saved } = await searchParams;
-  const [assignments, nextPractice] = await Promise.all([
+  const [assignments, nextPractice, nextGame] = await Promise.all([
     loadPlayerAssignments(supabase, user.id, org.id, today),
     loadNextPractice(supabase, org.id, today),
+    loadNextGame(supabase, org.id, today),
   ]);
 
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
@@ -54,6 +57,10 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
         >
           {saved === "skipped" ? "Workout marked as skipped." : "Workout saved. Nice work!"}
         </p>
+      ) : null}
+
+      {nextGame ? (
+        <NextGameCard game={nextGame} today={today} href={`/player/games/${nextGame.id}`} />
       ) : null}
 
       {nextPractice ? (
