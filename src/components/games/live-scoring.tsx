@@ -11,7 +11,8 @@ import {
   type GameStatus,
   type Inning,
 } from "@/lib/games";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, buttonClass } from "@/components/ui/button";
 import { LineScoreTable } from "./game-ui";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +28,8 @@ type Props = {
   opponentScore: number | null;
   /** Shown under Start game before the game begins: the other way to keep score. */
   alternative?: ReactNode;
+  /** Pitch-by-pitch live scoring page; when set, it's the main way to start the game. */
+  liveHref?: string;
 };
 
 /**
@@ -90,6 +93,39 @@ export function LiveScoring(props: Props) {
   if (status === "postponed" || status === "canceled") return null;
 
   if (status === "scheduled") {
+    const startSimple = () =>
+      run(
+        () => startGame(props.id),
+        () => {
+          setStatus("live");
+          setLine((l) => (l.length ? l : [{ us: 0, them: 0 }]));
+        },
+      );
+    if (props.liveHref) {
+      return (
+        <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
+          <h2 className="font-semibold">Score this game</h2>
+          <Link href={props.liveHref} className={buttonClass("primary", "h-14 w-full text-base")}>
+            ▶ Start live scoring
+          </Link>
+          <p className="text-center text-sm text-zinc-600">
+            Pick your pitcher and lineup, then tap each pitch and play. Pitch counts, the box score
+            and the parents&apos; live view update by themselves.
+          </p>
+          <div className="border-t border-zinc-100 pt-2 text-center">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={startSimple}
+              className="min-h-11 text-sm font-medium text-zinc-600 underline-offset-2 hover:text-zinc-900 hover:underline"
+            >
+              Just tracking runs? Keep a simple line score instead
+            </button>
+          </div>
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+        </section>
+      );
+    }
     return (
       <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <h2 className="font-semibold">Live scoring</h2>
@@ -101,15 +137,7 @@ export function LiveScoring(props: Props) {
           type="button"
           className="h-14 w-full text-base"
           disabled={pending}
-          onClick={() =>
-            run(
-              () => startGame(props.id),
-              () => {
-                setStatus("live");
-                setLine((l) => (l.length ? l : [{ us: 0, them: 0 }]));
-              },
-            )
-          }
+          onClick={startSimple}
         >
           ▶ Start game
         </Button>

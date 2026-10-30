@@ -3,8 +3,11 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { loadGame, matchupLabel } from "@/lib/games";
-import { loadBirthDates } from "@/lib/throwing";
-import { ageOn, pitchSmartBand } from "@/lib/workload";
+import { loadBirthDates, loadThrowing } from "@/lib/throwing";
+import { addDays } from "@/lib/schedule";
+import { ageOn, availability, pitchSmartBand, throwingAlerts } from "@/lib/workload";
+import { formatGameDate } from "@/lib/games";
+import type { PitcherOption } from "@/components/live/lineup-setup";
 import {
   batterUp,
   describePlay,
@@ -58,6 +61,49 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
       .neq("id", id)
       .order("date", { ascending: false })
       .limit(1);
+    // Who can pitch today: Player Health status for every player, pitchers first.
+    const [{ data: positions }, throws] = await Promise.all([
+      supabase
+        .from("org_memberships")
+        .select("profile_id, position")
+        .eq("org_id", org.id)
+        .eq("role", "player"),
+      loadThrowing(supabase, org.id, addDays(game.date, -30)),
+    ]);
+    const posOf = new Map((positions ?? []).map((m) => [m.profile_id, m.position]));
+    const RANK = { ready: 0, unknown: 1, rest: 2, pain: 3 } as const;
+    const pitcherOptions: PitcherOption[] = roster
+      .map((pl) => {
+        const mine = throws.filter((r) => r.playerId === pl.id);
+        const birth = births.get(pl.id) ?? null;
+        const a = availability(mine, birth, game.date);
+        const pain = throwingAlerts(mine, birth, game.date).some((x) => x.level === "critical");
+        const option: PitcherOption = {
+          ...pl,
+          isPitcher: posOf.get(pl.id) === "P",
+          status: pain
+            ? "pain"
+            : a.state === "resting"
+              ? "rest"
+              : a.state === "available"
+                ? "ready"
+                : "unknown",
+          detail: pain
+            ? "Reported arm pain"
+            : a.state === "resting"
+              ? `Rest until ${formatGameDate(a.until)}`
+              : a.state === "available"
+                ? `Ready · up to ${a.remainingToday} pitches`
+                : "Ready · add a birthday for pitch limits",
+        };
+        return option;
+      })
+      .sort(
+        (x, y) =>
+          Number(y.isPitcher) - Number(x.isPitcher) ||
+          RANK[x.status] - RANK[y.status] ||
+          x.name.localeCompare(y.name),
+      );
     const defaultLineup = (recent?.[0]?.game_batting ?? [])
       .filter((r) => r.batting_order != null && names.has(r.player_id))
       .sort((a, b) => (a.batting_order ?? 99) - (b.batting_order ?? 99))
@@ -66,16 +112,14 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
       <div className="max-w-2xl">
         {header}
         <p className="mb-4 text-sm text-zinc-600">
-          Set the batting order and starting pitcher. Then tap the result of each at-bat; the box
-          score, season stats, and Pitch Smart pitch counts fill in automatically. Parents can
-          follow along live.
+          Three quick steps, then tap each pitch and play from the dugout.
         </p>
         <LineupSetup
           gameId={id}
           roster={roster}
           defaultLineup={defaultLineup}
-          defaultPitcher={null}
-          defaultWeBatFirst={game.homeAway === "away"}
+          pitchers={pitcherOptions}
+          homeAway={game.homeAway}
         />
       </div>
     );

@@ -137,7 +137,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
               inningsScheduled={g.inningsScheduled}
               teamScore={g.teamScore}
               opponentScore={g.opponentScore}
-              alternative={atBatLink}
+              liveHref={`/games/${g.id}/live`}
             />
           )}
           {!liveLogged && g.status === "live" ? atBatLink : null}
