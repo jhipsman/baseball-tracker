@@ -440,6 +440,52 @@
   background: var(--brand-50);
 }
 
+/* ---------------------------------------------------------- batter vs pitcher */
+.duel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--zinc-200);
+  border-radius: 14px;
+  background: var(--color-surface-solid, #fff);
+  margin-bottom: 10px;
+}
+.duel > div {
+  min-width: 0;
+  padding: 10px 14px;
+}
+.duel > div + div {
+  border-left: 1px solid var(--zinc-200);
+}
+.duel small {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--zinc-600);
+}
+.duel b {
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.duel span {
+  display: block;
+  font-size: 14px;
+  color: var(--zinc-600);
+  font-variant-numeric: tabular-nums;
+}
+.duel strong {
+  font-weight: 700;
+  color: var(--zinc-900);
+}
+.scoringGrid {
+  margin-top: 10px;
+}
+
 /* ---------------------------------------------------------- pitcher + Pitch Smart */
 .pitcher {
   display: flex;
@@ -557,7 +603,7 @@
 }
 .pitchButtons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
 .pitchButtons button {
@@ -588,27 +634,18 @@
   background: var(--brand-50);
   border-color: var(--brand-600);
 }
-.inPlay {
-  width: 100%;
+.pitchButtons .inPlay {
   background: var(--brand-700);
+  border-color: var(--brand-700);
   color: var(--color-on-brand, #fff);
-  border: 0;
-  border-radius: 12px;
-  min-height: 64px;
-  padding: 12px;
-  margin-top: 10px;
-  font-size: 18px !important;
-  font-weight: 700 !important;
 }
-.inPlay:hover:not(:disabled) {
+.pitchButtons .inPlay span {
+  color: var(--color-on-brand, #fff);
+  font-weight: 700;
+}
+.pitchButtons .inPlay:hover:not(:disabled) {
   background: var(--brand-900);
-}
-.inPlay span {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--brand-100);
-  margin-top: 4px;
+  border-color: var(--brand-900);
 }
 .sectionLabel {
   font-size: 12px;
@@ -968,9 +1005,6 @@
 }
 
 @media (min-width: 1200px) {
-  .field {
-    min-height: 440px;
-  }
   .workspace {
     max-width: 1100px;
   }
@@ -1016,8 +1050,9 @@
     padding: 8px 0 10px;
     gap: 8px 16px;
   }
+  /* Phones: the inning-by-inning line lives on the game page; keep the count. */
   .lineScore {
-    gap: 10px;
+    display: none;
   }
   .count {
     gap: 14px;
@@ -1037,50 +1072,8 @@
     grid-template-columns: 1fr;
     gap: 12px;
   }
-  /*
-   * Phone order: while pitching, the pitcher's count and Pitch Smart status
-   * sit right above the at-bat buttons and the diamond moves below them.
-   * While building a play, the diamond comes first so it can be tapped.
-   */
-  .fieldColumn {
-    display: contents;
-  }
-  .scoringGrid > .controls {
-    order: 3;
-  }
-  .scoringGrid .field {
-    order: 4;
-  }
-  .scoringGrid .fieldFooter {
-    order: 5;
-  }
-  .scoringGrid .pitcher {
-    order: 1;
-  }
-  .scoringGrid .workload {
-    order: 2;
-  }
-  .building .field {
-    order: 1;
-  }
-  .building .fieldFooter {
-    order: 2;
-  }
-  .building > .controls {
-    order: 3;
-  }
-  .building .pitcher {
-    order: 4;
-  }
-  .building .workload {
-    order: 5;
-  }
-  .scoringGrid .pitcher,
-  .scoringGrid .workload {
-    margin: 0;
-  }
   .field {
-    max-height: 350px;
+    max-height: 300px;
   }
   .pitcher {
     padding: 8px 14px;
@@ -1106,7 +1099,24 @@
     gap: 6px;
   }
   .pitchButtons button {
-    min-height: 76px;
+    min-height: 72px;
+    padding: 8px 2px;
+  }
+  .pitchButtons b {
+    font-size: 24px;
+    margin-bottom: 6px;
+  }
+  .pitchButtons span {
+    font-size: 12px;
+  }
+  .duel > div {
+    padding: 8px 12px;
+  }
+  .duel b {
+    font-size: 16px;
+  }
+  .duel span {
+    font-size: 13px;
   }
   .quickResults,
   .results {

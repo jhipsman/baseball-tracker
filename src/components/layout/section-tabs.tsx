@@ -24,6 +24,7 @@ export function SectionTabs({
   const active = activeTab(pathname, tabs);
   return (
     <nav
+      data-section-tabs
       aria-label={def!.label}
       className="relative mr-auto! mb-6 ml-0! flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-surface p-1 ring-1 ring-zinc-200 print:hidden"
     >

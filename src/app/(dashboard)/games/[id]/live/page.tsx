@@ -42,11 +42,14 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
   const p = (pid: string) => ({ id: pid, name: names.get(pid) ?? "Player" });
 
   const header = (
-    <div className="mb-4">
-      <Link href={`/games/${id}`} className="text-sm text-brand-700 hover:underline">
+    <div className="mb-3 sm:mb-4">
+      <Link
+        href={`/games/${id}`}
+        className="inline-flex min-h-11 items-center text-sm text-brand-700 hover:underline sm:min-h-0"
+      >
         ← Game
       </Link>
-      <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">
+      <h1 className="text-xl font-medium tracking-tight sm:text-3xl">
         Live: {matchupLabel(game.homeAway, game.opponent)}
       </h1>
     </div>
@@ -134,7 +137,8 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
   const name = (pid: string | null) => (pid ? (names.get(pid) ?? "Player").split(" ")[0] : "—");
 
   return (
-    <div className="max-w-6xl">
+    // data-focus: on phones the app menu steps aside while scoring (see globals.css).
+    <div className="max-w-6xl" data-focus={game.status === "final" ? undefined : ""}>
       {header}
       <Scorer
         gameId={id}

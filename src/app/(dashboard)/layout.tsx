@@ -29,7 +29,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
       <TimezoneSync current={tz ? decodeURIComponent(tz) : undefined} />
-      <aside className="glass md:sticky md:top-3 md:m-3 md:mr-0 md:h-[calc(100dvh-1.5rem)] md:w-64 md:shrink-0 md:rounded-3xl md:border-0">
+      <aside
+        data-app-nav
+        className="glass md:sticky md:top-3 md:m-3 md:mr-0 md:h-[calc(100dvh-1.5rem)] md:w-64 md:shrink-0 md:rounded-3xl md:border-0"
+      >
         <div className="flex h-full flex-col gap-4 p-4 md:overflow-y-auto md:p-5">
           <div className="flex items-center gap-2">
             <LogoMark className="size-7 text-brand-600 drop-shadow-[0_0_10px_rgb(18_183_106/0.45)]" />

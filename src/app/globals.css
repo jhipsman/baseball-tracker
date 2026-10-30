@@ -441,3 +441,14 @@ html[data-theme-switching]::view-transition-new(root) {
     stroke-dashoffset: 0;
   }
 }
+
+/* Scoring focus mode: on phones the app menu and section tabs step aside so the
+   field and pitch buttons fit on one screen. "← Game" on the page leads back. */
+@media (max-width: 767px) {
+  body:has([data-focus]) :is([data-app-nav], [data-section-tabs]) {
+    display: none;
+  }
+  body:has([data-focus]) main {
+    padding-top: 0.75rem;
+  }
+}
