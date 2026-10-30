@@ -4,77 +4,86 @@ import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { playerToday } from "@/lib/player";
 import { formatGameDate } from "@/lib/games";
-import { addDays } from "@/lib/schedule";
 import { loadTeam } from "@/lib/team";
-import { loadBirthDates, loadThrowing } from "@/lib/throwing";
-import {
-  acuteChronic,
-  ageOn,
-  availability,
-  competitiveByDay,
-  throwingAlerts,
-  throwsBetween,
-} from "@/lib/workload";
-import { PITCH_SMART_NOTE } from "@/constants/throwing";
-import { ThrowLogForm } from "@/components/throwing/throw-log-form";
-import { AlertList, ArmFeelChip, AvailabilityBadge } from "@/components/throwing/status";
+import { loadHealth } from "@/lib/health-data";
+import { LANES, type Lane, type PlayerHealth } from "@/lib/health";
+import { ArmFeelChip } from "@/components/throwing/status";
+import { HandleAlert } from "@/components/health/alert-actions";
 import { cn } from "@/lib/utils";
 
-export const metadata: Metadata = { title: "Throwing" };
+export const metadata: Metadata = { title: "Player Health" };
 
-export default async function ThrowingPage({ searchParams }: PageProps<"/throwing">) {
+const LANE_STYLE: Record<Lane, { icon: string; pill: string }> = {
+  attention: { icon: "⚠", pill: "bg-amber-100 text-amber-900" },
+  out: { icon: "⛔", pill: "bg-red-100 text-red-800" },
+  limited: { icon: "◐", pill: "bg-orange-50 text-orange-900" },
+  resting: { icon: "⏸", pill: "bg-sky-100 text-sky-900" },
+  ready: { icon: "✓", pill: "bg-brand-100 text-brand-900" },
+};
+
+function PlayerCard({ h }: { h: PlayerHealth }) {
+  const style = LANE_STYLE[h.lane];
+  return (
+    <li className="rounded-2xl bg-surface p-3 ring-1 ring-zinc-200">
+      <div className="flex items-start gap-3">
+        <span
+          aria-hidden
+          className={cn(
+            "grid size-9 shrink-0 place-items-center rounded-full font-bold",
+            style.pill,
+          )}
+        >
+          {style.icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <Link href={`/throwing/${h.id}`} className="block truncate font-semibold hover:underline">
+            {h.name}
+          </Link>
+          <p className="text-sm text-zinc-600">{h.detail}</p>
+        </div>
+        {h.feel ? <ArmFeelChip feel={h.feel.feel} /> : null}
+      </div>
+      {h.lane === "attention" ? (
+        <ul className="mt-2 space-y-2 border-t border-zinc-100 pt-2">
+          {h.open.map((a) => (
+            <li key={a.key} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <span className={a.level === "critical" ? "text-red-800" : "text-amber-900"}>
+                {a.level === "critical" ? "⛔ " : "⚠ "}
+                {a.message}
+              </span>
+              <HandleAlert playerId={h.id} alertKey={a.key} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </li>
+  );
+}
+
+export default async function HealthTodayPage({ searchParams }: PageProps<"/throwing">) {
   const { supabase, org, isStaff } = await requireActiveOrg();
   if (!isStaff) redirect("/player/throwing");
   const { today } = await playerToday();
   const sp = await searchParams;
   const groupId = typeof sp.group === "string" ? sp.group : "";
 
-  const [team, rows, births] = await Promise.all([
-    loadTeam(supabase, org.id, today, today, today),
-    loadThrowing(supabase, org.id, addDays(today, -60)),
-    loadBirthDates(supabase, org.id),
-  ]);
-
+  const team = await loadTeam(supabase, org.id, today, today, today);
   const group = team.groups.find((g) => g.id === groupId);
   const players = team.players.filter((p) => !group || group.memberIds.includes(p.id));
-
-  const summary = players.map((p) => {
-    const mine = rows.filter((r) => r.playerId === p.id);
-    const birth = births.get(p.id) ?? null;
-    const outings = [...competitiveByDay(mine)].sort(([a], [b]) => b.localeCompare(a));
-    const feel = mine.find((r) => r.armFeel);
-    return {
-      player: p,
-      birth,
-      age: birth ? ageOn(birth, today) : null,
-      avail: availability(mine, birth, today),
-      alerts: throwingAlerts(mine, birth, today),
-      lastOuting: outings[0] ?? null,
-      week: throwsBetween(mine, addDays(today, -6), today),
-      acwr: acuteChronic(mine, today),
-      feel,
-      hasThrowing: mine.length > 0,
-    };
-  });
-  const severity = (s: (typeof summary)[number]) =>
-    s.alerts.some((a) => a.level === "critical")
-      ? 2
-      : s.alerts.some((a) => a.level === "warning")
-        ? 1
-        : 0;
-  const sorted = summary.toSorted(
-    (a, b) => severity(b) - severity(a) || a.player.name.localeCompare(b.player.name),
-  );
-  const urgent = sorted.flatMap((s) =>
-    s.alerts.filter((a) => a.level !== "info").map((a) => ({ who: s.player.name, alert: a })),
-  );
-  const missingBirth = summary.filter((s) => !s.birth);
+  const { health } = await loadHealth(supabase, org.id, players, today);
+  const byLane = (lane: Lane) =>
+    health.filter((h) => h.lane === lane).sort((a, b) => a.name.localeCompare(b.name));
+  const checkedIn = health.filter((h) => h.checkedInToday).length;
+  const missing = health.filter((h) => !h.checkedInToday && h.lane !== "out");
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="max-w-6xl space-y-5">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Throwing &amp; arm care</h1>
-        <p className="mt-1 max-w-3xl text-sm text-zinc-600">{PITCH_SMART_NOTE}</p>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Player Health</h1>
+        <p className="mt-1 text-sm text-zinc-600">
+          {formatGameDate(today, { weekday: "long", month: "long" })} · who&apos;s ready, who needs
+          a look.
+        </p>
       </div>
 
       {team.groups.length > 0 ? (
@@ -84,9 +93,9 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
               key={g.id || "all"}
               href={g.id ? `/throwing?group=${g.id}` : "/throwing"}
               className={cn(
-                "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
+                "inline-flex min-h-11 items-center rounded-full px-4 font-medium ring-1 ring-inset",
                 g.id === groupId
-                  ? "bg-brand-700 text-on-brand ring-brand-700"
+                  ? "bg-zinc-900 text-zinc-50 ring-zinc-900"
                   : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
               )}
             >
@@ -96,136 +105,77 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
         </div>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <div className="min-w-0 space-y-4">
-          <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
-            <h2 className="font-semibold">Alerts</h2>
-            {urgent.length === 0 ? (
-              <p className="mt-2 text-sm text-zinc-500">No workload or arm alerts right now.</p>
-            ) : (
-              <div className="mt-3 space-y-1.5">
-                {urgent.map((u, i) => (
-                  <AlertList key={i} alerts={[u.alert]} who={u.who} />
-                ))}
-              </div>
-            )}
-            {missingBirth.length > 0 ? (
-              <p className="mt-3 text-xs text-zinc-500">
-                {missingBirth.length} player{missingBirth.length === 1 ? "" : "s"} without a
-                birthdate, so Pitch Smart limits can&apos;t be checked:{" "}
-                {missingBirth.map((s, i) => (
-                  <span key={s.player.id}>
-                    {i ? ", " : ""}
-                    <Link
-                      href={`/roster/${s.player.id}#throwing`}
-                      className="font-medium text-brand-700 hover:underline"
-                    >
-                      {s.player.name}
-                    </Link>
-                  </span>
-                ))}
+      {players.length === 0 ? (
+        <p className="rounded-2xl bg-surface p-5 text-sm text-zinc-600 ring-1 ring-zinc-200">
+          No players yet. Invite your team from Team → Members &amp; invites.
+        </p>
+      ) : (
+        <>
+          <section
+            aria-label="Arm check-ins today"
+            className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h2 className="font-semibold">
+                {checkedIn} of {health.length} checked in on their arm today
+              </h2>
+              <span className="text-sm text-zinc-500">
+                Players tap one button on their home page
+              </span>
+            </div>
+            <div
+              className="mt-3 h-2 overflow-hidden rounded-full bg-zinc-100"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={health.length}
+              aria-valuenow={checkedIn}
+              aria-label="Check-ins"
+            >
+              <div
+                className="h-full rounded-full bg-brand-600"
+                style={{ width: `${(checkedIn / Math.max(1, health.length)) * 100}%` }}
+              />
+            </div>
+            {missing.length > 0 && checkedIn < health.length ? (
+              <p className="mt-2 text-sm text-zinc-600">
+                Not yet: {missing.map((h) => h.name.split(" ")[0]).join(", ")}
               </p>
             ) : null}
           </section>
 
-          <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
-            <table className="w-full min-w-[52rem] text-sm">
-              <thead>
-                <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-500">
-                  <th className="sticky left-0 z-10 bg-surface-solid px-4 py-2.5">Player</th>
-                  <th className="px-3 py-2.5">Age</th>
-                  <th className="px-3 py-2.5">Today</th>
-                  <th className="px-3 py-2.5">Last outing</th>
-                  <th className="px-3 py-2.5 text-right">Throws (7d)</th>
-                  <th className="px-3 py-2.5 text-right">vs usual</th>
-                  <th className="px-3 py-2.5">Arm</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((s) => (
-                  <tr key={s.player.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="sticky left-0 z-10 bg-surface-solid px-4 py-2.5">
-                      <Link
-                        href={`/roster/${s.player.id}#throwing`}
-                        className="font-medium hover:underline"
-                      >
-                        {s.player.name}
-                      </Link>
-                      <span className="ml-2 text-xs text-zinc-500">{s.player.detail}</span>
-                      {severity(s) === 2 ? (
-                        <span className="ml-2 text-xs font-semibold text-red-700">⛔ Alert</span>
-                      ) : severity(s) === 1 ? (
-                        <span className="ml-2 text-xs font-semibold text-amber-800">⚠ Watch</span>
-                      ) : null}
-                    </td>
-                    <td className="px-3 py-2.5 tabular-nums">
-                      {s.age ?? <span className="text-zinc-400">—</span>}
-                    </td>
-                    <td className="px-3 py-2.5">
-                      <AvailabilityBadge a={s.avail} />
-                    </td>
-                    <td className="px-3 py-2.5 text-zinc-600 tabular-nums">
-                      {s.lastOuting ? (
-                        `${formatGameDate(s.lastOuting[0])} · ${s.lastOuting[1]} pitches`
-                      ) : (
-                        <span className="text-zinc-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2.5 text-right tabular-nums">
-                      {s.hasThrowing ? s.week : <span className="text-zinc-400">—</span>}
-                    </td>
-                    <td className="px-3 py-2.5 text-right tabular-nums">
-                      {s.acwr ? (
-                        <span
-                          className={
-                            s.acwr.ratio > 1.5
-                              ? "font-semibold text-red-700"
-                              : s.acwr.ratio < 0.8
-                                ? "text-zinc-500"
-                                : ""
-                          }
-                        >
-                          {s.acwr.ratio.toFixed(1)}×
-                        </span>
-                      ) : (
-                        <span className="text-zinc-400">—</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2.5">
-                      {s.feel ? (
-                        <span className="flex items-center gap-1.5">
-                          <ArmFeelChip feel={s.feel.armFeel} />
-                          <span className="text-xs whitespace-nowrap text-zinc-500">
-                            {formatGameDate(s.feel.date, { weekday: undefined })}
-                          </span>
-                        </span>
-                      ) : (
-                        <span className="text-zinc-400">—</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-zinc-500">
-            “vs usual” compares this week&apos;s throws to the player&apos;s average week over the
-            last 4 (shown after 3 weeks of logs). Above 1.5× is a spike worth watching.
-          </p>
-        </div>
-
-        <aside className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200 lg:self-start">
-          <h2 className="mb-3 font-semibold">Log pitch counts</h2>
-          {players.length === 0 ? (
-            <p className="text-sm text-zinc-500">No players yet.</p>
-          ) : (
-            <ThrowLogForm
-              players={players.map((p) => ({ id: p.id, name: p.name }))}
-              defaultType="game"
-            />
-          )}
-        </aside>
-      </div>
+          {LANES.map((lane) => {
+            const list = byLane(lane.key);
+            if (!list.length && lane.key !== "attention") return null;
+            return (
+              <section key={lane.key} aria-labelledby={`lane-${lane.key}`} className="space-y-2">
+                <h2 id={`lane-${lane.key}`} className="flex items-baseline gap-2">
+                  <span className="text-lg font-semibold">{lane.title}</span>
+                  <span className="text-sm text-zinc-500">
+                    {list.length} · {lane.hint}
+                  </span>
+                </h2>
+                {list.length ? (
+                  <ul
+                    className={cn(
+                      "grid gap-2",
+                      lane.key === "attention" ? "lg:grid-cols-2" : "sm:grid-cols-2 lg:grid-cols-3",
+                    )}
+                  >
+                    {list.map((h) => (
+                      <PlayerCard key={h.id} h={h} />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="rounded-2xl bg-surface p-4 text-sm text-zinc-600 ring-1 ring-zinc-200">
+                    ✓ Nothing new. Alerts show up here when a player reports pain or soreness, goes
+                    over a pitch limit, or throws a lot more than usual.
+                  </p>
+                )}
+              </section>
+            );
+          })}
+        </>
+      )}
     </div>
   );
 }

@@ -44,7 +44,10 @@ export const COACH_SECTIONS: Section[] = [
     key: "health",
     label: "Player Health",
     module: "health",
-    tabs: [{ href: "/throwing", label: "Throwing & arm care" }],
+    tabs: [
+      { href: "/throwing", label: "Today" },
+      { href: "/throwing/workload", label: "Workload & logs" },
+    ],
   },
   {
     key: "videos",

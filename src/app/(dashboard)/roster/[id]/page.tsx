@@ -267,6 +267,9 @@ export default async function PlayerProfilePage({
         <section id="throwing" className="space-y-3">
           <div className="flex flex-wrap items-center gap-3">
             <h2 className="text-lg font-semibold">Throwing</h2>
+            <Link href={`/throwing/${id}`} className="text-sm font-medium text-brand-700">
+              Player Health →
+            </Link>
             <AvailabilityBadge a={availability(throwing, birth, today)} />
             {birth ? (
               <span className="text-sm text-zinc-500">

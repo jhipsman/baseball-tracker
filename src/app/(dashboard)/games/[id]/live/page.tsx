@@ -1,12 +1,10 @@
-import { FIELD_POSITIONS, opponentLabel, opponentOrder } from "@/lib/live/defense";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { loadGame, matchupLabel } from "@/lib/games";
-import { loadBirthDates, loadThrowing } from "@/lib/throwing";
-import { addDays } from "@/lib/schedule";
-import { ageOn, availability, pitchSmartBand, throwingAlerts } from "@/lib/workload";
+import { loadBirthDates } from "@/lib/throwing";
+import { ageOn, pitchSmartBand } from "@/lib/workload";
 import { formatGameDate } from "@/lib/games";
 import type { PitcherOption } from "@/components/live/lineup-setup";
 import {
@@ -18,6 +16,8 @@ import {
   situation,
 } from "@/lib/live/engine";
 import { loadPlayerNames, loadPlays, parseLiveState } from "@/lib/live/data";
+import { loadHealth } from "@/lib/health-data";
+import { FIELD_POSITIONS, opponentLabel, opponentOrder } from "@/lib/live/defense";
 import { LineupSetup } from "@/components/live/lineup-setup";
 import { Scorer } from "@/components/live/scorer";
 
@@ -65,40 +65,43 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
       .neq("id", id)
       .order("date", { ascending: false })
       .limit(1);
-    // Who can pitch today: Player Health status for every player, pitchers first.
-    const [{ data: positions }, throws] = await Promise.all([
+    // Who can pitch today: Player Health on the game date for every player, pitchers first.
+    const [{ data: positions }, { health }] = await Promise.all([
       supabase
         .from("org_memberships")
         .select("profile_id, position")
         .eq("org_id", org.id)
         .eq("role", "player"),
-      loadThrowing(supabase, org.id, addDays(game.date, -30)),
+      loadHealth(supabase, org.id, roster, game.date),
     ]);
     const posOf = new Map((positions ?? []).map((m) => [m.profile_id, m.position]));
     const RANK = { ready: 0, unknown: 1, rest: 2, pain: 3 } as const;
-    const pitcherOptions: PitcherOption[] = roster
-      .map((pl) => {
-        const mine = throws.filter((r) => r.playerId === pl.id);
-        const birth = births.get(pl.id) ?? null;
-        const a = availability(mine, birth, game.date);
-        const pain = throwingAlerts(mine, birth, game.date).some((x) => x.level === "critical");
+    const pitcherOptions: PitcherOption[] = health
+      .map((h) => {
+        const pain = h.lane === "out" || h.open.some((x) => x.key.startsWith("pain:"));
         const option: PitcherOption = {
-          ...pl,
-          isPitcher: posOf.get(pl.id) === "P",
+          id: h.id,
+          name: h.name,
+          isPitcher: posOf.get(h.id) === "P",
           status: pain
             ? "pain"
-            : a.state === "resting"
+            : h.avail.state === "resting"
               ? "rest"
-              : a.state === "available"
+              : h.avail.state === "available"
                 ? "ready"
                 : "unknown",
-          detail: pain
-            ? "Reported arm pain"
-            : a.state === "resting"
-              ? `Rest until ${formatGameDate(a.until)}`
-              : a.state === "available"
-                ? `Ready · up to ${a.remainingToday} pitches`
-                : "Ready · add a birthday for pitch limits",
+          detail:
+            h.lane === "out"
+              ? `Out${h.status.reason ? ` · ${h.status.reason}` : ""}`
+              : pain
+                ? "Reported arm pain"
+                : h.avail.state === "resting"
+                  ? `Rest until ${formatGameDate(h.avail.until)}`
+                  : `${h.lane === "limited" ? `Limited${h.status.reason ? ` (${h.status.reason})` : ""} · ` : "Ready · "}${
+                      h.avail.state === "available"
+                        ? `up to ${h.avail.remainingToday} pitches`
+                        : "add a birthday for pitch limits"
+                    }`,
         };
         return option;
       })

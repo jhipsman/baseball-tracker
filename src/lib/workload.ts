@@ -129,7 +129,12 @@ export function acuteChronic(logs: ThrowLog[], today: string) {
   return { acute, chronic, ratio: acute / chronic };
 }
 
-export type Alert = { level: "critical" | "warning" | "info"; message: string };
+export type Alert = {
+  level: "critical" | "warning" | "info";
+  message: string;
+  /** Stable for one occurrence, so a coach can mark it handled (e.g. "pain:2026-11-02"). */
+  key: string;
+};
 
 export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today: string): Alert[] {
   const alerts: Alert[] = [];
@@ -144,14 +149,27 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
     alerts.push({
       level: "critical",
       message: `Reported arm pain on ${dayLabel(latestFeel.date)}`,
+      key: `pain:${latestFeel.date}`,
     });
   }
+  const latest = (feels: string[]) =>
+    week
+      .filter((l) => l.armFeel && feels.includes(l.armFeel))
+      .reduce((max, l) => (l.date > max ? l.date : max), "");
   const sore = week.filter((l) => l.armFeel === "sore" || l.armFeel === "pain").length;
   if (sore >= 2)
-    alerts.push({ level: "warning", message: `Sore or painful arm ${sore}× in the last 7 days` });
+    alerts.push({
+      level: "warning",
+      message: `Sore or painful arm ${sore}× in the last 7 days`,
+      key: `sore:${latest(["sore", "pain"])}`,
+    });
   const tired = week.filter((l) => l.armFeel === "tired").length;
   if (tired >= 3)
-    alerts.push({ level: "warning", message: `Tired arm ${tired}× in the last 7 days` });
+    alerts.push({
+      level: "warning",
+      message: `Tired arm ${tired}× in the last 7 days`,
+      key: `tired:${latest(["tired"])}`,
+    });
 
   if (birthDate) {
     // Over the daily max, or pitched before the required rest was up (last 14 days).
@@ -163,6 +181,7 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
         alerts.push({
           level: "critical",
           message: `${pitches} pitches on ${dayLabel(date)}: over the Pitch Smart daily max of ${dailyMax} for age ${age}`,
+          key: `over:${date}`,
         });
       }
     }
@@ -175,11 +194,16 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
         alerts.push({
           level: "critical",
           message: `Pitched on ${dayLabel(date)} before the required rest after ${tooSoon[1]} pitches on ${dayLabel(tooSoon[0])}`,
+          key: `rest:${date}`,
         });
       }
     }
   } else if (byDay.size > 0) {
-    alerts.push({ level: "info", message: "Add a birthdate to check Pitch Smart limits" });
+    alerts.push({
+      level: "info",
+      message: "Add a birthdate to check Pitch Smart limits",
+      key: "birthdate",
+    });
   }
 
   const acwr = acuteChronic(logs, today);
@@ -187,6 +211,8 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
     alerts.push({
       level: acwr.ratio > 2 ? "critical" : "warning",
       message: `Throwing volume spike: ${acwr.acute} throws this week vs ${Math.round(acwr.chronic)}/week usual (${acwr.ratio.toFixed(1)}×)`,
+      // One per week of throwing: handling it quiets this spike, not the next one.
+      key: `spike:${addDays(today, -((new Date(`${today}T12:00:00Z`).getUTCDay() + 6) % 7))}`,
     });
   }
 

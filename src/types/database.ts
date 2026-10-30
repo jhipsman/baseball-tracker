@@ -903,6 +903,36 @@ export type Database = {
           },
         ];
       };
+      health_alert_acks: {
+        Row: {
+          acked_at: string;
+          acked_by: string | null;
+          alert_key: string;
+          id: string;
+          note: string | null;
+          org_id: string;
+          player_id: string;
+        };
+        Insert: {
+          acked_at?: string;
+          acked_by?: string | null;
+          alert_key: string;
+          id?: string;
+          note?: string | null;
+          org_id: string;
+          player_id: string;
+        };
+        Update: {
+          acked_at?: string;
+          acked_by?: string | null;
+          alert_key?: string;
+          id?: string;
+          note?: string | null;
+          org_id?: string;
+          player_id?: string;
+        };
+        Relationships: [];
+      };
       organizations: {
         Row: {
           created_at: string;
@@ -1067,6 +1097,39 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      player_health_status: {
+        Row: {
+          org_id: string;
+          plan: Json;
+          player_id: string;
+          reason: string | null;
+          return_date: string | null;
+          status: Database["public"]["Enums"]["health_status"];
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          org_id: string;
+          plan?: Json;
+          player_id: string;
+          reason?: string | null;
+          return_date?: string | null;
+          status?: Database["public"]["Enums"]["health_status"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          org_id?: string;
+          plan?: Json;
+          player_id?: string;
+          reason?: string | null;
+          return_date?: string | null;
+          status?: Database["public"]["Enums"]["health_status"];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
       };
       player_group_members: {
         Row: {
@@ -2279,6 +2342,7 @@ export type Database = {
         | "hitting";
       exercise_group_type: "superset" | "circuit" | "emom" | "amrap";
       game_kind: "league" | "non_league" | "scrimmage" | "tournament" | "playoff";
+      health_status: "full" | "limited" | "out";
       game_status: "scheduled" | "live" | "final" | "postponed" | "canceled";
       home_away: "home" | "away" | "neutral";
       member_status: "active" | "inactive" | "injured";
@@ -2433,6 +2497,7 @@ export const Constants = {
       exercise_group_type: ["superset", "circuit", "emom", "amrap"],
       game_kind: ["league", "non_league", "scrimmage", "tournament", "playoff"],
       game_status: ["scheduled", "live", "final", "postponed", "canceled"],
+      health_status: ["full", "limited", "out"],
       home_away: ["home", "away", "neutral"],
       member_status: ["active", "inactive", "injured"],
       org_role: ["admin", "coach", "trainer", "player", "parent"],

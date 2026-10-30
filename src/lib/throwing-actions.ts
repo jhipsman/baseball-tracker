@@ -89,6 +89,7 @@ export async function logThrowing(input: ThrowingInput): Promise<{ error?: strin
   }
 
   revalidatePath("/player/throwing");
+  revalidatePath("/player");
   revalidatePath("/throwing");
   revalidatePath("/roster", "layout");
   revalidatePath("/parent", "layout");
@@ -103,6 +104,7 @@ export async function deleteThrowing(formData: FormData) {
     .eq("id", String(formData.get("id") ?? ""))
     .eq("org_id", org.id);
   revalidatePath("/player/throwing");
+  revalidatePath("/player");
   revalidatePath("/throwing");
   revalidatePath("/roster", "layout");
   revalidatePath("/parent", "layout");

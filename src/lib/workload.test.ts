@@ -118,7 +118,9 @@ describe("alerts", () => {
 
   it("asks for a birthdate when there are competitive pitches", () => {
     const a = throwingAlerts([log(TODAY, "game", 40)], null, TODAY);
-    expect(a).toEqual([{ level: "info", message: "Add a birthdate to check Pitch Smart limits" }]);
+    expect(a).toEqual([
+      { level: "info", message: "Add a birthdate to check Pitch Smart limits", key: "birthdate" },
+    ]);
   });
 
   it("flags repeated soreness and volume spikes", () => {
@@ -132,5 +134,9 @@ describe("alerts", () => {
     const msgs = throwingAlerts(logs, born, TODAY).map((x) => `${x.level}: ${x.message}`);
     expect(msgs.some((m) => m.startsWith("warning: Sore or painful arm 2×"))).toBe(true);
     expect(msgs.some((m) => m.includes("Throwing volume spike"))).toBe(true);
+    // Keys stay put for the same occurrence so "handled" sticks.
+    expect(throwingAlerts(logs, born, TODAY).map((x) => x.key)).toContain(
+      `sore:${addDays(TODAY, -1)}`,
+    );
   });
 });
