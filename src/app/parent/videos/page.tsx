@@ -18,7 +18,9 @@ export default async function ParentVideosPage({ searchParams }: PageProps<"/par
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{child.firstName}&apos;s videos</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
+          {child.firstName}&apos;s videos
+        </h1>
         <p className="text-sm text-zinc-600">
           Videos the coach has reviewed, with drawings, notes, and feedback.
         </p>

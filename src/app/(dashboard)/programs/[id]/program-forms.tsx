@@ -84,7 +84,9 @@ export function AssignForm({
         onClick={() => toggleSet(ids)}
         className={cn(
           "rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset disabled:opacity-40",
-          on ? "bg-brand-700 text-white ring-brand-700" : "bg-white text-zinc-700 ring-zinc-300",
+          on
+            ? "bg-brand-700 text-on-brand ring-brand-700"
+            : "bg-surface text-zinc-700 ring-zinc-300",
         )}
       >
         {label}
@@ -154,7 +156,7 @@ export function AssignForm({
             name="start_date"
             defaultValue={today}
             required
-            className="mt-1 block h-11 rounded-lg border-0 bg-white px-3 ring-1 ring-inset ring-zinc-300"
+            className="mt-1 block h-11 rounded-lg border-0 bg-surface px-3 ring-1 ring-inset ring-zinc-300"
           />
         </label>
         <SubmitButton pendingLabel="Assigning…" disabled={selectedCount === 0}>

@@ -171,7 +171,7 @@ export function PushSettings({
           >
             <span
               className={cn(
-                "inline-block size-5 rounded-full bg-white shadow transition-transform",
+                "inline-block size-5 rounded-full bg-surface shadow transition-transform",
                 subscribed ? "translate-x-6" : "translate-x-1",
               )}
             />

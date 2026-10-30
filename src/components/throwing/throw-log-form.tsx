@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 const chip = (on: boolean) =>
   cn(
     "min-h-11 rounded-lg px-3 py-2 text-sm font-medium ring-1 ring-inset",
-    on ? "bg-zinc-900 text-white ring-zinc-900" : "bg-white text-zinc-700 ring-zinc-300",
+    on ? "bg-zinc-900 text-zinc-50 ring-zinc-900" : "bg-surface text-zinc-700 ring-zinc-300",
   );
 
 function localDate() {
@@ -98,7 +98,7 @@ export function ThrowLogForm({
           <select
             value={playerId}
             onChange={(e) => setPlayerId(e.target.value)}
-            className="mt-1 block h-11 w-full rounded-lg border-0 bg-white px-3 ring-1 ring-inset ring-zinc-300"
+            className="mt-1 block h-11 w-full rounded-lg border-0 bg-surface px-3 ring-1 ring-inset ring-zinc-300"
           >
             {players.map((p) => (
               <option key={p.id} value={p.id}>
@@ -139,7 +139,7 @@ export function ThrowLogForm({
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="mt-1 block h-11 rounded-lg border-0 bg-white px-3 ring-1 ring-inset ring-zinc-300"
+          className="mt-1 block h-11 rounded-lg border-0 bg-surface px-3 ring-1 ring-inset ring-zinc-300"
         />
       </label>
 
@@ -164,7 +164,7 @@ export function ThrowLogForm({
                 value={pitches}
                 placeholder={showMix && mixTotal ? String(mixTotal) : "0"}
                 onChange={(e) => setPitches(e.target.value.replace(/\D/g, "").slice(0, 3))}
-                className="h-12 w-24 rounded-lg border-0 bg-white text-center text-xl font-semibold tabular-nums ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600"
+                className="h-12 w-24 rounded-lg border-0 bg-surface text-center text-xl font-semibold tabular-nums ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600"
               />
               <button
                 type="button"
@@ -185,7 +185,7 @@ export function ThrowLogForm({
                 value={distance}
                 onChange={(e) => setDistance(e.target.value.replace(/\D/g, "").slice(0, 3))}
                 placeholder="e.g. 180"
-                className="mt-1 block h-11 w-32 rounded-lg border-0 bg-white px-3 tabular-nums ring-1 ring-inset ring-zinc-300"
+                className="mt-1 block h-11 w-32 rounded-lg border-0 bg-surface px-3 tabular-nums ring-1 ring-inset ring-zinc-300"
               />
             </label>
           ) : null}
@@ -209,7 +209,7 @@ export function ThrowLogForm({
                           [p.key]: e.target.value.replace(/\D/g, "").slice(0, 3),
                         }))
                       }
-                      className="mt-0.5 block h-11 w-full rounded-lg border-0 bg-white text-center tabular-nums ring-1 ring-inset ring-zinc-300"
+                      className="mt-0.5 block h-11 w-full rounded-lg border-0 bg-surface text-center tabular-nums ring-1 ring-inset ring-zinc-300"
                     />
                   </label>
                 ))}
@@ -257,7 +257,7 @@ export function ThrowLogForm({
                 "min-h-11 rounded-lg px-3 py-2 text-sm font-semibold ring-1 ring-inset",
                 armFeel === f.key
                   ? cn(f.className, "ring-transparent")
-                  : "bg-white text-zinc-700 ring-zinc-300",
+                  : "bg-surface text-zinc-700 ring-zinc-300",
               )}
             >
               {f.label}
@@ -299,7 +299,7 @@ export function ThrowLogForm({
         type="button"
         disabled={pending}
         onClick={submit}
-        className="h-12 w-full rounded-xl bg-brand-700 text-base font-semibold text-white disabled:opacity-60"
+        className="h-12 w-full rounded-xl bg-brand-700 text-base font-semibold text-on-brand disabled:opacity-60"
       >
         {pending ? "Saving…" : checkIn ? "Save check-in" : "Log session"}
       </button>

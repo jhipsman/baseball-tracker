@@ -23,12 +23,12 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Calendar" };
 
 const STATUS_STYLE: Record<EntryStatus, string> = {
-  completed: "bg-brand-600 text-white",
+  completed: "bg-brand-600 text-on-brand",
   partial: "bg-amber-300 text-amber-950",
   skipped: "bg-zinc-300 text-zinc-700 line-through",
   missed: "bg-red-100 text-red-800 ring-1 ring-inset ring-red-300",
-  today: "bg-white text-zinc-900 ring-2 ring-inset ring-brand-600",
-  upcoming: "bg-white text-zinc-600 ring-1 ring-inset ring-zinc-300",
+  today: "bg-surface text-zinc-900 ring-2 ring-inset ring-brand-600",
+  upcoming: "bg-surface text-zinc-600 ring-1 ring-inset ring-zinc-300",
 };
 const STATUS_LABEL: Record<EntryStatus, string> = {
   completed: "Done",
@@ -101,7 +101,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
     <div className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Calendar</h1>
           <p className="mt-1 text-sm text-zinc-600">
             {SEASON_PHASE_LABELS[org.current_season_phase]} ·{" "}
             {due > 0
@@ -124,7 +124,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
               id="group"
               name="group"
               defaultValue={groupId}
-              className="h-9 rounded-lg border-0 bg-white px-2 text-sm ring-1 ring-inset ring-zinc-300"
+              className="h-9 rounded-lg border-0 bg-surface px-2 text-sm ring-1 ring-inset ring-zinc-300"
             >
               <option value="">All players</option>
               {groups.map((g) => (
@@ -148,7 +148,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
                 aria-current={v === view ? "page" : undefined}
                 className={cn(
                   "rounded-md px-3 py-1.5 capitalize",
-                  v === view ? "bg-white shadow-sm" : "text-zinc-500 hover:text-zinc-800",
+                  v === view ? "bg-surface shadow-sm" : "text-zinc-500 hover:text-zinc-800",
                 )}
               >
                 {v}
@@ -185,7 +185,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
       <Legend />
 
       {roster.length === 0 && practices.length === 0 && games.length === 0 ? (
-        <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-xl bg-surface p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           {group ? `No players in ${group.name} yet.` : "No players on the roster yet."}
         </p>
       ) : view === "week" ? (
@@ -237,7 +237,7 @@ function Legend() {
 }
 
 const PRACTICE_STYLE = "bg-sky-100 text-sky-900 ring-1 ring-inset ring-sky-300";
-const PRACTICE_DRAFT_STYLE = "border border-dashed border-sky-400 bg-white text-sky-900";
+const PRACTICE_DRAFT_STYLE = "border border-dashed border-sky-400 bg-surface text-sky-900";
 
 function PracticePill({ p, compact }: { p: PracticeSummary; compact?: boolean }) {
   const start = parseTime(p.startTime);
@@ -358,11 +358,11 @@ function WeekGrid({
   const programCount = new Set(entries.map((e) => e.programId)).size;
 
   return (
-    <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+    <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
       <table className="w-full min-w-[56rem] table-fixed border-collapse text-sm">
         <thead>
           <tr className="border-b border-zinc-200 text-left">
-            <th className="sticky left-0 z-10 w-48 bg-white px-3 py-2 font-semibold">Player</th>
+            <th className="sticky left-0 z-10 w-48 bg-surface px-3 py-2 font-semibold">Player</th>
             {days.map((d) => (
               <th
                 key={d}
@@ -382,7 +382,7 @@ function WeekGrid({
             <tr className="border-b border-zinc-200 bg-amber-50/40 align-top">
               <th
                 scope="row"
-                className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-medium"
+                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium"
               >
                 Games
               </th>
@@ -408,7 +408,7 @@ function WeekGrid({
             <tr className="border-b border-zinc-200 bg-sky-50/40 align-top">
               <th
                 scope="row"
-                className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-medium"
+                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium"
               >
                 Practices
               </th>
@@ -434,7 +434,7 @@ function WeekGrid({
               <tr key={p.id} className="border-b border-zinc-100 align-top last:border-0">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-normal"
+                  className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-normal"
                 >
                   <span className="block truncate font-medium">{p.name}</span>
                   <span className="block text-xs text-zinc-500">
@@ -485,7 +485,7 @@ function MonthGrid({
   for (const e of entries) byDay.set(e.date, [...(byDay.get(e.date) ?? []), e]);
 
   return (
-    <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+    <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
       <div className="grid min-w-[42rem] grid-cols-7 border-b border-zinc-200 text-center text-xs font-medium text-zinc-500">
         {DAY_OF_WEEK_LABELS.map((d) => (
           <div key={d} className="py-2">
@@ -518,7 +518,7 @@ function MonthGrid({
               <span
                 className={cn(
                   "inline-flex size-6 items-center justify-center rounded-full text-xs font-semibold tabular-nums",
-                  d === today && "bg-brand-700 text-white",
+                  d === today && "bg-brand-700 text-on-brand",
                 )}
               >
                 {Number(d.slice(8))}

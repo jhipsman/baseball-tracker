@@ -98,7 +98,7 @@ export function VideoWorkspace({
 
       <aside className="space-y-4">
         {video.notes ? (
-          <section className="rounded-xl bg-white p-4 text-sm ring-1 ring-zinc-200">
+          <section className="rounded-xl bg-surface p-4 text-sm ring-1 ring-zinc-200">
             <h2 className="font-semibold">Player&apos;s note</h2>
             <p className="mt-1 whitespace-pre-wrap text-zinc-700">{video.notes}</p>
           </section>
@@ -127,7 +127,7 @@ function CoachReview({ video }: { video: VideoDetail }) {
   const reviewed = video.status === "reviewed";
 
   return (
-    <section className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+    <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold">Feedback for {video.playerName.split(" ")[0]}</h2>
         <StatusBadge status={video.status} />
@@ -199,7 +199,7 @@ function PlayerFeedback({ video }: { video: VideoDetail }) {
     );
   }
   return (
-    <section className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+    <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
       <div>
         <h2 className="font-semibold">Coach feedback</h2>
         <p className="text-xs text-zinc-500">
@@ -312,7 +312,7 @@ function AiPanel({
   }
 
   return (
-    <section className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+    <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
       <div>
         <h2 className="font-semibold">AI analysis</h2>
         <p className="mt-1 text-xs text-zinc-500">

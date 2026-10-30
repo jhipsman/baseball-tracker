@@ -25,7 +25,7 @@ export function CreateGroupForm() {
           placeholder="e.g. Pitchers, JV, Catchers"
           maxLength={60}
           required
-          className="block h-11 min-w-0 flex-1 rounded-lg border-0 bg-white px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
+          className="block h-11 min-w-0 flex-1 rounded-lg border-0 bg-surface px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
         />
         <SubmitButton pending={pending} pendingLabel="Creating…">
           Create group

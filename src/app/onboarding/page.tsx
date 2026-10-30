@@ -30,7 +30,7 @@ export default async function OnboardingPage() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12">
       {invited ? (
-        <div className="mb-6 w-full max-w-md rounded-2xl bg-white p-6 shadow-sm ring-1 ring-brand-500 sm:p-8">
+        <div className="mb-6 w-full max-w-md rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-brand-500 sm:p-8">
           <h1 className="text-xl font-semibold">You&apos;ve been invited</h1>
           <p className="mt-1 text-sm text-zinc-600">Join your team to get started.</p>
           <ul className="mt-4 space-y-3">
@@ -51,7 +51,7 @@ export default async function OnboardingPage() {
           </ul>
         </div>
       ) : null}
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
+      <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
         {invited ? (
           // Invitees almost never want a new organization: keep it one tap away, not in the way.
           <details>

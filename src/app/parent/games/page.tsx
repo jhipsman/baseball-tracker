@@ -23,7 +23,9 @@ export default async function ParentGamesPage({ searchParams }: PageProps<"/pare
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{child.firstName}&apos;s games</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
+          {child.firstName}&apos;s games
+        </h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent/games" />
         <ParentSectionTabs
           section="schedule"

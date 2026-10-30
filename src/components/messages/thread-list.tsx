@@ -17,11 +17,13 @@ export function ThreadList({
 }) {
   if (!threads.length) {
     return (
-      <p className="rounded-xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">{empty}</p>
+      <p className="rounded-xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+        {empty}
+      </p>
     );
   }
   return (
-    <ul className="divide-y divide-zinc-100 overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200">
+    <ul className="divide-y divide-zinc-100 overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200">
       {threads.map((t) => (
         <li key={t.id}>
           <Link

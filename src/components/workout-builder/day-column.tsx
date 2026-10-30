@@ -57,13 +57,13 @@ export const DayColumn = memo(function DayColumn({
             onChange={(e) => update({ name: e.target.value })}
             placeholder="Day name"
             aria-label="Day name"
-            className="min-w-0 flex-1 rounded-md border-0 bg-transparent px-1 py-1 text-sm font-semibold hover:bg-white focus:bg-white focus:ring-2 focus:ring-brand-600"
+            className="min-w-0 flex-1 rounded-md border-0 bg-transparent px-1 py-1 text-sm font-semibold hover:bg-surface focus:bg-surface focus:ring-2 focus:ring-brand-600"
           />
           <button
             type="button"
             onClick={() => dispatch({ type: "duplicateDay", dayId: day.id })}
             title="Duplicate day"
-            className="rounded px-1.5 py-1 text-xs text-zinc-500 hover:bg-white hover:text-zinc-800"
+            className="rounded px-1.5 py-1 text-xs text-zinc-500 hover:bg-surface hover:text-zinc-800"
           >
             Copy
           </button>
@@ -77,7 +77,7 @@ export const DayColumn = memo(function DayColumn({
               }}
               title="Delete day"
               aria-label={`Delete ${day.name || "day"}`}
-              className="rounded px-1.5 py-1 text-sm text-zinc-400 hover:bg-white hover:text-red-600"
+              className="rounded px-1.5 py-1 text-sm text-zinc-400 hover:bg-surface hover:text-red-600"
             >
               ×
             </button>
@@ -88,7 +88,7 @@ export const DayColumn = memo(function DayColumn({
             value={day.sessionType}
             onChange={(e) => update({ sessionType: e.target.value as BuilderDay["sessionType"] })}
             aria-label="Session type"
-            className="h-8 min-w-0 flex-1 rounded-md border-0 bg-white px-1.5 text-xs ring-1 ring-inset ring-zinc-200"
+            className="h-8 min-w-0 flex-1 rounded-md border-0 bg-surface px-1.5 text-xs ring-1 ring-inset ring-zinc-200"
           >
             {SESSION_TYPES.map((t) => (
               <option key={t} value={t}>
@@ -102,7 +102,7 @@ export const DayColumn = memo(function DayColumn({
               update({ dayOfWeek: e.target.value === "" ? null : Number(e.target.value) })
             }
             aria-label="Day of week"
-            className="h-8 w-20 rounded-md border-0 bg-white px-1.5 text-xs ring-1 ring-inset ring-zinc-200"
+            className="h-8 w-20 rounded-md border-0 bg-surface px-1.5 text-xs ring-1 ring-inset ring-zinc-200"
           >
             <option value="">Any day</option>
             {DAY_OF_WEEK_LABELS.map((d, i) => (

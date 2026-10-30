@@ -20,7 +20,7 @@ export function VideoGrid({
 }) {
   if (videos.length === 0) {
     return (
-      <div className="rounded-xl bg-white p-6 text-sm text-zinc-600 ring-1 ring-zinc-200">
+      <div className="rounded-xl bg-surface p-6 text-sm text-zinc-600 ring-1 ring-zinc-200">
         {empty}
       </div>
     );
@@ -31,7 +31,7 @@ export function VideoGrid({
         <li key={v.id}>
           <Link
             href={`${hrefBase}/${v.id}`}
-            className="group block overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200 hover:ring-brand-500"
+            className="group block overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200 hover:ring-brand-500"
           >
             <div className="relative aspect-video bg-zinc-900">
               {v.thumbUrl ? (

@@ -23,11 +23,11 @@ export async function NewThreadPage({ base, to }: { base: string; to?: string | 
         <Link href={base} className="text-sm font-medium text-brand-700">
           ← Messages
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">
           {isStaff ? "New message" : "Message a coach"}
         </h1>
       </div>
-      <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+      <div className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
         <NewThreadForm
           recipients={recipients}
           groups={isStaff ? dir.groups : []}

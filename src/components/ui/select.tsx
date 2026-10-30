@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 export const selectClass =
-  "block h-11 rounded-lg border-0 bg-white px-3 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
+  "block h-11 rounded-lg border-0 bg-surface px-3 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
 
 export function SelectField({
   label,

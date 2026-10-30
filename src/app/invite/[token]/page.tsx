@@ -15,7 +15,7 @@ function ContinueLink() {
   return (
     <Link
       href="/"
-      className="flex h-11 w-full items-center justify-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-300 ring-inset hover:bg-zinc-50"
+      className="flex h-11 w-full items-center justify-center rounded-lg bg-surface px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-300 ring-inset hover:bg-zinc-50"
     >
       Continue to Diamond Program
     </Link>
@@ -127,7 +127,7 @@ export default async function InvitePage({ params, searchParams }: PageProps<"/i
         <span aria-hidden className="inline-block size-6 rotate-45 rounded-sm bg-brand-700" />
         Diamond Program
       </p>
-      <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
+      <div className="w-full max-w-sm rounded-2xl bg-surface p-6 shadow-sm ring-1 ring-zinc-200 sm:p-8">
         <h1 className="mb-4 text-xl font-semibold">{title}</h1>
         {body}
       </div>

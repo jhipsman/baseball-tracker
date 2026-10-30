@@ -74,7 +74,7 @@ export function SortableTable({
     sort.key === key ? (sort.asc ? "ascending" : "descending") : undefined;
 
   return (
-    <div className="rounded-xl bg-white ring-1 ring-zinc-200">
+    <div className="rounded-xl bg-surface ring-1 ring-zinc-200">
       <div className="overflow-x-auto">
         <table className="w-full text-sm tabular-nums">
           <caption className="px-3 pt-3 text-left text-sm font-semibold sm:px-4">{caption}</caption>
@@ -83,7 +83,7 @@ export function SortableTable({
               <th
                 scope="col"
                 aria-sort={aria("name")}
-                className="sticky left-0 z-10 bg-white px-3 py-2 text-left font-medium sm:px-4"
+                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium sm:px-4"
               >
                 <button
                   type="button"
@@ -129,7 +129,7 @@ export function SortableTable({
                   scope="row"
                   className={cn(
                     "sticky left-0 z-10 max-w-40 truncate px-3 py-2 text-left font-medium sm:px-4",
-                    r.highlight ? "bg-brand-50" : "bg-white",
+                    r.highlight ? "bg-brand-50" : "bg-surface",
                   )}
                 >
                   {r.href ? (
@@ -158,7 +158,10 @@ export function SortableTable({
           {totals ? (
             <tfoot>
               <tr className="border-t border-zinc-300 font-semibold">
-                <th scope="row" className="sticky left-0 z-10 bg-white px-3 py-2 text-left sm:px-4">
+                <th
+                  scope="row"
+                  className="sticky left-0 z-10 bg-surface px-3 py-2 text-left sm:px-4"
+                >
                   Team
                 </th>
                 {columns.map((c) => (

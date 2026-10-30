@@ -20,7 +20,7 @@ export default async function EditExercisePage({ params }: PageProps<"/exercises
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Edit {exercise.name}</h1>
+      <h1 className="mb-6 text-2xl font-medium tracking-tight sm:text-3xl">Edit {exercise.name}</h1>
       <ExerciseForm exercise={exercise} />
     </div>
   );

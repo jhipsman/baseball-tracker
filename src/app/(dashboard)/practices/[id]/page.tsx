@@ -44,7 +44,7 @@ export default async function PracticeBuilderPage({ params }: PageProps<"/practi
       <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">{plan.title}</h1>
+            <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">{plan.title}</h1>
             <span
               className={cn(
                 "rounded-full px-2 py-0.5 text-xs font-semibold",
@@ -79,7 +79,7 @@ export default async function PracticeBuilderPage({ params }: PageProps<"/practi
       <div className="mt-5 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_auto_1fr] lg:gap-x-6">
         <div className="lg:col-start-2 lg:row-start-1">
           {plan.isTemplate ? (
-            <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+            <div className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
               <p className="font-semibold">Use this template</p>
               <p className="mb-3 text-xs text-zinc-600">
                 Creates a draft practice with these blocks on the date you pick.
@@ -105,7 +105,7 @@ export default async function PracticeBuilderPage({ params }: PageProps<"/practi
           />
         </div>
 
-        <details className="group rounded-xl bg-white ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-2">
+        <details className="group rounded-xl bg-surface ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-2">
           <summary className="flex cursor-pointer items-center justify-between gap-2 p-4 font-semibold">
             Details
             <span className="text-xs font-normal text-zinc-500 group-open:hidden">
@@ -122,7 +122,7 @@ export default async function PracticeBuilderPage({ params }: PageProps<"/practi
           </div>
         </details>
 
-        <div className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-3">
+        <div className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-3">
           <p className="font-semibold">More</p>
           {plan.isTemplate ? null : <DuplicateForm id={plan.id} defaultDate={nextWeek} />}
           {plan.isTemplate ? null : <SaveAsTemplateButton id={plan.id} />}

@@ -49,7 +49,7 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
     <div className="max-w-6xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Exercise library</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Exercise library</h1>
           <p className="mt-1 text-sm text-zinc-600">
             {exercises.length} exercise{exercises.length === 1 ? "" : "s"}
             {category ? ` in ${CATEGORY_LABELS[category]}` : ""}
@@ -67,13 +67,13 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
               type="search"
               defaultValue={q}
               placeholder="Search exercises…"
-              className="block h-11 w-full rounded-lg border-0 bg-white px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
+              className="block h-11 w-full rounded-lg border-0 bg-surface px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
             />
           </form>
           {isStaff ? (
             <Link
               href="/exercises/new"
-              className="inline-flex h-11 shrink-0 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+              className="inline-flex h-11 shrink-0 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
             >
               New exercise
             </Link>
@@ -89,8 +89,8 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-inset",
               c === category
-                ? "bg-brand-700 text-white ring-brand-700"
-                : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                ? "bg-brand-700 text-on-brand ring-brand-700"
+                : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
             )}
           >
             {c ? CATEGORY_LABELS[c] : "All"}
@@ -103,7 +103,10 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
       ) : (
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {exercises.map((ex) => (
-            <li key={ex.id} className="flex flex-col rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+            <li
+              key={ex.id}
+              className="flex flex-col rounded-xl bg-surface p-4 ring-1 ring-zinc-200"
+            >
               <div className="flex items-start justify-between gap-2">
                 <h2 className="min-w-0 font-medium">{ex.name}</h2>
                 <span className="flex shrink-0 flex-wrap justify-end gap-1">

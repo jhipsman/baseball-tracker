@@ -43,7 +43,7 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
       <Link href={`/games/${id}`} className="text-sm text-brand-700 hover:underline">
         ← Game
       </Link>
-      <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+      <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">
         Live: {matchupLabel(game.homeAway, game.opponent)}
       </h1>
     </div>

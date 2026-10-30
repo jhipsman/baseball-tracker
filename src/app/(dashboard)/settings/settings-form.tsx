@@ -62,7 +62,7 @@ export function SettingsForm({
           nothing is deleted, so you can turn it back on any time. Programs, workouts, the calendar,
           and the roster are always on.
         </p>
-        <ul className="divide-y divide-zinc-100 rounded-xl bg-white ring-1 ring-zinc-200">
+        <ul className="divide-y divide-zinc-100 rounded-xl bg-surface ring-1 ring-zinc-200">
           {MODULES.map((m) => (
             <li key={m.key}>
               <label className="flex cursor-pointer items-start gap-3 p-4">

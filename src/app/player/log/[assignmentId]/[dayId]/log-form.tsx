@@ -61,7 +61,7 @@ type ExState = { sets: SetRow[]; notes: string; showNotes: boolean; unit: Distan
 type Field = Exclude<keyof SetRow, "done">;
 
 const cellInput =
-  "h-12 w-full min-w-0 rounded-lg border-0 bg-white px-2 text-center text-base tabular-nums ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600";
+  "h-12 w-full min-w-0 rounded-lg border-0 bg-surface px-2 text-center text-base tabular-nums ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600";
 
 /** Which inputs each tracking type shows, left to right. */
 function columnsFor(type: TrackingType, unit: DistanceUnit) {
@@ -346,7 +346,7 @@ export function LogForm({
             <li
               key={it.programExerciseId}
               className={cn(
-                "rounded-2xl bg-white p-4 ring-1 ring-zinc-200",
+                "rounded-2xl bg-surface p-4 ring-1 ring-zinc-200",
                 it.groupType && "border-l-4 border-l-sky-500",
               )}
             >
@@ -402,7 +402,7 @@ export function LogForm({
                     onChange={(e) =>
                       updateEx(it.programExerciseId, { unit: e.target.value as DistanceUnit })
                     }
-                    className="h-9 rounded-lg border-0 bg-white px-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300"
+                    className="h-9 rounded-lg border-0 bg-surface px-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300"
                   >
                     {DISTANCE_UNITS.map((u) => (
                       <option key={u} value={u}>
@@ -455,7 +455,7 @@ export function LogForm({
                       className={cn(
                         "flex h-12 w-12 items-center justify-center rounded-lg text-xl font-bold",
                         row.done
-                          ? "bg-brand-700 text-white"
+                          ? "bg-brand-700 text-on-brand"
                           : "bg-zinc-100 text-zinc-400 ring-1 ring-inset ring-zinc-200",
                       )}
                     >
@@ -525,7 +525,7 @@ export function LogForm({
         })}
       </ol>
 
-      <section className="space-y-4 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="space-y-4 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <h2 className="font-semibold">Wrap up</h2>
         <fieldset>
           <legend className="text-sm font-medium text-zinc-800">
@@ -541,7 +541,7 @@ export function LogForm({
                 className={cn(
                   "h-12 rounded-lg text-base font-semibold tabular-nums",
                   rpe === n
-                    ? "bg-brand-700 text-white"
+                    ? "bg-brand-700 text-on-brand"
                     : "bg-zinc-100 text-zinc-700 ring-1 ring-inset ring-zinc-200",
                 )}
               >
@@ -576,7 +576,7 @@ export function LogForm({
         </p>
       ) : null}
 
-      <div className="sticky bottom-20 z-10 space-y-2 rounded-2xl bg-white/95 p-3 shadow-lg ring-1 ring-zinc-200 backdrop-blur">
+      <div className="sticky bottom-20 z-10 space-y-2 rounded-2xl bg-surface/95 p-3 shadow-lg ring-1 ring-zinc-200 backdrop-blur">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
             {total > 0 ? `${done}/${total} sets done` : "Session"}
@@ -610,7 +610,7 @@ export function LogForm({
             type="button"
             disabled={pending}
             onClick={() => submit(finishStatus)}
-            className="h-14 flex-1 rounded-xl bg-brand-700 text-base font-semibold text-white disabled:opacity-60"
+            className="h-14 flex-1 rounded-xl bg-brand-700 text-base font-semibold text-on-brand disabled:opacity-60"
           >
             {pending ? "Saving…" : existing ? "Update workout" : "Finish workout"}
           </button>

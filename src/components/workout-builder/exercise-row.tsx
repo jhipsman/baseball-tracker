@@ -18,7 +18,7 @@ const GROUP_BAR: Record<string, string> = {
 };
 
 const inputClass =
-  "block h-9 w-full rounded-md border-0 bg-white px-2 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm";
+  "block h-9 w-full rounded-md border-0 bg-surface px-2 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm";
 
 function toInt(value: string): number | null {
   const n = Number.parseInt(value, 10);
@@ -101,7 +101,7 @@ export const ExerciseRow = memo(function ExerciseRow({
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
       className={cn(
-        "relative rounded-lg bg-white",
+        "relative rounded-lg bg-surface",
         selected ? "ring-2 ring-brand-600" : "ring-1 ring-zinc-200",
         item.groupId && "border-l-4",
         item.groupType && GROUP_BAR[item.groupType],

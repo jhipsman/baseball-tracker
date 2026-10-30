@@ -25,8 +25,8 @@ export function SeasonFilter({
     cn(
       "shrink-0 rounded-full px-3 py-1 text-sm font-medium ring-1 ring-inset",
       on
-        ? "bg-zinc-900 text-white ring-zinc-900"
-        : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+        ? "bg-zinc-900 text-zinc-50 ring-zinc-900"
+        : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
     );
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -57,7 +57,7 @@ export function SeasonFilter({
         >
           <span
             className={cn(
-              "absolute top-0.5 size-4 rounded-full bg-white shadow transition-all",
+              "absolute top-0.5 size-4 rounded-full bg-surface shadow transition-all",
               includeScrimmages ? "left-4.5" : "left-0.5",
             )}
           />

@@ -91,7 +91,7 @@ export function LiveScoring(props: Props) {
 
   if (status === "scheduled") {
     return (
-      <section className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <h2 className="font-semibold">Live scoring</h2>
         <p className="text-sm text-zinc-600">
           Keep score from the dugout. Players and parents watching the game page see it update.
@@ -126,7 +126,7 @@ export function LiveScoring(props: Props) {
 
   if (status === "final" && !ending) {
     return (
-      <section className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="font-semibold">Final score</h2>
           <div className="flex gap-2">
@@ -157,7 +157,7 @@ export function LiveScoring(props: Props) {
   return (
     <section
       data-testid="live-scoring"
-      className="space-y-4 rounded-2xl bg-white p-4 ring-2 ring-red-500"
+      className="space-y-4 rounded-2xl bg-surface p-4 ring-2 ring-red-500"
     >
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-semibold">
@@ -233,7 +233,7 @@ export function LiveScoring(props: Props) {
                 aria-label={`Take away a run from ${name}`}
                 disabled={inInning === 0}
                 onClick={() => queue(addRuns(line, inning, side, -1), inning)}
-                className="size-14 shrink-0 rounded-xl bg-white text-3xl font-bold ring-1 ring-zinc-300 active:bg-zinc-100 disabled:opacity-40"
+                className="size-14 shrink-0 rounded-xl bg-surface text-3xl font-bold ring-1 ring-zinc-300 active:bg-zinc-100 disabled:opacity-40"
               >
                 −
               </button>
@@ -243,8 +243,8 @@ export function LiveScoring(props: Props) {
                 data-testid={`add-run-${side}`}
                 onClick={() => queue(addRuns(line, inning, side, 1), inning)}
                 className={cn(
-                  "size-14 shrink-0 rounded-xl text-3xl font-bold text-white active:opacity-80",
-                  side === "us" ? "bg-brand-700" : "bg-zinc-800",
+                  "size-14 shrink-0 rounded-xl text-3xl font-bold active:opacity-80",
+                  side === "us" ? "bg-brand-700 text-on-brand" : "bg-neutral-700 text-white",
                 )}
               >
                 +
@@ -329,7 +329,7 @@ function EndGameForm({
     });
   };
   const input =
-    "block h-14 w-full rounded-lg border-0 bg-white text-center text-2xl font-bold tabular-nums ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600";
+    "block h-14 w-full rounded-lg border-0 bg-surface text-center text-2xl font-bold tabular-nums ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600";
   return (
     <form onSubmit={submit} className="space-y-3 rounded-xl bg-zinc-50 p-3">
       <p className="text-sm font-semibold">Final score</p>

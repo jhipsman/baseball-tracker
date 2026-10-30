@@ -49,9 +49,9 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Me</h1>
+      <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Me</h1>
 
-      <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <p className="text-sm text-zinc-500">Consistency, last 28 days</p>
         <p className="mt-1 text-4xl font-semibold">
           {c28.rate == null ? "—" : `${Math.round(c28.rate * 100)}%`}
@@ -63,7 +63,7 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
 
       <nav
         aria-label="My records"
-        className="divide-y divide-zinc-100 rounded-2xl bg-white ring-1 ring-zinc-200"
+        className="divide-y divide-zinc-100 rounded-2xl bg-surface ring-1 ring-zinc-200"
       >
         <MeLink href="/player/history" hint="Every workout you've logged">
           Workout history →
@@ -90,7 +90,7 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
             ))}
           </div>
           {selected ? (
-            <div id="chart" className="rounded-2xl bg-white p-3 ring-1 ring-zinc-200">
+            <div id="chart" className="rounded-2xl bg-surface p-3 ring-1 ring-zinc-200">
               <h3 className="text-sm font-semibold">
                 {METRICS.find((m) => m.key === selected)!.label} over time
               </h3>
@@ -102,10 +102,10 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
       {membership.role === "player" ? (
         <ParentsCard supabase={supabase} orgId={org.id} userId={user.id} />
       ) : null}
-      <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <ProfileForm fullName={profile?.full_name ?? ""} />
       </section>
-      <dl className="divide-y divide-zinc-100 rounded-2xl bg-white px-4 ring-1 ring-zinc-200">
+      <dl className="divide-y divide-zinc-100 rounded-2xl bg-surface px-4 ring-1 ring-zinc-200">
         {facts.map(([k, v]) => (
           <div key={k} className="flex justify-between gap-4 py-3 text-sm">
             <dt className="text-zinc-500">{k}</dt>

@@ -88,7 +88,7 @@ export default async function BoxScoreEntryPage({ params }: PageProps<"/games/[i
         >
           ← Back to game
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">
           Box score: {game.homeAway === "away" ? "@" : "vs"} {game.opponent}
         </h1>
         <p className="mt-1 text-sm text-zinc-600">
@@ -99,7 +99,7 @@ export default async function BoxScoreEntryPage({ params }: PageProps<"/games/[i
       </div>
 
       {roster.length === 0 ? (
-        <p className="rounded-xl bg-white p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-xl bg-surface p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
           No players on the roster yet.{" "}
           <Link href="/roster" className="font-semibold text-brand-700">
             Invite players

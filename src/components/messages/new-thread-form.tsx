@@ -84,8 +84,8 @@ export function NewThreadForm({
                   className={cn(
                     "rounded-full px-3 py-1 text-xs font-semibold ring-1 disabled:opacity-40",
                     all
-                      ? "bg-brand-700 text-white ring-brand-700"
-                      : "bg-white text-zinc-700 ring-zinc-300",
+                      ? "bg-brand-700 text-on-brand ring-brand-700"
+                      : "bg-surface text-zinc-700 ring-zinc-300",
                   )}
                 >
                   {g.name} ({ids.length})
@@ -102,7 +102,7 @@ export function NewThreadForm({
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search people"
             aria-label="Search people"
-            className="block h-10 w-full rounded-lg border-0 bg-white px-3 text-base ring-1 ring-zinc-300 ring-inset focus:ring-2 focus:ring-brand-600 sm:text-sm"
+            className="block h-10 w-full rounded-lg border-0 bg-surface px-3 text-base ring-1 ring-zinc-300 ring-inset focus:ring-2 focus:ring-brand-600 sm:text-sm"
           />
         ) : null}
 
@@ -122,7 +122,7 @@ export function NewThreadForm({
                   {s.title}
                 </p>
               ) : null}
-              <ul className="max-h-72 divide-y divide-zinc-100 overflow-y-auto rounded-xl bg-white ring-1 ring-zinc-200">
+              <ul className="max-h-72 divide-y divide-zinc-100 overflow-y-auto rounded-xl bg-surface ring-1 ring-zinc-200">
                 {people.map((r) => (
                   <li key={r.id}>
                     <label className="flex cursor-pointer items-center gap-3 px-3 py-2.5 hover:bg-zinc-50">

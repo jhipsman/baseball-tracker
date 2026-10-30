@@ -146,8 +146,8 @@ export function VideoUploadForm({
               onClick={() => setType(t.key)}
               className={
                 type === t.key
-                  ? "h-10 rounded-full bg-brand-700 px-4 text-sm font-semibold text-white"
-                  : "h-10 rounded-full bg-white px-4 text-sm font-medium text-zinc-700 ring-1 ring-zinc-300"
+                  ? "h-10 rounded-full bg-brand-700 px-4 text-sm font-semibold text-on-brand"
+                  : "h-10 rounded-full bg-surface px-4 text-sm font-medium text-zinc-700 ring-1 ring-zinc-300"
               }
             >
               {t.label}

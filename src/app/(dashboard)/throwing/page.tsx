@@ -73,7 +73,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
   return (
     <div className="max-w-7xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Throwing &amp; arm care</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Throwing &amp; arm care</h1>
         <p className="mt-1 max-w-3xl text-sm text-zinc-600">{PITCH_SMART_NOTE}</p>
       </div>
 
@@ -86,8 +86,8 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
               className={cn(
                 "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
                 g.id === groupId
-                  ? "bg-brand-700 text-white ring-brand-700"
-                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                  ? "bg-brand-700 text-on-brand ring-brand-700"
+                  : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
               )}
             >
               {g.name}
@@ -98,7 +98,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-4">
-          <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
             <h2 className="font-semibold">Alerts</h2>
             {urgent.length === 0 ? (
               <p className="mt-2 text-sm text-zinc-500">No workload or arm alerts right now.</p>
@@ -128,11 +128,11 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
             ) : null}
           </section>
 
-          <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+          <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
             <table className="w-full min-w-[52rem] text-sm">
               <thead>
                 <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-500">
-                  <th className="sticky left-0 z-10 bg-white px-4 py-2.5">Player</th>
+                  <th className="sticky left-0 z-10 bg-surface px-4 py-2.5">Player</th>
                   <th className="px-3 py-2.5">Age</th>
                   <th className="px-3 py-2.5">Today</th>
                   <th className="px-3 py-2.5">Last outing</th>
@@ -144,7 +144,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
               <tbody>
                 {sorted.map((s) => (
                   <tr key={s.player.id} className="border-b border-zinc-100 last:border-0">
-                    <td className="sticky left-0 z-10 bg-white px-4 py-2.5">
+                    <td className="sticky left-0 z-10 bg-surface px-4 py-2.5">
                       <Link
                         href={`/roster/${s.player.id}#throwing`}
                         className="font-medium hover:underline"
@@ -214,7 +214,7 @@ export default async function ThrowingPage({ searchParams }: PageProps<"/throwin
           </p>
         </div>
 
-        <aside className="rounded-xl bg-white p-5 ring-1 ring-zinc-200 lg:self-start">
+        <aside className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200 lg:self-start">
           <h2 className="mb-3 font-semibold">Log pitch counts</h2>
           {players.length === 0 ? (
             <p className="text-sm text-zinc-500">No players yet.</p>

@@ -26,10 +26,10 @@ export function TestingForm({
           name="assessment_date"
           defaultValue={today}
           required
-          className="mt-1 block h-10 rounded-lg border-0 bg-white px-3 ring-1 ring-inset ring-zinc-300"
+          className="mt-1 block h-10 rounded-lg border-0 bg-surface px-3 ring-1 ring-inset ring-zinc-300"
         />
       </label>
-      <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+      <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-zinc-200 text-left text-xs text-zinc-500">
@@ -60,7 +60,7 @@ export function TestingForm({
                       placeholder={
                         p.latest[k] != null ? `last ${formatMetric(k, p.latest[k])}` : "—"
                       }
-                      className="block h-10 w-full min-w-28 rounded-lg border-0 bg-white px-2 text-base tabular-nums ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-300 focus:ring-2 focus:ring-brand-600 sm:text-sm"
+                      className="block h-10 w-full min-w-28 rounded-lg border-0 bg-surface px-2 text-base tabular-nums ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-300 focus:ring-2 focus:ring-brand-600 sm:text-sm"
                     />
                   </td>
                 ))}

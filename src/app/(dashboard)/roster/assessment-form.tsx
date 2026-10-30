@@ -22,7 +22,7 @@ export function AssessmentForm({ playerId, today }: { playerId: string; today: s
           name="assessment_date"
           defaultValue={today}
           required
-          className="mt-1 block h-10 rounded-lg border-0 bg-white px-3 ring-1 ring-inset ring-zinc-300"
+          className="mt-1 block h-10 rounded-lg border-0 bg-surface px-3 ring-1 ring-inset ring-zinc-300"
         />
       </label>
       {GROUPS.map((g) => (
@@ -38,7 +38,7 @@ export function AssessmentForm({ playerId, today }: { playerId: string; today: s
                   name={m.key}
                   inputMode="decimal"
                   placeholder={m.key === "height_in" ? "73 = 6'1\"" : "—"}
-                  className="mt-0.5 block h-10 w-full rounded-lg border-0 bg-white px-2 text-base tabular-nums ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600 sm:text-sm"
+                  className="mt-0.5 block h-10 w-full rounded-lg border-0 bg-surface px-2 text-base tabular-nums ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600 sm:text-sm"
                 />
               </label>
             ))}

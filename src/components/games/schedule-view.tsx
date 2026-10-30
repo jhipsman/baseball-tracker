@@ -52,7 +52,7 @@ export function ScheduleView({
       <section className="space-y-2">
         <h2 className="font-semibold">Upcoming</h2>
         {items.length === 0 ? (
-          <p className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+          <p className="rounded-2xl bg-surface p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
             No games on the schedule yet. The coach&apos;s schedule shows up here.
           </p>
         ) : (
@@ -61,7 +61,7 @@ export function ScheduleView({
               item.kind === "game" ? (
                 <ul
                   key={item.game.id}
-                  className="overflow-hidden rounded-2xl bg-white ring-1 ring-zinc-200"
+                  className="overflow-hidden rounded-2xl bg-surface ring-1 ring-zinc-200"
                 >
                   <GameRow g={item.game} href={hrefFor(item.game)} today={today} />
                 </ul>
@@ -69,7 +69,7 @@ export function ScheduleView({
                 <div
                   key={item.t.id}
                   data-testid="tournament-block"
-                  className="overflow-hidden rounded-2xl bg-white ring-1 ring-amber-200"
+                  className="overflow-hidden rounded-2xl bg-surface ring-1 ring-amber-200"
                 >
                   <div className="space-y-2 bg-amber-50/60 p-4">
                     <TournamentSummary t={item.t} record={tournamentRecord(games, item.t.id)} />
@@ -106,7 +106,7 @@ export function ScheduleView({
               .filter((t) => t.endDate < today)
               .toReversed()
               .map((t) => (
-                <li key={t.id} className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+                <li key={t.id} className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
                   <TournamentSummary t={t} record={tournamentRecord(games, t.id)} />
                 </li>
               ))}

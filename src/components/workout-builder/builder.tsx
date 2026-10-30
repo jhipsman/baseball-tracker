@@ -322,8 +322,8 @@ export function WorkoutBuilder({
                 className={cn(
                   "shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium",
                   i === activeWeek
-                    ? "bg-zinc-900 text-white"
-                    : "bg-white text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50",
+                    ? "bg-zinc-900 text-zinc-50"
+                    : "bg-surface text-zinc-700 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50",
                 )}
               >
                 Week {i + 1}
@@ -350,7 +350,7 @@ export function WorkoutBuilder({
               }
               placeholder="Week label (e.g. Deload)"
               aria-label="Week label"
-              className="h-8 w-44 rounded-md border-0 bg-white px-2 text-sm ring-1 ring-inset ring-zinc-200"
+              className="h-8 w-44 rounded-md border-0 bg-surface px-2 text-sm ring-1 ring-inset ring-zinc-200"
             />
             <button
               type="button"
@@ -411,7 +411,7 @@ export function WorkoutBuilder({
 
       {/* Grouping toolbar */}
       {selection.length > 0 ? (
-        <div className="fixed inset-x-4 bottom-4 z-30 mx-auto flex max-w-xl flex-wrap items-center gap-2 rounded-xl bg-zinc-900 p-2 pl-4 text-sm text-white shadow-lg">
+        <div className="fixed inset-x-4 bottom-4 z-30 mx-auto flex max-w-xl flex-wrap items-center gap-2 rounded-xl bg-zinc-900 p-2 pl-4 text-sm text-zinc-50 shadow-lg">
           <span className="mr-auto">
             {selection.length} selected
             {selection.length < 2 ? " · pick one more to group" : ""}
@@ -422,7 +422,7 @@ export function WorkoutBuilder({
               type="button"
               disabled={selection.length < 2}
               onClick={() => dispatch({ type: "groupSelected", groupType: g })}
-              className="rounded-md bg-white/10 px-2.5 py-1.5 font-medium hover:bg-white/20 disabled:opacity-40"
+              className="rounded-md bg-zinc-50/15 px-2.5 py-1.5 font-medium hover:bg-zinc-50/25 disabled:opacity-40"
             >
               {GROUP_LABELS[g]}
             </button>
@@ -430,7 +430,7 @@ export function WorkoutBuilder({
           <button
             type="button"
             onClick={() => dispatch({ type: "clearSelection" })}
-            className="rounded-md px-2 py-1.5 text-zinc-300 hover:text-white"
+            className="rounded-md px-2 py-1.5 text-zinc-300 hover:text-zinc-50"
           >
             Cancel
           </button>
@@ -442,7 +442,7 @@ export function WorkoutBuilder({
         type="button"
         onClick={() => setLibraryOpen(true)}
         className={cn(
-          "fixed right-4 bottom-4 z-20 rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-white shadow-lg lg:hidden",
+          "fixed right-4 bottom-4 z-20 rounded-full bg-brand-700 px-5 py-3 text-sm font-semibold text-on-brand shadow-lg lg:hidden",
           selection.length > 0 && "hidden",
         )}
       >
@@ -474,7 +474,7 @@ export function WorkoutBuilder({
 
       <DragOverlay dropAnimation={null}>
         {active ? (
-          <div className="flex w-64 cursor-grabbing items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-lg ring-2 ring-brand-500">
+          <div className="flex w-64 cursor-grabbing items-center gap-2 rounded-lg bg-surface px-3 py-2 shadow-lg ring-2 ring-brand-500">
             {active.kind === "library" ? (
               <ExerciseCardBody exercise={active.exercise} />
             ) : (

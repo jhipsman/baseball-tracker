@@ -49,7 +49,7 @@ export default async function PracticePrintPage({ params }: PageProps<"/practice
         <PrintButton />
       </div>
 
-      <div className="print-sheet max-w-4xl rounded-xl bg-white p-6 text-zinc-900 ring-1 ring-zinc-200">
+      <div className="print-sheet max-w-4xl rounded-xl bg-surface p-6 text-zinc-900 ring-1 ring-zinc-200">
         <header className="flex flex-wrap items-end justify-between gap-2 border-b-2 border-zinc-900 pb-2">
           <div>
             <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">

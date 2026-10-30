@@ -24,7 +24,7 @@ export default async function NewGamePage({ searchParams }: PageProps<"/games/ne
       <Link href="/games" className="text-sm text-zinc-500 hover:text-zinc-800">
         ← Games
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight">Add game</h1>
+      <h1 className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl">Add game</h1>
       <p className="mt-1 text-sm text-zinc-600">
         Adding a whole season?{" "}
         <Link href="/games/quick" className="font-medium text-brand-700 hover:underline">
@@ -32,7 +32,7 @@ export default async function NewGamePage({ searchParams }: PageProps<"/games/ne
         </Link>
         .
       </p>
-      <div className="mt-5 rounded-xl bg-white p-4 ring-1 ring-zinc-200 sm:p-6">
+      <div className="mt-5 rounded-xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-6">
         <NewGameForm
           groups={groups}
           tournaments={tournaments}

@@ -21,7 +21,7 @@ export function NewProgramForm({
   const v = state.values ?? {};
 
   return (
-    <form action={action} className="space-y-5 rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+    <form action={action} className="space-y-5 rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
       {templates.length > 0 ? (
         <SelectField
           label="Start from"

@@ -22,7 +22,7 @@ export function NextPracticeCard({
     <Link
       href={href}
       data-testid="next-practice"
-      className="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 active:bg-zinc-50"
+      className="flex items-center gap-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 active:bg-zinc-50"
     >
       <span
         aria-hidden

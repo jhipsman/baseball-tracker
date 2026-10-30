@@ -38,14 +38,14 @@ function DemoDialog({
         // A click on the backdrop lands on the <dialog> itself.
         if (e.target === e.currentTarget) ref.current?.close();
       }}
-      className="m-auto w-[min(56rem,calc(100vw-1rem))] max-w-none overflow-hidden rounded-2xl bg-zinc-950 p-0 text-white shadow-2xl backdrop:bg-black/70"
+      className="m-auto w-[min(56rem,calc(100vw-1rem))] max-w-none overflow-hidden rounded-2xl bg-neutral-950 p-0 text-white shadow-2xl backdrop:bg-black/70"
     >
       <div className="flex items-center gap-3 px-4 py-2.5">
         <p className="min-w-0 flex-1 truncate text-sm font-semibold">{name}</p>
         <button
           type="button"
           onClick={() => ref.current?.close()}
-          className="h-9 shrink-0 rounded-lg px-3 text-sm font-semibold text-zinc-200 ring-1 ring-zinc-700 hover:bg-zinc-800"
+          className="h-9 shrink-0 rounded-lg px-3 text-sm font-semibold text-neutral-200 ring-1 ring-neutral-700 hover:bg-neutral-800"
         >
           Close
         </button>

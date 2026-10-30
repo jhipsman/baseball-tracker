@@ -101,13 +101,13 @@ export function ThrowingList({
 }) {
   if (rows.length === 0) {
     return (
-      <p className="rounded-xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+      <p className="rounded-xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
         No throwing logged yet.
       </p>
     );
   }
   return (
-    <ul className="divide-y divide-zinc-100 rounded-xl bg-white ring-1 ring-zinc-200">
+    <ul className="divide-y divide-zinc-100 rounded-xl bg-surface ring-1 ring-zinc-200">
       {rows.map((r) => (
         <li key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm">
           <span className="w-24 shrink-0 text-zinc-500 tabular-nums">{fmt(r.date)}</span>
@@ -164,12 +164,12 @@ export function BirthDateForm({
           name="birth_date"
           defaultValue={current ?? ""}
           required
-          className="mt-1 block h-10 rounded-lg border-0 bg-white px-3 ring-1 ring-inset ring-zinc-300"
+          className="mt-1 block h-10 rounded-lg border-0 bg-surface px-3 ring-1 ring-inset ring-zinc-300"
         />
       </label>
       <button
         type="submit"
-        className="h-10 rounded-lg bg-zinc-900 px-3 text-sm font-semibold text-white"
+        className="h-10 rounded-lg bg-zinc-900 px-3 text-sm font-semibold text-zinc-50"
       >
         Save
       </button>

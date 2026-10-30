@@ -91,7 +91,7 @@ export function ThrowsChart({ days, dailyMax }: { days: Day[]; dailyMax: number 
         {a ? (
           <div
             role="status"
-            className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 rounded-lg bg-white px-3 py-1.5 text-xs whitespace-nowrap shadow-lg ring-1 ring-zinc-200"
+            className="pointer-events-none absolute -top-2 left-1/2 -translate-x-1/2 rounded-lg bg-surface px-3 py-1.5 text-xs whitespace-nowrap shadow-lg ring-1 ring-zinc-200"
           >
             <span className="font-semibold text-zinc-900">{a.competitive + a.other} throws</span>
             <span className="text-zinc-500">

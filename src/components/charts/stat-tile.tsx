@@ -47,7 +47,7 @@ export function MetricTile({
   );
 
   const className = cn(
-    "block rounded-xl bg-white p-4 ring-1",
+    "block rounded-xl bg-surface p-4 ring-1",
     selected ? "ring-2 ring-brand-600" : "ring-zinc-200",
     href && "hover:ring-brand-500",
   );
@@ -75,7 +75,7 @@ function Sparkline({ values }: { values: number[] }) {
       <path
         d={v.map((n, i) => `${i ? "L" : "M"}${px(i)},${py(n)}`).join(" ")}
         fill="none"
-        stroke="#a1a1aa"
+        stroke="var(--color-zinc-400)"
         strokeWidth={1.5}
         strokeLinejoin="round"
         strokeLinecap="round"
@@ -84,8 +84,8 @@ function Sparkline({ values }: { values: number[] }) {
         cx={px(v.length - 1)}
         cy={py(v.at(-1)!)}
         r={3}
-        fill="#039855"
-        stroke="#fff"
+        fill="var(--color-brand-600)"
+        stroke="var(--color-surface-solid)"
         strokeWidth={1.5}
       />
     </svg>

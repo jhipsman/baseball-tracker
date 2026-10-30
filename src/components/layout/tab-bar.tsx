@@ -46,9 +46,9 @@ export function TabBar({
   return (
     <nav
       aria-label={label}
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur print:hidden"
+      className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] z-30 print:hidden"
     >
-      <ul className="mx-auto flex max-w-md">
+      <ul className="glass mx-auto flex max-w-md rounded-full p-1 shadow-lg ring-1 shadow-black/10 ring-zinc-200">
         {items.map((item) => {
           const paths = [item.href, ...(item.match ?? [])];
           const active = paths.some((p) =>
@@ -60,13 +60,13 @@ export function TabBar({
                 href={withParam(item.href)}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-16 flex-col items-center justify-center gap-0.5 text-xs font-medium",
-                  active ? "text-brand-700" : "text-zinc-500",
+                  "flex h-14 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold transition-colors",
+                  active ? "bg-zinc-100 text-brand-700" : "text-zinc-500 hover:text-zinc-900",
                 )}
               >
                 <svg
                   viewBox="0 0 24 24"
-                  className="size-6"
+                  className="size-5"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={1.8}

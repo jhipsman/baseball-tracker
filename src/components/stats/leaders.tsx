@@ -75,7 +75,7 @@ export function Leaders({
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       {cards.map((c) => (
-        <section key={c.title} className="rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+        <section key={c.title} className="rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
           <h3 className="flex items-baseline justify-between gap-1 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
             {c.title}
             {c.note ? <span className="text-[10px] font-normal normal-case">{c.note}</span> : null}

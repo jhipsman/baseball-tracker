@@ -19,7 +19,9 @@ export function AnnouncementList({
 }) {
   if (!items.length) {
     return (
-      <p className="rounded-xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">{empty}</p>
+      <p className="rounded-xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+        {empty}
+      </p>
     );
   }
   return (
@@ -34,7 +36,7 @@ export function AnnouncementList({
             key={a.id}
             id={`a-${a.id}`}
             className={cn(
-              "scroll-mt-20 rounded-xl bg-white p-4 ring-1 transition-shadow",
+              "scroll-mt-20 rounded-xl bg-surface p-4 ring-1 transition-shadow",
               highlighted ? "ring-2 ring-brand-500 shadow-md" : "ring-zinc-200",
             )}
           >

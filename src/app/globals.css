@@ -1,22 +1,180 @@
 @import "tailwindcss";
 
+/* Night mode is `data-theme="dark"` on <html> (set before paint by the script in
+   the root layout). The whole palette below is remapped there, so every
+   existing `zinc-*`, `brand-*`, `amber-*`, `red-*` and `sky-*` class flips with it. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans:
+    var(--font-display), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   --font-mono:
     ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+@theme {
+  /* Rounder, softer panels and controls. */
+  --radius-lg: 0.75rem;
+  --radius-xl: 1.125rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 2rem;
 
   /* Diamond green — primary brand color */
   --color-brand-50: #ecfdf3;
   --color-brand-100: #d1fadf;
   --color-brand-200: #a6f4c5;
+  --color-brand-300: #6ce9a6;
+  --color-brand-400: #32d583;
   --color-brand-500: #12b76a;
   --color-brand-600: #039855;
   --color-brand-700: #027a48;
   --color-brand-800: #05603a;
   --color-brand-900: #054f31;
+
+  /* Panels ("bg-surface") sit on the page backdrop; text on brand fills. */
+  --color-surface: rgb(255 255 255 / 0.84);
+  --color-surface-solid: #ffffff;
+  --color-on-brand: #ffffff;
+  --color-backdrop: #eceef1;
 }
 
+/* Screen only: printouts always use the day palette. */
+@media screen {
+  [data-theme="dark"] {
+    color-scheme: dark;
+
+    --color-surface: rgb(27 29 33 / 0.78);
+    --color-surface-solid: #1a1c20;
+    --color-on-brand: #04140b;
+    --color-backdrop: #0a0b0d;
+
+    --color-zinc-50: #111215;
+    --color-zinc-100: #1c1e22;
+    --color-zinc-200: #2a2d32;
+    --color-zinc-300: #3b3f45;
+    --color-zinc-400: #686d75;
+    --color-zinc-500: #8d929a;
+    --color-zinc-600: #a9adb4;
+    --color-zinc-700: #c7cad0;
+    --color-zinc-800: #e1e3e6;
+    --color-zinc-900: #f3f4f5;
+    --color-zinc-950: #ffffff;
+
+    --color-brand-50: rgb(61 220 132 / 0.1);
+    --color-brand-100: rgb(61 220 132 / 0.18);
+    --color-brand-200: rgb(61 220 132 / 0.32);
+    --color-brand-300: rgb(61 220 132 / 0.5);
+    --color-brand-400: #3ddc84;
+    --color-brand-500: #3ddc84;
+    --color-brand-600: #3ddc84;
+    --color-brand-700: #5ee89c;
+    --color-brand-800: #8af0b8;
+    --color-brand-900: #b9f6d4;
+
+    --color-amber-50: rgb(245 184 60 / 0.1);
+    --color-amber-100: rgb(245 184 60 / 0.18);
+    --color-amber-200: rgb(245 184 60 / 0.3);
+    --color-amber-300: rgb(245 184 60 / 0.45);
+    --color-amber-400: #f5b83c;
+    --color-amber-500: #f5b83c;
+    --color-amber-600: #f5b83c;
+    --color-amber-700: #f8ca6b;
+    --color-amber-800: #fad891;
+    --color-amber-900: #fce6b6;
+
+    --color-red-50: rgb(248 94 94 / 0.1);
+    --color-red-100: rgb(248 94 94 / 0.18);
+    --color-red-200: rgb(248 94 94 / 0.3);
+    --color-red-300: rgb(248 94 94 / 0.45);
+    --color-red-400: #f87171;
+    --color-red-500: #f25c5c;
+    --color-red-600: #ef4444;
+    --color-red-700: #fb8585;
+    --color-red-800: #fca5a5;
+    --color-red-900: #fecaca;
+
+    --color-sky-50: rgb(86 182 242 / 0.1);
+    --color-sky-100: rgb(86 182 242 / 0.18);
+    --color-sky-200: rgb(86 182 242 / 0.3);
+    --color-sky-300: rgb(86 182 242 / 0.45);
+    --color-sky-400: #56b6f2;
+    --color-sky-500: #56b6f2;
+    --color-sky-600: #56b6f2;
+    --color-sky-700: #7cc7f5;
+    --color-sky-800: #a3d8f8;
+    --color-sky-900: #c8e8fb;
+  }
+}
+
+html {
+  background: var(--color-backdrop);
+}
+
+/* Stadium-light backdrop: a green glow top-left and a warm one top-right. */
 body {
-  background: var(--color-zinc-50);
   color: var(--color-zinc-900);
+  background:
+    radial-gradient(70rem 40rem at -10% -15%, rgb(18 183 106 / 0.12), transparent 60%),
+    radial-gradient(60rem 36rem at 110% -10%, rgb(245 158 11 / 0.08), transparent 60%),
+    var(--color-backdrop);
+  background-attachment: fixed;
+}
+[data-theme="dark"] body {
+  background:
+    radial-gradient(70rem 40rem at -10% -15%, rgb(61 220 132 / 0.11), transparent 60%),
+    radial-gradient(60rem 36rem at 110% -10%, rgb(245 184 60 / 0.07), transparent 60%),
+    var(--color-backdrop);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: var(--color-brand-200);
+}
+
+/* Floating chrome (sidebar, headers, tab bars): frosted glass. */
+.glass {
+  background-color: var(--color-surface);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+}
+
+/* Dialogs and popovers never show the page through them. */
+dialog.bg-surface,
+[popover].bg-surface {
+  background-color: var(--color-surface-solid);
+}
+
+/* Big moments (today's workout, live game): always night-lit, both modes. */
+.hero {
+  color: #fff;
+  background:
+    radial-gradient(28rem 18rem at 0% 0%, rgb(61 220 132 / 0.28), transparent 65%),
+    radial-gradient(24rem 16rem at 100% 100%, rgb(245 184 60 / 0.14), transparent 65%),
+    linear-gradient(160deg, #1b2620, #0c0f0e);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+/* Pulsing "live" dot. */
+.live-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #f5b83c;
+  box-shadow: 0 0 0 0 rgb(245 184 60 / 0.6);
+  animation: live-pulse 1.8s ease-out infinite;
+}
+@keyframes live-pulse {
+  70% {
+    box-shadow: 0 0 0 0.5rem rgb(245 184 60 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(245 184 60 / 0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-dot {
+    animation: none;
+  }
 }

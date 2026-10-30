@@ -5,9 +5,9 @@ import { formatMetric, METRIC_BY_KEY } from "@/constants/metrics";
 
 export type MetricPoint = { date: string; value: number };
 
-const SERIES = "#039855"; // brand-600, validated against the light surface
-const GRID = "#e4e4e7"; // zinc-200 hairline
-const SURFACE = "#ffffff";
+const SERIES = "var(--color-brand-600)"; // brand-600 (a brighter green in night mode)
+const GRID = "var(--color-zinc-200)"; // hairline
+const SURFACE = "var(--color-surface-solid)";
 const HEIGHT = 220;
 const PAD = { top: 20, right: 56, bottom: 28, left: 44 };
 
@@ -172,7 +172,7 @@ export function MetricChart({ metricKey, points }: { metricKey: string; points: 
             x2={x(a.date)}
             y1={PAD.top - 8}
             y2={HEIGHT - PAD.bottom}
-            stroke="#a1a1aa"
+            stroke="var(--color-zinc-400)"
             strokeWidth={1}
           />
         ) : null}
@@ -221,7 +221,7 @@ export function MetricChart({ metricKey, points }: { metricKey: string; points: 
       {a ? (
         <div
           role="status"
-          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-lg bg-white px-3 py-2 text-xs whitespace-nowrap shadow-lg ring-1 ring-zinc-200"
+          className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-lg bg-surface px-3 py-2 text-xs whitespace-nowrap shadow-lg ring-1 ring-zinc-200"
           style={{ left: Math.min(Math.max(x(a.date), 70), width - 70) }}
         >
           <div className="flex items-center gap-2">

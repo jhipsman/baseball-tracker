@@ -61,7 +61,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
   const atBatLink = (
     <Link
       href={`/games/${g.id}/live`}
-      className="block rounded-xl bg-white px-4 py-3 text-sm ring-1 ring-zinc-300 hover:bg-zinc-50"
+      className="block rounded-xl bg-surface px-4 py-3 text-sm ring-1 ring-zinc-300 hover:bg-zinc-50"
     >
       <span className="font-semibold text-brand-700">Score at-bat by at-bat →</span>
       <span className="block text-zinc-600">
@@ -82,7 +82,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
       <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-semibold tracking-tight">
+            <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
               {matchupLabel(g.homeAway, g.opponent)}
             </h1>
             <StatusBadge status={g.status} />
@@ -114,7 +114,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
           {liveLogged ? (
             <Link
               href={`/games/${g.id}/live`}
-              className="flex items-center justify-between rounded-xl bg-zinc-900 px-4 py-3 text-white"
+              className="flex items-center justify-between hero rounded-xl px-4 py-3"
             >
               <span className="font-semibold">
                 {g.status === "final" ? "Open the game log" : "Open live scorer"}
@@ -141,7 +141,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
           <BoxScore gameId={g.id} />
 
           {g.notes ? (
-            <section className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+            <section className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
               <h2 className="font-semibold">Notes</h2>
               <p className="mt-1 text-sm whitespace-pre-line text-zinc-700">{g.notes}</p>
             </section>
@@ -150,7 +150,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
 
         <div className="space-y-4">
           {g.status !== "final" && g.status !== "live" ? (
-            <section className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+            <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
               <h2 className="font-semibold">Schedule changes</h2>
               <p className="text-xs text-zinc-600">
                 Postponing, canceling, or moving a game notifies{" "}
@@ -160,7 +160,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
             </section>
           ) : null}
 
-          <details className="group rounded-xl bg-white ring-1 ring-zinc-200">
+          <details className="group rounded-xl bg-surface ring-1 ring-zinc-200">
             <summary className="flex cursor-pointer items-center justify-between gap-2 p-4 font-semibold">
               Edit game
               <span className="text-xs font-normal text-zinc-500 group-open:hidden">
@@ -177,7 +177,7 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
             </div>
           </details>
 
-          <section className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+          <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
             <p className="font-semibold">More</p>
             <DuplicateGameForm
               id={g.id}

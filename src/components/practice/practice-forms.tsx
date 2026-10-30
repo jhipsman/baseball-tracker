@@ -27,7 +27,7 @@ export type PracticeDefaults = {
 };
 
 const textareaClass =
-  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
+  "block w-full rounded-lg border-0 bg-surface px-3 py-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
 
 /** Title / date / time / location / group / notes inputs. */
 export function PracticeFields({
@@ -206,7 +206,7 @@ export function PublishToggle({
     <div
       className={cn(
         "rounded-xl p-4 ring-1",
-        on ? "bg-brand-50 ring-brand-200" : "bg-white ring-zinc-200",
+        on ? "bg-brand-50 ring-brand-200" : "bg-surface ring-zinc-200",
       )}
     >
       <div className="flex items-center justify-between gap-3">
@@ -232,7 +232,7 @@ export function PublishToggle({
         >
           <span
             className={cn(
-              "inline-block size-5 rounded-full bg-white shadow transition-transform",
+              "inline-block size-5 rounded-full bg-surface shadow transition-transform",
               on ? "translate-x-6" : "translate-x-1",
             )}
           />

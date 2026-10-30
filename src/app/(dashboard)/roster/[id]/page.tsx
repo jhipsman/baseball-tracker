@@ -120,14 +120,14 @@ export default async function PlayerProfilePage({
           ← Roster
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
             {member.jersey_number != null ? (
               <span className="mr-2 text-zinc-400">#{member.jersey_number}</span>
             ) : null}
             {name}
           </h1>
           {member.position ? (
-            <span className="rounded bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-white">
+            <span className="rounded bg-zinc-900 px-2 py-0.5 text-xs font-semibold text-zinc-50">
               {member.position}
             </span>
           ) : null}
@@ -198,7 +198,7 @@ export default async function PlayerProfilePage({
             sub: programs.map((p) => p.programName).join(", ") || "None assigned",
           },
         ].map((s) => (
-          <div key={s.label} className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+          <div key={s.label} className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
             <dt className="text-xs text-zinc-500">{s.label}</dt>
             <dd className="mt-1 text-2xl font-semibold">{s.value}</dd>
             <dd className="mt-0.5 truncate text-xs text-zinc-500">{s.sub}</dd>
@@ -209,13 +209,13 @@ export default async function PlayerProfilePage({
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Recent workouts</h2>
         {!logs || logs.length === 0 ? (
-          <p className="rounded-xl bg-white p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
+          <p className="rounded-xl bg-surface p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
             No workouts logged yet.
           </p>
         ) : (
           <ul className="space-y-2">
             {logs.map((l) => (
-              <li key={l.id} className="rounded-xl bg-white ring-1 ring-zinc-200">
+              <li key={l.id} className="rounded-xl bg-surface ring-1 ring-zinc-200">
                 <details>
                   <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3">
                     <span className="font-medium">{l.day_name || "Workout"}</span>
@@ -276,14 +276,14 @@ export default async function PlayerProfilePage({
             ) : null}
           </div>
           <AlertList alerts={alerts} />
-          <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
             <ThrowsChart
               days={dailySeries(throwing, from28, today)}
               dailyMax={birth ? pitchSmartBand(ageOn(birth, today)).dailyMax : null}
             />
           </div>
           <ThrowingList rows={throwing.slice(0, 10)} canDelete={() => true} />
-          <details className="rounded-xl bg-white p-4 ring-1 ring-zinc-200" open={!birth}>
+          <details className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200" open={!birth}>
             <summary className="cursor-pointer text-sm font-semibold">Birthdate</summary>
             <div className="mt-3">
               <BirthDateForm
@@ -299,7 +299,7 @@ export default async function PlayerProfilePage({
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Metrics</h2>
         {withData.length === 0 ? (
-          <p className="rounded-xl bg-white p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
+          <p className="rounded-xl bg-surface p-6 text-sm text-zinc-500 ring-1 ring-zinc-200">
             No assessments yet. Add one below or run a team{" "}
             <Link href="/roster/testing" className="font-semibold text-brand-700">
               testing day
@@ -320,7 +320,7 @@ export default async function PlayerProfilePage({
               ))}
             </div>
             {selected ? (
-              <div id="chart" className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+              <div id="chart" className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
                 <h3 className="text-sm font-semibold">
                   {METRICS.find((m) => m.key === selected)!.label} over time
                 </h3>
@@ -331,7 +331,7 @@ export default async function PlayerProfilePage({
             ) : null}
 
             {/* Table view: every value, reachable without hovering. */}
-            <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+            <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
               <table className="w-full min-w-[40rem] text-sm">
                 <caption className="px-4 pt-3 text-left text-sm font-semibold">
                   Assessment history
@@ -382,7 +382,7 @@ export default async function PlayerProfilePage({
         )}
 
         <details
-          className="rounded-xl bg-white p-5 ring-1 ring-zinc-200"
+          className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200"
           open={withData.length === 0}
         >
           <summary className="cursor-pointer font-semibold">Add assessment</summary>

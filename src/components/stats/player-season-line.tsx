@@ -49,7 +49,7 @@ export async function PlayerSeasonLine({
 
   if (games.length === 0) {
     return (
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
         <span>No game stats in {y} yet.</span>
         {link}
       </div>
@@ -81,7 +81,7 @@ export async function PlayerSeasonLine({
     );
 
   return (
-    <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+    <div className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="text-xs text-zinc-500">
           {y} season · {games.length} game{games.length === 1 ? "" : "s"}

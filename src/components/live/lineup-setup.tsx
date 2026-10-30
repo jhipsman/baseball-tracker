@@ -46,7 +46,7 @@ export function LineupSetup({
         {lineup.length === 0 ? (
           <p className="text-sm text-zinc-500">Tap players below to add them in order.</p>
         ) : (
-          <ol className="divide-y divide-zinc-100 rounded-xl bg-white ring-1 ring-zinc-200">
+          <ol className="divide-y divide-zinc-100 rounded-xl bg-surface ring-1 ring-zinc-200">
             {lineup.map((id, i) => (
               <li key={id} className="flex items-center gap-2 px-3 py-2">
                 <span className="w-6 text-sm font-semibold text-zinc-500">{i + 1}</span>
@@ -86,7 +86,7 @@ export function LineupSetup({
                 key={p.id}
                 type="button"
                 onClick={() => setLineup((l) => [...l, p.id])}
-                className="h-11 rounded-full bg-white px-4 text-sm font-medium ring-1 ring-zinc-300 hover:bg-zinc-50"
+                className="h-11 rounded-full bg-surface px-4 text-sm font-medium ring-1 ring-zinc-300 hover:bg-zinc-50"
               >
                 + {p.name}
               </button>

@@ -31,7 +31,7 @@ export default async function TournamentPage({ params }: PageProps<"/games/tourn
       <Link href="/games?view=tournaments" className="text-sm text-zinc-500 hover:text-zinc-800">
         ← Tournaments
       </Link>
-      <div className="mt-2 flex flex-wrap items-start justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+      <div className="mt-2 flex flex-wrap items-start justify-between gap-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
         <TournamentSummary t={t} />
         <div className="flex flex-col items-end gap-2">
           <p className="text-sm text-zinc-600">
@@ -47,7 +47,7 @@ export default async function TournamentPage({ params }: PageProps<"/games/tourn
         </div>
       </div>
       {t.notes ? (
-        <p className="mt-3 rounded-xl bg-white p-4 text-sm whitespace-pre-line text-zinc-700 ring-1 ring-zinc-200">
+        <p className="mt-3 rounded-xl bg-surface p-4 text-sm whitespace-pre-line text-zinc-700 ring-1 ring-zinc-200">
           {t.notes}
         </p>
       ) : null}
@@ -60,7 +60,7 @@ export default async function TournamentPage({ params }: PageProps<"/games/tourn
         empty="No games yet. Add pool play below; add bracket games as they're set."
       />
 
-      <section className="mt-4 rounded-xl bg-white ring-1 ring-zinc-200">
+      <section className="mt-4 rounded-xl bg-surface ring-1 ring-zinc-200">
         <h2 className="p-4 font-semibold">Add a pool or bracket game</h2>
         <div className="border-t border-zinc-100 p-4">
           <NewGameForm
@@ -84,7 +84,7 @@ export default async function TournamentPage({ params }: PageProps<"/games/tourn
         </div>
       </section>
 
-      <details className="group mt-4 rounded-xl bg-white ring-1 ring-zinc-200">
+      <details className="group mt-4 rounded-xl bg-surface ring-1 ring-zinc-200">
         <summary className="cursor-pointer p-4 font-semibold">Edit tournament</summary>
         <div className="space-y-4 border-t border-zinc-100 p-4">
           <EditTournamentForm

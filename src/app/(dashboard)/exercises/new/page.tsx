@@ -11,7 +11,7 @@ export default async function NewExercisePage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-1 text-2xl font-semibold tracking-tight">New exercise</h1>
+      <h1 className="mb-1 text-2xl font-medium tracking-tight sm:text-3xl">New exercise</h1>
       <p className="mb-6 text-sm text-zinc-600">Custom exercises are only visible to your org.</p>
       <ExerciseForm />
     </div>

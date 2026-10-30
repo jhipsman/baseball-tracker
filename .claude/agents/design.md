@@ -29,13 +29,15 @@ Often-old-school coaches are short on time and skeptical of software: every scre
 
 # Design system (follow it; propose changes, don't drift)
 
-- **Stack:** Next.js App Router, React server components, Tailwind v4. Tokens live in `src/app/globals.css` (`brand-50…900` greens on `zinc` neutrals). Shared UI in `src/components/ui/*` (Button, Field, SelectField, SubmitButton, FormMessage, CopyButton). Reuse them; don't hand-roll new button styles.
+- **Stack:** Next.js App Router, React server components, Tailwind v4. Tokens live in `src/app/globals.css` (`brand-50…900` greens on `zinc` neutrals, plus `surface`, `surface-solid`, `on-brand`). Shared UI in `src/components/ui/*` (Button, Field, SelectField, SubmitButton, FormMessage, CopyButton). Reuse them; don't hand-roll new button styles.
 - **Color has one meaning each:** brand green = primary action / good; **amber = caution** (approaching a limit, needs review); **red = stop** (over a limit, arm pain, destructive). Never rely on color alone: pair with an icon or word (✓ ⏸ ⛔, "Needs review").
-- **Typography:** system font stack (no web fonts). One `h1` per page (`text-2xl font-semibold tracking-tight`); section headings `font-semibold`; helper text `text-sm text-zinc-600`; numbers that matter use `tabular-nums` and get size, not color, as emphasis.
-- **Shape and spacing:** cards `rounded-xl`/`rounded-2xl bg-white ring-1 ring-zinc-200`, page rhythm `space-y-4/6`, phone pages `max-w-md` with `pb-24` above the bottom tab bar.
+- **Day and Night mode (both must work):** `data-theme="dark"` on `<html>` remaps the whole `zinc`/`brand`/`amber`/`red`/`sky` palette in `globals.css`, so ordinary classes flip on their own. Rules: panels use `bg-surface` (never `bg-white`); text on a brand fill is `text-on-brand` (never `text-white`); an inverted chip is `bg-zinc-900 text-zinc-50`; things that must stay dark in both modes (video, the live scoreboard, `hero` cards) use `neutral-*`/`white` or the `.hero` class. No new hex colors in components; in SVG use `var(--color-…)`. Check every change in both modes.
+- **Look:** sports-broadcast glass. Frosted floating chrome (`.glass`: sidebar, headers, the pill tab bar), soft stadium-light backdrop, pill-shaped buttons and tabs, big medium-weight numbers. The night-lit `.hero` card (with `.live-dot` when a game is live) is for the one big moment on a screen (next game, today's workout) — at most one per screen.
+- **Typography:** Manrope (`next/font`, `--font-display`). One `h1` per page (`text-2xl font-medium tracking-tight sm:text-3xl`); section headings `font-semibold`; helper text `text-sm text-zinc-600`; numbers that matter use `tabular-nums` and get size, not color, as emphasis.
+- **Shape and spacing:** cards `rounded-xl`/`rounded-2xl bg-surface ring-1 ring-zinc-200` (radii are rounder than Tailwind's defaults), page rhythm `space-y-4/6`, phone pages `max-w-md` with `pb-24` above the floating tab bar.
 - **Touch:** targets ≥ 44px (`h-11`), primary in-game buttons ≥ 48px; spacing between destructive and frequent actions.
 - **Navigation:** coach sidebar = 7 sections with tab bars (`src/constants/sections.ts`); player tabs Today · Schedule · Health · Videos · Me; parent tabs Home · Schedule · Progress · Messages. Never exceed 5 phone tabs; add to an existing section before adding a destination. Turned-off features (`organizations.modules`) must disappear completely.
-- **Known inconsistency to fix when touching it:** the live diamond scorer (`src/components/live/scoring-workspace.module.css`) uses its own hex colors and 10–11px text. Bring it onto the app tokens and readable sizes without changing its behavior.
+- **Live scorer** (`src/components/live/scoring-workspace.module.css`) reads the app tokens through local `--zinc-*`/`--brand-*` variables; its scoreboard is always night-lit.
 
 # Patterns I insist on
 

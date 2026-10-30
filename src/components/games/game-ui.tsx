@@ -19,8 +19,8 @@ import {
 import { cn } from "@/lib/utils";
 
 const RESULT_STYLE: Record<Result, string> = {
-  W: "bg-brand-700 text-white",
-  L: "bg-zinc-800 text-white",
+  W: "bg-brand-700 text-on-brand",
+  L: "bg-zinc-800 text-zinc-50",
   T: "bg-zinc-300 text-zinc-800",
 };
 
@@ -61,7 +61,7 @@ export function StatusBadge({ status, className }: { status: GameStatus; classNa
       )}
     >
       {status === "live" ? (
-        <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-white" />
+        <span aria-hidden className="size-1.5 animate-pulse rounded-full bg-surface" />
       ) : null}
       {STATUS_LABEL[status]}
     </span>
@@ -74,7 +74,7 @@ export function DateBlock({ date, today }: { date: string; today: string }) {
     <div
       className={cn(
         "flex w-12 shrink-0 flex-col items-center rounded-lg py-1 text-center",
-        date === today ? "bg-brand-700 text-white" : "bg-zinc-100 text-zinc-800",
+        date === today ? "bg-brand-700 text-on-brand" : "bg-zinc-100 text-zinc-800",
       )}
     >
       <span className="text-[10px] font-semibold uppercase">
@@ -165,13 +165,13 @@ export function GameList({
 }) {
   if (games.length === 0) {
     return (
-      <p className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+      <p className="rounded-2xl bg-surface p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
         {empty}
       </p>
     );
   }
   return (
-    <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl bg-white ring-1 ring-zinc-200">
+    <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl bg-surface ring-1 ring-zinc-200">
       {games.map((g) => (
         <GameRow key={g.id} g={g} href={hrefFor(g)} today={today} showGroup={showGroup} />
       ))}
@@ -239,14 +239,14 @@ export function LineScoreTable({
     return played || v > 0 ? v : "";
   };
   return (
-    <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+    <div className="overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
       <table
         data-testid="line-score"
         className="w-full border-collapse text-center text-sm tabular-nums"
       >
         <thead>
           <tr className="border-b border-zinc-200 text-xs text-zinc-500">
-            <th className="sticky left-0 bg-white px-3 py-2 text-left font-medium">Team</th>
+            <th className="sticky left-0 bg-surface px-3 py-2 text-left font-medium">Team</th>
             {line.map((_, i) => (
               <th
                 key={i}
@@ -271,7 +271,7 @@ export function LineScoreTable({
             <tr key={side} className="border-b border-zinc-100 last:border-0">
               <th
                 scope="row"
-                className="sticky left-0 max-w-24 truncate bg-white px-3 py-2 text-left font-medium sm:max-w-40"
+                className="sticky left-0 max-w-24 truncate bg-surface px-3 py-2 text-left font-medium sm:max-w-40"
               >
                 {name}
               </th>
@@ -311,30 +311,42 @@ export function NextGameCard({
   href: string;
 }) {
   const when = g.date === today ? "Today" : formatGameDate(g.date);
+  const live = g.status === "live";
   return (
     <Link
       href={href}
       data-testid="next-game"
-      className="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200 active:bg-zinc-50"
+      className="hero relative block overflow-hidden rounded-3xl p-5 active:opacity-90"
     >
+      {/* Infield lines, for atmosphere. */}
+      <svg
+        aria-hidden
+        viewBox="0 0 100 100"
+        className="pointer-events-none absolute -right-6 -bottom-10 size-44 text-white/10"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1.2}
+      >
+        <path d="M50 92 12 54 50 16l38 38z" />
+        <circle cx="50" cy="54" r="5" />
+        <path d="M50 92 0 42M50 92l50-50" />
+      </svg>
+      <span className="relative flex items-center gap-2 text-xs font-semibold tracking-wide text-white/70 uppercase">
+        {live ? <span className="live-dot" /> : null}
+        Next game · {when}
+        {live ? <span className="text-[#f5b83c]">Live</span> : null}
+      </span>
+      <span className="relative mt-2 block truncate text-2xl font-medium tracking-tight">
+        {matchupLabel(g.homeAway, g.opponent)}
+      </span>
+      <span className="relative mt-1 block truncate text-sm text-white/60">
+        {[timeLine(g), g.location].filter(Boolean).join(" · ")}
+      </span>
       <span
         aria-hidden
-        className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-xl"
+        className="absolute top-4 right-4 flex size-9 items-center justify-center rounded-full bg-white/10 text-white"
       >
-        🏟️
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="flex items-center gap-2 text-xs font-semibold tracking-wide text-brand-700 uppercase">
-          Next game · {when}
-          {g.status === "live" ? <StatusBadge status="live" /> : null}
-        </span>
-        <span className="block truncate font-semibold">{matchupLabel(g.homeAway, g.opponent)}</span>
-        <span className="block truncate text-xs text-zinc-500">
-          {[timeLine(g), g.location].filter(Boolean).join(" · ")}
-        </span>
-      </span>
-      <span aria-hidden className="text-zinc-400">
-        →
+        ↗
       </span>
     </Link>
   );

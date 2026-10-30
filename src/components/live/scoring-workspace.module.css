@@ -74,7 +74,14 @@
 
 /* ---------------------------------------------------------- scoreboard */
 .scoreboard {
-  background: var(--zinc-900);
+  /* Night-lit in both themes, like the app's hero cards. */
+  --zinc-100: #f4f4f5;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-600: #52525b;
+  background:
+    radial-gradient(28rem 18rem at 0% 0%, rgb(61 220 132 / 0.24), transparent 65%),
+    linear-gradient(160deg, #1b2620, #0c0f0e);
   color: #fff;
   border-radius: 16px 16px 0 0;
   padding: 16px 24px 0;
@@ -107,7 +114,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   background: var(--brand-700);
-  color: #fff;
+  color: var(--color-on-brand, #fff);
   padding: 4px 8px;
   border-radius: 6px;
 }
@@ -133,7 +140,7 @@
   background: var(--brand-700);
   clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%);
   font-weight: 700;
-  color: #fff;
+  color: var(--color-on-brand, #fff);
   font-size: 15px;
 }
 .awayBadge {
@@ -224,7 +231,7 @@
 
 /* ---------------------------------------------------------- tabs + undo */
 .tabs {
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   border: 1px solid var(--zinc-200);
   border-top: 0;
   display: flex;
@@ -342,7 +349,7 @@
   box-shadow: 0 0 0 3px #ffffff66;
 }
 .aiming .fielder:hover {
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   color: var(--brand-900);
   transform: translate(-50%, -50%) scale(1.15);
 }
@@ -440,7 +447,7 @@
   align-items: center;
   border: 1px solid var(--zinc-200);
   border-radius: 14px;
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   padding: 12px 16px;
   margin-top: 4px;
 }
@@ -556,7 +563,7 @@
 .pitchButtons button {
   border: 1px solid var(--zinc-300);
   border-radius: 12px;
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   min-height: 80px;
   padding: 8px 4px;
   color: var(--zinc-900);
@@ -584,7 +591,7 @@
 .inPlay {
   width: 100%;
   background: var(--brand-700);
-  color: #fff;
+  color: var(--color-on-brand, #fff);
   border: 0;
   border-radius: 12px;
   min-height: 64px;
@@ -620,7 +627,7 @@
 .results button {
   border: 1px solid var(--zinc-300);
   border-radius: 10px;
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   padding: 8px 3px;
   min-height: 64px;
   color: var(--zinc-900);
@@ -640,7 +647,7 @@
   color: var(--zinc-600);
 }
 .secondary {
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   border: 1px solid var(--zinc-300);
   color: var(--zinc-800);
   min-height: 48px;
@@ -658,7 +665,7 @@
   background: var(--brand-700);
   border: 0;
   border-radius: 12px;
-  color: #fff;
+  color: var(--color-on-brand, #fff);
   font-size: 17px;
   font-weight: 700 !important;
   min-height: 56px;
@@ -715,7 +722,7 @@
 }
 .playCard {
   border: 1px solid var(--zinc-200);
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   border-radius: 16px;
   padding: 16px 18px 18px;
 }
@@ -771,7 +778,7 @@
 }
 .segment button {
   flex: 1;
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   color: var(--zinc-700);
   border: 1px solid var(--zinc-300);
   border-radius: 10px;
@@ -899,7 +906,7 @@
 
 /* ---------------------------------------------------------- play-by-play + lineup tabs */
 .feed {
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   padding: 20px 24px;
   border: 1px solid var(--zinc-200);
   border-radius: 14px;
@@ -950,7 +957,7 @@
   max-width: 100%;
   max-height: 90dvh;
   overflow-y: auto;
-  background: #fff;
+  background: var(--color-surface-solid, #fff);
   border-radius: 18px;
   padding: 20px 24px 24px;
   box-shadow: 0 30px 90px #0000004d;

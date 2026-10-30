@@ -54,7 +54,7 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
     <div className="max-w-5xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Programs</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Programs</h1>
           <p className="mt-1 text-sm text-zinc-600">
             {isStaff
               ? "Build training blocks, save templates, and assign them to players."
@@ -64,7 +64,7 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
         {isStaff ? (
           <Link
             href="/programs/new"
-            className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+            className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
           >
             New program
           </Link>
@@ -121,8 +121,8 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
               className={cn(
                 "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
                 t === type
-                  ? "bg-brand-700 text-white ring-brand-700"
-                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                  ? "bg-brand-700 text-on-brand ring-brand-700"
+                  : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
               )}
             >
               {t ? PROGRAM_TYPE_LABELS[t] : "All types"}
@@ -136,8 +136,8 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
               className={cn(
                 "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
                 ph === phase
-                  ? "bg-zinc-900 text-white ring-zinc-900"
-                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                  ? "bg-zinc-900 text-zinc-50 ring-zinc-900"
+                  : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
               )}
             >
               {ph ? SEASON_PHASE_LABELS[ph] : "Any season"}
@@ -186,7 +186,7 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
               <li key={p.id}>
                 <Link
                   href={`/programs/${p.id}`}
-                  className="block h-full rounded-xl bg-white p-4 ring-1 ring-zinc-200 hover:ring-brand-500"
+                  className="block h-full rounded-xl bg-surface p-4 ring-1 ring-zinc-200 hover:ring-brand-500"
                 >
                   <h2 className="font-semibold">{p.name}</h2>
                   {p.description ? (

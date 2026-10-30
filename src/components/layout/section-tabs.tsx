@@ -24,7 +24,7 @@ export function SectionTabs({
   return (
     <nav
       aria-label={def!.label}
-      className="relative mb-6 flex max-w-7xl gap-1 overflow-x-auto border-b border-zinc-200 print:hidden"
+      className="relative mr-auto! mb-6 ml-0! flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-surface p-1 ring-1 ring-zinc-200 print:hidden"
     >
       {tabs.map((t) => (
         <Link
@@ -32,10 +32,10 @@ export function SectionTabs({
           href={t.href}
           aria-current={t === active ? "page" : undefined}
           className={cn(
-            "-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium",
+            "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
             t === active
-              ? "border-brand-700 text-brand-900"
-              : "border-transparent text-zinc-500 hover:text-zinc-800",
+              ? "bg-zinc-100 text-zinc-950 ring-1 ring-zinc-200"
+              : "text-zinc-500 hover:text-zinc-900",
           )}
         >
           {t.label}

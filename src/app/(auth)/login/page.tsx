@@ -23,7 +23,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           </p>
           <Link
             href={signupHref}
-            className="mt-5 flex h-11 w-full items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
+            className="mt-5 flex h-11 w-full items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
           >
             Create an account
           </Link>

@@ -25,7 +25,7 @@ export const INTENSITIES: { key: ThrowingIntensity; label: string }[] = [
 
 /** Arm feel, best → worst. Status colors are reserved for state and always paired with a label. */
 export const ARM_FEELS: { key: ArmFeelValue; label: string; className: string }[] = [
-  { key: "great", label: "Great", className: "bg-brand-600 text-white" },
+  { key: "great", label: "Great", className: "bg-brand-600 text-on-brand" },
   { key: "good", label: "Good", className: "bg-brand-100 text-brand-900" },
   { key: "okay", label: "Okay", className: "bg-zinc-200 text-zinc-800" },
   { key: "tired", label: "Tired", className: "bg-amber-200 text-amber-950" },

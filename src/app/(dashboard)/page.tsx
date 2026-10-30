@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { throwingAlerts } from "@/lib/workload";
 import { hasModule } from "@/constants/modules";
 import { formatPracticeDate, practiceRange } from "@/lib/practices";
+import { loadNextGame } from "@/lib/games";
+import { NextGameCard } from "@/components/games/game-ui";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -22,7 +24,7 @@ export default async function DashboardPage() {
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   return (
     <div className="max-w-5xl">
-      <h1 className="text-2xl font-semibold tracking-tight">
+      <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
         {firstName ? `Welcome, ${firstName}` : "Welcome"}
       </h1>
       <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
@@ -39,6 +41,10 @@ async function DashboardContent({
   isAdmin,
 }: Pick<Awaited<ReturnType<typeof requireActiveOrg>>, "supabase" | "org"> & { isAdmin: boolean }) {
   const { today } = await playerToday();
+  const [dashboard, nextGame] = await Promise.all([
+    loadDashboard(supabase, org, today),
+    hasModule(org.modules, "games") ? loadNextGame(supabase, org.id, today) : null,
+  ]);
   const {
     team,
     recent,
@@ -51,7 +57,7 @@ async function DashboardContent({
     nextPractice,
     assignmentCount,
     assessmentCount,
-  } = await loadDashboard(supabase, org, today);
+  } = dashboard;
   const armAlerts = team.players.flatMap((p) =>
     throwingAlerts(
       throwRows.filter((r) => r.playerId === p.id),
@@ -123,8 +129,14 @@ async function DashboardContent({
         </Link>
       ) : null}
 
+      {nextGame ? (
+        <div className="mt-6">
+          <NextGameCard game={nextGame} today={today} href={`/games/${nextGame.id}`} />
+        </div>
+      ) : null}
+
       {remaining > 0 ? (
-        <section className="mt-6 rounded-xl bg-white p-5 ring-1 ring-brand-500">
+        <section className="mt-6 rounded-xl bg-surface p-5 ring-1 ring-brand-500">
           <h2 className="font-semibold">Getting started</h2>
           <p className="mt-0.5 text-sm text-zinc-600">
             {remaining} step{remaining === 1 ? "" : "s"} left to get your team training.
@@ -148,7 +160,7 @@ async function DashboardContent({
                     className={cn(
                       "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
                       st.done || st === nextStep
-                        ? "bg-brand-600 text-white"
+                        ? "bg-brand-600 text-on-brand"
                         : "bg-zinc-100 text-zinc-600",
                     )}
                   >
@@ -177,7 +189,7 @@ async function DashboardContent({
       ) : null}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="text-sm text-zinc-600">Team compliance, last 7 days</h2>
           <p className="mt-1 text-5xl font-semibold">
             {teamCompliance.rate == null ? "—" : `${Math.round(teamCompliance.rate * 100)}%`}
@@ -192,7 +204,7 @@ async function DashboardContent({
           </Link>
         </section>
 
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="font-semibold">Needs attention</h2>
           {attention.length === 0 ? (
             <p className="mt-2 text-sm text-zinc-500">
@@ -224,7 +236,7 @@ async function DashboardContent({
           </Link>
         </section>
 
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="font-semibold">Recent workouts</h2>
           {!recent || recent.length === 0 ? (
             <p className="mt-2 text-sm text-zinc-500">
@@ -281,12 +293,12 @@ async function DashboardContent({
             <Link
               key={s.label}
               href={s.href}
-              className="rounded-xl bg-white px-4 py-3 ring-1 ring-zinc-200 hover:ring-brand-500"
+              className="rounded-xl bg-surface px-4 py-3 ring-1 ring-zinc-200 hover:ring-brand-500"
             >
               {body}
             </Link>
           ) : (
-            <div key={s.label} className="rounded-xl bg-white px-4 py-3 ring-1 ring-zinc-200">
+            <div key={s.label} className="rounded-xl bg-surface px-4 py-3 ring-1 ring-zinc-200">
               {body}
             </div>
           );

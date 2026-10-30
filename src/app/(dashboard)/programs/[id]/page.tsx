@@ -106,7 +106,7 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
           <Link href="/programs" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
             ← Programs
           </Link>
-          <h1 className="text-2xl font-semibold tracking-tight">{program.name}</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">{program.name}</h1>
           {program.description ? (
             <p className="mt-1 max-w-2xl text-sm text-zinc-600">{program.description}</p>
           ) : null}
@@ -133,7 +133,7 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
           <div className="flex flex-wrap gap-2">
             <Link
               href={`/programs/${id}/builder`}
-              className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+              className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
             >
               Open builder
             </Link>
@@ -162,7 +162,7 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
       </div>
 
       {isStaff && !program.is_template ? (
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="mb-4 font-semibold">Assign to players</h2>
           <AssignForm
             programId={id}
@@ -278,7 +278,7 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
                 }));
                 const labels = blockLabels(items);
                 return (
-                  <div key={d.id} className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+                  <div key={d.id} className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
                     <div className="flex items-baseline justify-between gap-2">
                       <h3 className="font-medium">{d.name || `Day ${d.day_number}`}</h3>
                       <span className="text-xs text-zinc-500">
@@ -342,7 +342,7 @@ export default async function ProgramPage({ params }: PageProps<"/programs/[id]"
       </section>
 
       {isStaff ? (
-        <details className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <details className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <summary className="cursor-pointer font-semibold">Edit details</summary>
           <div className="mt-4 max-w-2xl">
             <EditProgramForm

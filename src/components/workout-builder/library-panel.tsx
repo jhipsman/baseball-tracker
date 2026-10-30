@@ -37,7 +37,7 @@ const LibraryCard = memo(function LibraryCard({
       {...listeners}
       {...attributes}
       className={cn(
-        "group flex cursor-grab touch-manipulation items-center gap-2 rounded-lg bg-white px-3 py-2 ring-1 ring-zinc-200 select-none hover:ring-brand-500 active:cursor-grabbing",
+        "group flex cursor-grab touch-manipulation items-center gap-2 rounded-lg bg-surface px-3 py-2 ring-1 ring-zinc-200 select-none hover:ring-brand-500 active:cursor-grabbing",
         isDragging && "opacity-40",
       )}
     >
@@ -111,7 +111,7 @@ export function LibraryPanel({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search name, muscle, equipment…"
           aria-label="Search exercises"
-          className="block h-10 w-full rounded-lg border-0 bg-white px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
+          className="block h-10 w-full rounded-lg border-0 bg-surface px-3 text-base ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 sm:text-sm"
         />
         <div className="flex flex-wrap gap-1">
           <button
@@ -120,8 +120,8 @@ export function LibraryPanel({
             className={cn(
               "rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
               category === null
-                ? "bg-brand-700 text-white ring-brand-700"
-                : "bg-white text-zinc-700 ring-zinc-300",
+                ? "bg-brand-700 text-on-brand ring-brand-700"
+                : "bg-surface text-zinc-700 ring-zinc-300",
             )}
           >
             All
@@ -134,8 +134,8 @@ export function LibraryPanel({
               className={cn(
                 "flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
                 category === c
-                  ? "bg-brand-700 text-white ring-brand-700"
-                  : "bg-white text-zinc-700 ring-zinc-300",
+                  ? "bg-brand-700 text-on-brand ring-brand-700"
+                  : "bg-surface text-zinc-700 ring-zinc-300",
               )}
             >
               <span aria-hidden className={cn("size-1.5 rounded-full", CATEGORY_DOT[c])} />
@@ -147,7 +147,7 @@ export function LibraryPanel({
           value={equipment}
           onChange={(e) => setEquipment(e.target.value)}
           aria-label="Filter by equipment"
-          className="block h-9 w-full rounded-lg border-0 bg-white px-2 text-sm ring-1 ring-inset ring-zinc-300"
+          className="block h-9 w-full rounded-lg border-0 bg-surface px-2 text-sm ring-1 ring-inset ring-zinc-300"
         >
           <option value="">Any equipment</option>
           {EQUIPMENT.map((e) => (

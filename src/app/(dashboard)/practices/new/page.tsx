@@ -29,7 +29,7 @@ export default async function NewPracticePage({ searchParams }: PageProps<"/prac
       >
         ← Practices
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+      <h1 className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl">
         {asTemplate ? "New practice template" : "New practice"}
       </h1>
       <p className="mt-1 text-sm text-zinc-600">
@@ -37,7 +37,7 @@ export default async function NewPracticePage({ searchParams }: PageProps<"/prac
           ? "Templates have no date. Use them to start new practices quickly."
           : "Set the basics, then add blocks in the builder. It stays a draft until you publish it."}
       </p>
-      <div className="mt-6 rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+      <div className="mt-6 rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
         <NewPracticeForm
           groups={groups ?? []}
           today={today}

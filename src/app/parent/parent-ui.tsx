@@ -26,7 +26,9 @@ export function ChildSwitcher({
             aria-current={on ? "page" : undefined}
             className={cn(
               "shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ring-1 ring-inset",
-              on ? "bg-zinc-900 text-white ring-zinc-900" : "bg-white text-zinc-700 ring-zinc-300",
+              on
+                ? "bg-zinc-900 text-zinc-50 ring-zinc-900"
+                : "bg-surface text-zinc-700 ring-zinc-300",
             )}
           >
             {c.firstName}
@@ -49,7 +51,7 @@ export function Card({
   className?: string;
 }) {
   return (
-    <section className={cn("space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200", className)}>
+    <section className={cn("space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200", className)}>
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-semibold">{title}</h2>
         {action}
@@ -71,7 +73,7 @@ export function PrivacyNote() {
 export function NoLinkedPlayer() {
   return (
     <div className="space-y-3">
-      <div className="rounded-2xl bg-white p-6 text-center ring-1 ring-zinc-200">
+      <div className="rounded-2xl bg-surface p-6 text-center ring-1 ring-zinc-200">
         <p className="text-3xl" aria-hidden>
           ⚾
         </p>
@@ -103,7 +105,7 @@ const STATUS_CHIP = {
   skipped: { label: "Skipped", className: "bg-zinc-100 text-zinc-600" },
   missed: { label: "Missed", className: "bg-zinc-100 text-zinc-700" },
   today: { label: "Today", className: "bg-sky-50 text-sky-900" },
-  upcoming: { label: "Planned", className: "bg-white text-zinc-600 ring-1 ring-zinc-200" },
+  upcoming: { label: "Planned", className: "bg-surface text-zinc-600 ring-1 ring-zinc-200" },
 } as const;
 
 export function StatusChip({ status }: { status: keyof typeof STATUS_CHIP }) {

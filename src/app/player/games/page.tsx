@@ -16,7 +16,7 @@ export default async function PlayerGamesPage() {
   ]);
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold tracking-tight">Games</h1>
+      <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Games</h1>
       <ScheduleView
         games={games}
         tournaments={tournaments}

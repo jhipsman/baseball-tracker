@@ -34,7 +34,7 @@ export async function LiveFeed({
 
   return (
     <section
-      className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200"
+      className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200"
       aria-label="Game log"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">

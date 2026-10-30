@@ -23,7 +23,7 @@ export default async function ImportsPage() {
         </p>
       </header>
       <ImportWizard />
-      <section className="rounded-xl border border-zinc-200 bg-white p-5">
+      <section className="rounded-xl border border-zinc-200 bg-surface p-5">
         <h2 className="font-semibold">Imported data</h2>
         <p className="mt-2 text-sm text-zinc-600">
           Schedules appear in{" "}

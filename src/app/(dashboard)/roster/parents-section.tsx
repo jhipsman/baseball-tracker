@@ -24,7 +24,7 @@ export async function ParentsSection({
   return (
     <section id="parents" className="space-y-3">
       <h2 className="text-lg font-semibold">Parents &amp; guardians</h2>
-      <div className="space-y-4 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+      <div className="space-y-4 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
         {parents.length === 0 && pending.length === 0 ? (
           <p className="text-sm text-zinc-500">
             No parents linked yet. Parents get a read-only view of this player only.

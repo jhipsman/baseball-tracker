@@ -39,7 +39,7 @@ export default async function GamesPage({ searchParams }: PageProps<"/games">) {
     <div className="max-w-4xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Games</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Games</h1>
           <p className="mt-1 text-sm text-zinc-600">
             {year} record{" "}
             <span data-testid="season-record" className="font-semibold text-zinc-900 tabular-nums">
@@ -63,7 +63,7 @@ export default async function GamesPage({ searchParams }: PageProps<"/games">) {
           </Link>
           <Link
             href="/games/new"
-            className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+            className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
           >
             Add game
           </Link>
@@ -112,7 +112,7 @@ export default async function GamesPage({ searchParams }: PageProps<"/games">) {
               const tg = games.filter((g) => g.tournamentId === t.id);
               const r = recordOf(tg);
               return (
-                <li key={t.id} className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+                <li key={t.id} className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
                   <TournamentSummary
                     t={t}
                     href={`/games/tournaments/${t.id}`}

@@ -13,9 +13,9 @@ export default async function PlayerVideosPage() {
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-semibold tracking-tight">Videos</h1>
+      <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Videos</h1>
       <details
-        className="group rounded-2xl bg-white p-4 ring-1 ring-zinc-200"
+        className="group rounded-2xl bg-surface p-4 ring-1 ring-zinc-200"
         open={videos.length === 0}
       >
         <summary className="cursor-pointer list-none font-semibold">

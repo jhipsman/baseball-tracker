@@ -46,7 +46,7 @@ export default async function PracticesPage({ searchParams }: PageProps<"/practi
     <div className="max-w-4xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Practices</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Practices</h1>
           <p className="mt-1 text-sm text-zinc-600">
             Plan practices block by block, publish them to the team, and print a dugout copy.
           </p>
@@ -54,7 +54,7 @@ export default async function PracticesPage({ searchParams }: PageProps<"/practi
         <div className="flex gap-2">
           <Link
             href={view === "templates" ? "/practices/new?template=1" : "/practices/new"}
-            className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+            className="inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
           >
             {view === "templates" ? "New template" : "New practice"}
           </Link>
@@ -110,7 +110,7 @@ export default async function PracticesPage({ searchParams }: PageProps<"/practi
           </p>
         </div>
       ) : (
-        <ul className="mt-4 divide-y divide-zinc-100 overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200">
+        <ul className="mt-4 divide-y divide-zinc-100 overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200">
           {list.map((p) => (
             <PracticeRow key={p.id} p={p} today={today} />
           ))}
@@ -132,7 +132,7 @@ function PracticeRow({ p, today }: { p: PracticeSummary; today: string }) {
           <div
             className={cn(
               "flex w-14 shrink-0 flex-col items-center rounded-lg py-1.5 text-center",
-              p.date === today ? "bg-brand-700 text-white" : "bg-zinc-100 text-zinc-800",
+              p.date === today ? "bg-brand-700 text-on-brand" : "bg-zinc-100 text-zinc-800",
             )}
           >
             <span className="text-[11px] font-semibold uppercase">

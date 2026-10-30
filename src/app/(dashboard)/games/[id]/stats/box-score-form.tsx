@@ -95,7 +95,7 @@ const PITCH_LABEL: Record<PitchNum, string> = {
 };
 
 const cellBase =
-  "block h-10 rounded-md border-0 bg-white px-1 text-center text-base tabular-nums ring-1 ring-inset focus:ring-2 focus:ring-brand-600 sm:text-sm";
+  "block h-10 rounded-md border-0 bg-surface px-1 text-center text-base tabular-nums ring-1 ring-inset focus:ring-2 focus:ring-brand-600 sm:text-sm";
 
 /** Digits-only number box; ArrowUp/ArrowDown step it. Empty = null when allowed. */
 function NumInput({
@@ -426,7 +426,7 @@ export function BoxScoreForm({
       value={b.position}
       onChange={(e) => setBat(i, { position: e.target.value })}
       className={cn(
-        "h-10 rounded-md border-0 bg-white px-1 text-base ring-1 ring-inset ring-zinc-300 sm:text-sm",
+        "h-10 rounded-md border-0 bg-surface px-1 text-base ring-1 ring-inset ring-zinc-300 sm:text-sm",
         className,
       )}
     >
@@ -459,13 +459,13 @@ export function BoxScoreForm({
         </div>
 
         {batters.length === 0 ? (
-          <p className="rounded-xl bg-white p-4 text-sm text-zinc-600 ring-1 ring-zinc-200">
+          <p className="rounded-xl bg-surface p-4 text-sm text-zinc-600 ring-1 ring-zinc-200">
             Add the players who batted. Leave out anyone who didn&apos;t play.
           </p>
         ) : (
           <>
             {/* Laptop: one row per batter, tab across. */}
-            <div className="hidden overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200 md:block">
+            <div className="hidden overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200 md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 text-xs text-zinc-500">
@@ -554,7 +554,7 @@ export function BoxScoreForm({
                 return (
                   <li
                     key={b.playerId}
-                    className="space-y-2 rounded-xl bg-white p-3 ring-1 ring-zinc-200"
+                    className="space-y-2 rounded-xl bg-surface p-3 ring-1 ring-zinc-200"
                   >
                     <div className="flex items-center gap-2">
                       <NumInput
@@ -621,7 +621,7 @@ export function BoxScoreForm({
         )}
 
         {notInLineup.length > 0 ? (
-          <div className="rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
                 Add to lineup
@@ -640,7 +640,7 @@ export function BoxScoreForm({
                   key={p.id}
                   type="button"
                   onClick={() => addBatter(p.id)}
-                  className="h-9 rounded-full bg-white px-3 text-sm font-medium text-zinc-700 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50"
+                  className="h-9 rounded-full bg-surface px-3 text-sm font-medium text-zinc-700 ring-1 ring-inset ring-zinc-300 hover:bg-zinc-50"
                 >
                   + {p.jersey != null ? `#${p.jersey} ` : ""}
                   {p.short}
@@ -665,7 +665,7 @@ export function BoxScoreForm({
 
         {pitchers.length > 0 ? (
           <>
-            <div className="hidden overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200 md:block">
+            <div className="hidden overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200 md:block">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-zinc-200 text-xs text-zinc-500">
@@ -779,7 +779,7 @@ export function BoxScoreForm({
                 return (
                   <li
                     key={p.playerId}
-                    className="space-y-2 rounded-xl bg-white p-3 ring-1 ring-zinc-200"
+                    className="space-y-2 rounded-xl bg-surface p-3 ring-1 ring-zinc-200"
                   >
                     <div className="flex items-center gap-2">
                       <p className="min-w-0 flex-1 truncate font-semibold">{nameOf(p.playerId)}</p>
@@ -874,7 +874,7 @@ export function BoxScoreForm({
             <select
               value=""
               onChange={(e) => addPitcher(e.target.value)}
-              className="h-11 min-w-0 flex-1 rounded-lg border-0 bg-white px-3 text-base ring-1 ring-inset ring-zinc-300 sm:max-w-xs sm:flex-none sm:text-sm"
+              className="h-11 min-w-0 flex-1 rounded-lg border-0 bg-surface px-3 text-base ring-1 ring-inset ring-zinc-300 sm:max-w-xs sm:flex-none sm:text-sm"
             >
               <option value="">Choose a player…</option>
               {notPitching.map((p) => (
@@ -894,7 +894,7 @@ export function BoxScoreForm({
       </section>
 
       {/* -------------------------------------------------------------- Save */}
-      <div className="sticky bottom-0 -mx-4 space-y-2 border-t border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
+      <div className="sticky bottom-0 -mx-4 space-y-2 border-t border-zinc-200 bg-surface/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
         {errList(check.errors)}
         {check.warnings.length ? (
           <ul className="space-y-0.5 text-xs text-amber-800">
@@ -972,7 +972,7 @@ function DecisionSelect({
       value={p.decision}
       onChange={(e) => onChange(i, { decision: e.target.value as Decision | "" })}
       className={cn(
-        "h-10 rounded-md border-0 bg-white px-1 text-base ring-1 ring-inset ring-zinc-300 sm:text-sm",
+        "h-10 rounded-md border-0 bg-surface px-1 text-base ring-1 ring-inset ring-zinc-300 sm:text-sm",
         className ?? "w-16",
       )}
     >

@@ -32,7 +32,7 @@ export async function MemberInbox({ base, highlight }: { base: string; highlight
   return (
     <div className="space-y-6">
       {cleared ? <RefreshOnMount /> : null}
-      <h1 className="text-2xl font-semibold tracking-tight">Messages</h1>
+      <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Messages</h1>
 
       <section className="space-y-3" aria-labelledby="conversations-heading">
         <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ export async function MemberInbox({ base, highlight }: { base: string; highlight
           </h2>
           <Link
             href={`${base}/new`}
-            className="ml-auto inline-flex h-9 items-center rounded-lg bg-brand-700 px-3 text-sm font-semibold text-white hover:bg-brand-600"
+            className="ml-auto inline-flex h-9 items-center rounded-lg bg-brand-700 px-3 text-sm font-semibold text-on-brand hover:bg-brand-600"
           >
             Message a coach
           </Link>

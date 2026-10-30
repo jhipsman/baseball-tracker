@@ -18,11 +18,11 @@ export default async function NewTournamentPage() {
       <Link href="/games?view=tournaments" className="text-sm text-zinc-500 hover:text-zinc-800">
         ← Tournaments
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight">New tournament</h1>
+      <h1 className="mt-2 text-2xl font-medium tracking-tight sm:text-3xl">New tournament</h1>
       <p className="mt-1 text-sm text-zinc-600">
         Add the dates, place, and bracket link. You can add pool and bracket games next.
       </p>
-      <div className="mt-5 rounded-xl bg-white p-4 ring-1 ring-zinc-200 sm:p-6">
+      <div className="mt-5 rounded-xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-6">
         <NewTournamentForm groups={groups} today={today} />
       </div>
     </div>

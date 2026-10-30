@@ -58,7 +58,7 @@ const strip = (blocks: PracticeBlock[]) =>
   }));
 
 const inputClass =
-  "block w-full rounded-lg border-0 bg-white px-2.5 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
+  "block w-full rounded-lg border-0 bg-surface px-2.5 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
 
 export function PracticeBuilder({
   planId,
@@ -211,7 +211,7 @@ export function PracticeBuilder({
 
   return (
     <section aria-label="Practice blocks" className="space-y-3">
-      <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white/95 px-3 py-2 ring-1 ring-zinc-200 backdrop-blur">
+      <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface/95 px-3 py-2 ring-1 ring-zinc-200 backdrop-blur">
         <p className="text-sm">
           <span className="font-semibold tabular-nums" data-testid="practice-total">
             {formatDuration(total)}
@@ -252,7 +252,7 @@ export function PracticeBuilder({
             type="button"
             onClick={() => void flush()}
             disabled={status === "saved" || status === "saving"}
-            className="h-8 rounded-lg bg-brand-700 px-3 text-xs font-semibold text-white hover:bg-brand-600 disabled:bg-zinc-200 disabled:text-zinc-500"
+            className="h-8 rounded-lg bg-brand-700 px-3 text-xs font-semibold text-on-brand hover:bg-brand-600 disabled:bg-zinc-200 disabled:text-zinc-500"
           >
             Save
           </button>
@@ -304,7 +304,7 @@ export function PracticeBuilder({
               type="button"
               onClick={() => add(k.key)}
               disabled={blocks.length >= MAX_BLOCKS}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-white px-3 text-sm font-medium ring-1 ring-zinc-300 ring-inset hover:bg-zinc-50 disabled:opacity-50"
+              className="inline-flex h-9 items-center gap-1.5 rounded-full bg-surface px-3 text-sm font-medium ring-1 ring-zinc-300 ring-inset hover:bg-zinc-50 disabled:opacity-50"
             >
               <span aria-hidden className={cn("size-2.5 rounded-full", k.dot)} />+ {k.label}
             </button>
@@ -366,7 +366,7 @@ const BlockCard = memo(function BlockCard({
       style={{ transform: CSS.Translate.toString(transform), transition }}
       data-testid="practice-block"
       className={cn(
-        "rounded-xl bg-white ring-1 ring-zinc-200",
+        "rounded-xl bg-surface ring-1 ring-zinc-200",
         isDragging && "relative z-10 shadow-lg ring-brand-500",
       )}
     >
@@ -498,7 +498,7 @@ const BlockCard = memo(function BlockCard({
                   type="button"
                   aria-label={`Remove station ${si + 1}`}
                   onClick={() => set({ stations: b.stations.filter((_, x) => x !== si) })}
-                  className="row-span-1 h-9 rounded-lg px-2 text-zinc-400 hover:bg-white hover:text-red-600 sm:order-last"
+                  className="row-span-1 h-9 rounded-lg px-2 text-zinc-400 hover:bg-surface hover:text-red-600 sm:order-last"
                 >
                   ✕
                 </button>
@@ -583,7 +583,7 @@ function MinutesInput({ value, onChange }: { value: number; onChange: (n: number
           if (e.target.value !== "" && Number.isFinite(n) && n >= 1) onChange(Math.min(240, n));
         }}
         onBlur={() => setDraft(null)}
-        className="h-9 w-12 border-0 bg-white pr-4 text-center text-base tabular-nums ring-1 ring-zinc-200 ring-inset [appearance:textfield] focus:ring-2 focus:ring-brand-600 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none"
+        className="h-9 w-12 border-0 bg-surface pr-4 text-center text-base tabular-nums ring-1 ring-zinc-200 ring-inset [appearance:textfield] focus:ring-2 focus:ring-brand-600 sm:text-sm [&::-webkit-inner-spin-button]:appearance-none"
       />
       <span
         aria-hidden

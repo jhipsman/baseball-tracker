@@ -2,6 +2,7 @@ import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { OrgSwitcher } from "@/components/layout/org-switcher";
 import { SeasonToggle } from "@/components/layout/season-toggle";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
@@ -25,15 +26,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
       <TimezoneSync current={tz ? decodeURIComponent(tz) : undefined} />
-      <aside className="border-b border-zinc-200 bg-white md:sticky md:top-0 md:h-dvh md:w-60 md:shrink-0 md:border-r md:border-b-0">
-        <div className="flex h-full flex-col gap-4 p-4">
+      <aside className="glass border-b border-zinc-200/70 md:sticky md:top-3 md:m-3 md:mr-0 md:h-[calc(100dvh-1.5rem)] md:w-64 md:shrink-0 md:rounded-3xl md:border-0 md:shadow-xl md:ring-1 md:shadow-black/5 md:ring-zinc-200/80">
+        <div className="flex h-full flex-col gap-4 p-4 md:overflow-y-auto md:p-5">
           <div className="flex items-center gap-2">
-            <span aria-hidden className="inline-block size-5 rotate-45 rounded-sm bg-brand-700" />
+            <span
+              aria-hidden
+              className="inline-block size-5 shrink-0 rotate-45 rounded-[5px] bg-brand-600 shadow-[0_0_18px_rgb(18_183_106/0.45)]"
+            />
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{org.name}</p>
+              <p className="truncate text-sm font-semibold tracking-tight">{org.name}</p>
               <p className="text-xs text-zinc-500">{ROLE_LABELS[membership.role]}</p>
             </div>
-            <NotificationBell className="ml-auto" />
+            <div className="ml-auto flex items-center">
+              <ThemeToggle />
+              <NotificationBell />
+            </div>
             <form action={signOut} className="md:hidden">
               <button type="submit" className="text-sm font-medium text-zinc-700">
                 Sign out
@@ -49,7 +56,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           {/* Phones: the season takes one line until tapped. */}
           <details className="group md:hidden">
-            <summary className="flex h-11 cursor-pointer list-none items-center justify-between rounded-lg px-3 text-sm ring-1 ring-zinc-200">
+            <summary className="flex h-11 cursor-pointer list-none items-center justify-between rounded-full px-4 text-sm ring-1 ring-zinc-200">
               <span>
                 Season: <strong>{SEASON_PHASE_LABELS[org.current_season_phase]}</strong>
               </span>
@@ -75,7 +82,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 px-4 py-6 md:px-8 md:py-8">
+      <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
         <div className="mx-auto w-full max-w-7xl [&>*]:mx-auto">{children}</div>
       </main>
     </div>

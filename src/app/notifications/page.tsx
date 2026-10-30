@@ -31,7 +31,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-zinc-50">
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-surface/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-xl items-center gap-2 px-4">
           <Link
             href={home}
@@ -44,12 +44,12 @@ export default async function NotificationsPage() {
       </header>
       <main className="mx-auto w-full max-w-xl flex-1 space-y-6 px-4 py-5">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight">Notifications</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Notifications</h1>
           {unread ? (
             <form action={markAllNotificationsRead} className="ml-auto">
               <button
                 type="submit"
-                className="h-9 rounded-lg bg-white px-3 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-300 hover:bg-zinc-50"
+                className="h-9 rounded-lg bg-surface px-3 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-300 hover:bg-zinc-50"
               >
                 Mark all read
               </button>
@@ -60,7 +60,7 @@ export default async function NotificationsPage() {
         {list.length ? (
           <ul
             aria-label="Notifications"
-            className="divide-y divide-zinc-100 overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200"
+            className="divide-y divide-zinc-100 overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200"
           >
             {list.map((n) => (
               <li key={n.id}>
@@ -106,13 +106,13 @@ export default async function NotificationsPage() {
             ))}
           </ul>
         ) : (
-          <p className="rounded-xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+          <p className="rounded-xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
             You&apos;re all caught up. Announcements, messages, and updates from your team show up
             here.
           </p>
         )}
 
-        <section className="space-y-3 rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+        <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
           <h2 className="font-semibold">Phone notifications</h2>
           {vapidKey ? (
             <PushSettings

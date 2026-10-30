@@ -20,7 +20,7 @@ export default async function PlayerVideoPage({ params }: PageProps<"/player/vid
         <Link href="/player/videos" className="text-sm text-brand-700 hover:underline">
           ← Videos
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{video.title}</h1>
+        <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">{video.title}</h1>
         <p className="text-sm text-zinc-600">
           {VIDEO_TYPE_LABEL[video.type]} ·{" "}
           {new Date(video.createdAt).toLocaleDateString("en-US", {

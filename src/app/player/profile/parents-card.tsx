@@ -22,7 +22,7 @@ export async function ParentsCard({
   ]);
 
   return (
-    <section id="parents" className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+    <section id="parents" className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
       <div>
         <h2 className="font-semibold">Invite a parent or guardian</h2>
         <p className="mt-1 text-sm text-zinc-600">

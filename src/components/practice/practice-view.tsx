@@ -53,7 +53,7 @@ export function PracticeView({ plan }: { plan: PracticePlan }) {
     <article className="space-y-5">
       <header>
         <p className="text-xs font-semibold tracking-wide text-brand-700 uppercase">Practice</p>
-        <h1 className="text-2xl font-semibold tracking-tight">{plan.title}</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">{plan.title}</h1>
         <PracticeMeta plan={plan} />
       </header>
 
@@ -65,7 +65,7 @@ export function PracticeView({ plan }: { plan: PracticePlan }) {
       ) : null}
 
       {plan.blocks.length === 0 ? (
-        <p className="rounded-xl bg-white p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-xl bg-surface p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           The schedule for this practice hasn&apos;t been posted yet.
         </p>
       ) : (
@@ -85,7 +85,7 @@ export function PracticeView({ plan }: { plan: PracticePlan }) {
                     kind.dot,
                   )}
                 />
-                <div className="min-w-0 flex-1 rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+                <div className="min-w-0 flex-1 rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-2">
                     <h3 className="font-semibold">{b.title}</h3>
                     <span className="text-xs text-zinc-500 tabular-nums">{times[i].label}</span>

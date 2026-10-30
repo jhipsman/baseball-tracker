@@ -28,10 +28,12 @@ export function GameLog({
 }) {
   if (log.length === 0)
     return (
-      <p className="rounded-2xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">{empty}</p>
+      <p className="rounded-2xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+        {empty}
+      </p>
     );
   return (
-    <ol className="divide-y divide-zinc-100 rounded-2xl bg-white ring-1 ring-zinc-200">
+    <ol className="divide-y divide-zinc-100 rounded-2xl bg-surface ring-1 ring-zinc-200">
       {log.map(({ game, bat, pit }) => {
         const head = (
           <>

@@ -148,7 +148,7 @@ export default async function LogWorkoutPage({
           {assignment.program.name} · Week {day.week.week_number}
           {day.week.label ? ` · ${day.week.label}` : ""}
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
           {day.name || `Day ${day.day_number}`}
         </h1>
         <p className="text-sm text-zinc-500">{SESSION_LABELS[day.session_type]}</p>
@@ -162,7 +162,7 @@ export default async function LogWorkoutPage({
       </div>
 
       {items.length === 0 ? (
-        <p className="rounded-2xl bg-white p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-2xl bg-surface p-4 text-sm text-zinc-500 ring-1 ring-zinc-200">
           No exercises listed for this day. Mark it done when you&apos;ve finished the session.
         </p>
       ) : null}

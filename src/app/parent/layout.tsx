@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { ParentNav } from "@/components/layout/parent-nav";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { NotificationBell } from "@/components/notifications/bell";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
@@ -13,13 +14,14 @@ export default async function ParentLayout({ children }: { children: React.React
   const { tz } = await playerToday();
 
   return (
-    <div className="flex min-h-full flex-1 flex-col bg-zinc-50">
+    <div className="flex min-h-full flex-1 flex-col">
       <TimezoneSync current={tz ? decodeURIComponent(tz) : undefined} />
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-white/95 backdrop-blur">
+      <header className="glass sticky top-0 z-20 border-b border-zinc-200/70">
         <div className="mx-auto flex h-14 max-w-md items-center gap-2 px-4">
-          <span aria-hidden className="inline-block size-4 rotate-45 rounded-sm bg-brand-700" />
-          <span className="truncate text-sm font-semibold">{org.name}</span>
+          <span aria-hidden className="inline-block size-4 rotate-45 rounded-[4px] bg-brand-600" />
+          <span className="truncate text-sm font-semibold tracking-tight">{org.name}</span>
           <div className="ml-auto flex items-center gap-1">
+            <ThemeToggle />
             <NotificationBell />
             <form action={signOut}>
               <button

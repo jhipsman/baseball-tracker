@@ -45,7 +45,7 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
   return (
     <div className="max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Testing day</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Testing day</h1>
         <p className="mt-1 text-sm text-zinc-600">
           Enter a whole team&apos;s results at once. Leave a box blank to skip it.
         </p>
@@ -67,8 +67,8 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
                 className={cn(
                   "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
                   on
-                    ? "bg-brand-700 text-white ring-brand-700"
-                    : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                    ? "bg-brand-700 text-on-brand ring-brand-700"
+                    : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
                 )}
               >
                 {m.label}
@@ -88,8 +88,8 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
                 className={cn(
                   "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
                   g.id === groupId
-                    ? "bg-zinc-900 text-white ring-zinc-900"
-                    : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                    ? "bg-zinc-900 text-zinc-50 ring-zinc-900"
+                    : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
                 )}
               >
                 {g.name}
@@ -100,7 +100,7 @@ export default async function TestingDayPage({ searchParams }: PageProps<"/roste
       </div>
 
       {players.length === 0 ? (
-        <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-xl bg-surface p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           No active players{group ? ` in ${group.name}` : ""} yet.{" "}
           <Link href="/roster/manage" className="font-semibold text-brand-700 hover:underline">
             Invite your players →

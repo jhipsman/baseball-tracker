@@ -36,7 +36,7 @@ export function SeasonToggle({ phase, editable }: { phase: Phase; editable: bool
           }
           className={cn(
             "rounded-md px-2 py-1.5 whitespace-nowrap",
-            optimistic === p ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500",
+            optimistic === p ? "bg-surface text-zinc-900 shadow-sm" : "text-zinc-500",
             editable ? "hover:text-zinc-900" : "cursor-default",
           )}
         >

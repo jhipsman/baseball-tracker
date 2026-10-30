@@ -38,14 +38,14 @@ export default async function HistoryPage() {
         <Link href="/player/profile" className="text-sm font-medium text-zinc-500">
           ← Me
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">History</h1>
+        <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">History</h1>
         <p className="text-sm text-zinc-500">
           {logs.length} workout{logs.length === 1 ? "" : "s"} logged · {completedCount} completed
         </p>
       </div>
 
       {logs.length === 0 ? (
-        <p className="rounded-2xl bg-white p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-2xl bg-surface p-6 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           Workouts you log will show up here. Start one from the Today tab.
         </p>
       ) : (
@@ -107,12 +107,12 @@ export default async function HistoryPage() {
                 {l.program_day_id ? (
                   <Link
                     href={`/player/log/${l.program_assignment_id}/${l.program_day_id}`}
-                    className="block rounded-xl bg-white p-4 ring-1 ring-zinc-200 active:bg-zinc-50"
+                    className="block rounded-xl bg-surface p-4 ring-1 ring-zinc-200 active:bg-zinc-50"
                   >
                     {body}
                   </Link>
                 ) : (
-                  <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">{body}</div>
+                  <div className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">{body}</div>
                 )}
               </li>
             );

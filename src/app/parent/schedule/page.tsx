@@ -65,7 +65,9 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">{child.firstName}&apos;s schedule</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
+          {child.firstName}&apos;s schedule
+        </h1>
         <p className="text-sm text-zinc-600">
           Games, practices, and workouts for the next two weeks.
         </p>
@@ -80,12 +82,12 @@ export default async function ParentSchedulePage({ searchParams }: PageProps<"/p
       </div>
 
       {entries.length === 0 && practices.length === 0 && games.length === 0 ? (
-        <p className="rounded-2xl bg-white p-6 text-sm text-zinc-600 ring-1 ring-zinc-200">
+        <p className="rounded-2xl bg-surface p-6 text-sm text-zinc-600 ring-1 ring-zinc-200">
           Nothing scheduled for the next two weeks. When the coach assigns {child.firstName} a
           program, the workouts show up here.
         </p>
       ) : (
-        <ol className="divide-y divide-zinc-100 rounded-2xl bg-white ring-1 ring-zinc-200">
+        <ol className="divide-y divide-zinc-100 rounded-2xl bg-surface ring-1 ring-zinc-200">
           {dates.map((d) => {
             const list = byDate.get(d) ?? [];
             const pr = practicesByDate.get(d) ?? [];

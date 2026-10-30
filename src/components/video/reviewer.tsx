@@ -561,7 +561,7 @@ export function Reviewer({
         ) : null}
         {rec ? (
           <div className="absolute left-3 top-3 flex items-center gap-2 rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
-            <span className="size-2 animate-pulse rounded-full bg-white" />
+            <span className="size-2 animate-pulse rounded-full bg-surface" />
             REC {formatClock(rec.elapsed).split(".")[0]}
           </div>
         ) : null}
@@ -606,7 +606,7 @@ export function Reviewer({
               }}
               className={cn(
                 "h-11 px-3 text-sm font-semibold first:rounded-l-lg last:rounded-r-lg",
-                rate === s ? "bg-zinc-900 text-white" : "bg-white text-zinc-700",
+                rate === s ? "bg-zinc-900 text-zinc-50" : "bg-surface text-zinc-700",
               )}
             >
               {s === 1 ? "1×" : s === 0.5 ? "½×" : "¼×"}
@@ -642,7 +642,7 @@ export function Reviewer({
       {belowPlayer}
 
       {canEdit ? (
-        <div className="space-y-2 rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+        <div className="space-y-2 rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex flex-wrap gap-1" role="group" aria-label="Drawing tool">
               {TOOLS.map((t) => (
@@ -656,7 +656,7 @@ export function Reviewer({
                   }}
                   className={cn(
                     "h-10 rounded-lg px-3 text-sm font-semibold",
-                    tool === t.key ? "bg-brand-700 text-white" : "bg-zinc-100 text-zinc-800",
+                    tool === t.key ? "bg-brand-700 text-on-brand" : "bg-zinc-100 text-zinc-800",
                   )}
                 >
                   {t.label}
@@ -737,7 +737,7 @@ export function Reviewer({
       ) : null}
 
       {canEdit ? (
-        <section className="space-y-2 rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+        <section className="space-y-2 rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
           <h3 className="text-sm font-semibold">Voice-over breakdown</h3>
           <p className="text-xs text-zinc-500">
             Records the video, your drawings, and your voice while you play, pause, step, and draw.
@@ -786,7 +786,7 @@ export function Reviewer({
             {canEdit ? "Pause on a frame and pick a tool to start." : "None yet."}
           </p>
         ) : (
-          <ul className="divide-y divide-zinc-100 rounded-xl bg-white ring-1 ring-zinc-200">
+          <ul className="divide-y divide-zinc-100 rounded-xl bg-surface ring-1 ring-zinc-200">
             {sorted.map((a) => {
               const deg = a.kind === "angle" ? angleOf(a, aspect) : null;
               return (

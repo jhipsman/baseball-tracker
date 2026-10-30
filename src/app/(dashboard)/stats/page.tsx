@@ -60,7 +60,7 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
     <div className="max-w-6xl space-y-6">
       <div className="space-y-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Stats</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Stats</h1>
           <p className="mt-1 text-sm text-zinc-600">
             Season stats from your box scores. Enter a box score from any game&apos;s page.
           </p>
@@ -78,7 +78,7 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
       </div>
 
       {teamGames === 0 ? (
-        <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+        <p className="rounded-xl bg-surface p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           No box scores for {year} yet. Open a game and choose <strong>Enter box score</strong>.
         </p>
       ) : (
@@ -106,7 +106,7 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
           {season.games.length === 0 && missing.length === 0 ? (
             <p className="text-sm text-zinc-500">No final games yet this season.</p>
           ) : (
-            <ul className="divide-y divide-zinc-100 rounded-xl bg-white ring-1 ring-zinc-200">
+            <ul className="divide-y divide-zinc-100 rounded-xl bg-surface ring-1 ring-zinc-200">
               {missing.map((g) => (
                 <li key={g.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
                   <span className="w-14 text-zinc-500 tabular-nums">{fmtDay(g.date)}</span>
@@ -144,7 +144,7 @@ export default async function StatsPage({ searchParams }: PageProps<"/stats">) {
 
         <section id="visibility" className="space-y-3">
           <h2 className="text-lg font-semibold">Team setting</h2>
-          <div className="rounded-xl bg-white p-4 ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
             <VisibilityForm current={visibility} canEdit={membership.role === "admin"} />
           </div>
         </section>

@@ -43,7 +43,7 @@ export function GameView({
 
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
             {matchupLabel(g.homeAway, g.opponent)}
           </h1>
           <StatusBadge status={g.status} />
@@ -63,7 +63,7 @@ export function GameView({
       <OffBanner status={g.status} />
 
       {showScore && g.teamScore != null && g.opponentScore != null ? (
-        <section className="flex items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+        <section className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
           <div className="flex items-center gap-2">
             {result ? <ResultChip result={result} className="size-8 text-base" /> : null}
             <span className="text-3xl font-bold tabular-nums" data-testid="game-score">
@@ -82,7 +82,7 @@ export function GameView({
         <LineScoreTable game={g} teamName={teamName} currentInning={g.currentInning} />
       ) : null}
 
-      <section className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <dl className="grid grid-cols-[6rem_1fr] gap-x-3 gap-y-2 text-sm">
           <dt className="text-zinc-500">When</dt>
           <dd className="font-medium">{timeLine(g)}</dd>

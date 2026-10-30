@@ -31,7 +31,7 @@ export async function ThreadPage({ id, base }: { id: string; base: string }) {
           <summary className="cursor-pointer">
             {thread.members.length} people in this conversation
           </summary>
-          <ul className="mt-2 space-y-1 rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+          <ul className="mt-2 space-y-1 rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
             {thread.members.map((m) => (
               <li key={m.id} className="flex flex-wrap items-baseline gap-x-2">
                 <span className="font-medium text-zinc-900">
@@ -74,8 +74,8 @@ export async function ThreadPage({ id, base }: { id: string; base: string }) {
                   className={cn(
                     "mt-1 inline-block rounded-2xl px-3 py-2 text-left text-sm whitespace-pre-wrap break-words",
                     mine
-                      ? "bg-brand-700 text-white"
-                      : "bg-white text-zinc-900 ring-1 ring-zinc-200",
+                      ? "bg-brand-700 text-on-brand"
+                      : "bg-surface text-zinc-900 ring-1 ring-zinc-200",
                   )}
                 >
                   {m.body}
@@ -86,7 +86,7 @@ export async function ThreadPage({ id, base }: { id: string; base: string }) {
         })}
       </ol>
 
-      <div className="rounded-xl bg-white p-3 ring-1 ring-zinc-200">
+      <div className="rounded-xl bg-surface p-3 ring-1 ring-zinc-200">
         <ReplyForm threadId={thread.id} />
       </div>
     </div>

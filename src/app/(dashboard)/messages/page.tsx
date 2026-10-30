@@ -41,7 +41,7 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
   return (
     <div className="max-w-6xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Messages</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Messages</h1>
         <p className="mt-1 text-sm text-zinc-600">
           Post announcements to the team or a group, and message players, parents, and staff.
           Parents are copied on conversations with their player.
@@ -57,8 +57,8 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
             className={cn(
               "rounded-full px-3 py-1.5 text-sm font-medium",
               tab === t.key
-                ? "bg-zinc-900 text-white"
-                : "bg-white text-zinc-700 ring-1 ring-zinc-300",
+                ? "bg-zinc-900 text-zinc-50"
+                : "bg-surface text-zinc-700 ring-1 ring-zinc-300",
             )}
           >
             {t.label}
@@ -72,7 +72,7 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
             <h2 className="font-semibold">Conversations</h2>
             <Link
               href="/messages/new"
-              className="ml-auto inline-flex h-10 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+              className="ml-auto inline-flex h-10 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
             >
               New message
             </Link>
@@ -86,7 +86,7 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
         </section>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <aside className="h-fit rounded-xl bg-white p-4 ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-1">
+          <aside className="h-fit rounded-xl bg-surface p-4 ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-1">
             <h2 className="mb-3 font-semibold">New announcement</h2>
             <AnnouncementForm groups={dir.groups} />
           </aside>

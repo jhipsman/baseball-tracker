@@ -93,7 +93,7 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <h1 className="text-2xl font-semibold tracking-tight">How {name} is doing</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">How {name} is doing</h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent" />
       </div>
 

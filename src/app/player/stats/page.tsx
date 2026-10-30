@@ -17,7 +17,7 @@ export default async function PlayerStatsPage({ searchParams }: PageProps<"/play
         <Link href="/player/profile" className="text-sm font-medium text-zinc-500">
           ← Me
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">My stats</h1>
+        <h1 className="mt-1 text-2xl font-medium tracking-tight sm:text-3xl">My stats</h1>
       </div>
       <MyStats
         playerId={user.id}

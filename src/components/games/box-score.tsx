@@ -27,7 +27,7 @@ export async function BoxScore({ gameId }: { gameId: string }) {
     return (
       <section
         aria-label="Box score"
-        className="rounded-xl bg-white p-4 text-sm ring-1 ring-zinc-200"
+        className="rounded-xl bg-surface p-4 text-sm ring-1 ring-zinc-200"
       >
         <h2 className="font-semibold">Box score</h2>
         <p className="mt-1 text-zinc-500">
@@ -40,7 +40,7 @@ export async function BoxScore({ gameId }: { gameId: string }) {
         {isStaff ? (
           <Link
             href={enterHref}
-            className="mt-3 inline-flex h-11 items-center rounded-lg bg-white px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-300 hover:bg-zinc-50"
+            className="mt-3 inline-flex h-11 items-center rounded-lg bg-surface px-4 text-sm font-semibold text-zinc-900 ring-1 ring-zinc-300 hover:bg-zinc-50"
           >
             Enter box score
           </Link>
@@ -64,7 +64,7 @@ export async function BoxScore({ gameId }: { gameId: string }) {
   return (
     <section
       aria-label="Box score"
-      className="space-y-3 rounded-xl bg-white p-3 ring-1 ring-zinc-200 sm:p-4"
+      className="space-y-3 rounded-xl bg-surface p-3 ring-1 ring-zinc-200 sm:p-4"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="font-semibold">Box score</h2>

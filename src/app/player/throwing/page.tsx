@@ -41,11 +41,11 @@ export default async function PlayerThrowingPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Health</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Health</h1>
         <p className="text-sm text-zinc-600">Throwing &amp; arm care</p>
       </div>
 
-      <section className="space-y-3 rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm font-medium text-zinc-600">Pitching today</p>
           <AvailabilityBadge a={avail} size="lg" />
@@ -76,12 +76,12 @@ export default async function PlayerThrowingPage() {
         <AlertList alerts={alerts} />
       </section>
 
-      <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <h2 className="mb-3 font-semibold">Log throwing or arm check-in</h2>
         <ThrowLogForm compact />
       </section>
 
-      <section className="rounded-2xl bg-white p-4 ring-1 ring-zinc-200">
+      <section className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
         <h2 className="mb-3 font-semibold">Last 28 days</h2>
         <ThrowsChart days={dailySeries(rows, addDays(today, -27), today)} dailyMax={dailyMax} />
       </section>

@@ -73,7 +73,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
     <div className="max-w-7xl space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Roster</h1>
+          <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Roster</h1>
           <p className="mt-1 text-sm text-zinc-600">
             {players.length} player{players.length === 1 ? "" : "s"}
             {group ? ` in ${group.name}` : ""}
@@ -95,8 +95,8 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
               className={cn(
                 "rounded-full px-3 py-1 font-medium ring-1 ring-inset",
                 g.id === groupId
-                  ? "bg-brand-700 text-white ring-brand-700"
-                  : "bg-white text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
+                  ? "bg-brand-700 text-on-brand ring-brand-700"
+                  : "bg-surface text-zinc-700 ring-zinc-300 hover:bg-zinc-50",
               )}
             >
               {g.name}
@@ -107,7 +107,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
 
       {players.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-3 [&>*]:min-w-0">
-          <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
             <p className="text-sm text-zinc-600">Team compliance, last 7 days</p>
             <p className="mt-1 text-5xl font-semibold text-zinc-900">
               {team7.rate == null ? "—" : `${Math.round(team7.rate * 100)}%`}
@@ -116,7 +116,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
               {team7.logged} of {team7.due} due workouts logged
             </p>
           </div>
-          <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
             <p className="text-sm text-zinc-600">Need attention</p>
             <p className="mt-1 text-3xl font-semibold text-zinc-900">{attention.length}</p>
             <p className="mt-1 truncate text-xs text-zinc-500">
@@ -125,7 +125,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
                 : "Everyone is keeping up"}
             </p>
           </div>
-          <div className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
             <p className="text-sm text-zinc-600">No active program</p>
             <p className="mt-1 text-3xl font-semibold text-zinc-900">{noProgram.length}</p>
             <p className="mt-1 truncate text-xs text-zinc-500">
@@ -139,7 +139,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
 
       {players.length === 0 ? (
         group ? (
-          <p className="rounded-xl bg-white p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
+          <p className="rounded-xl bg-surface p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
             No players in {group.name} yet. Add them from{" "}
             <Link href="/roster/manage" className="font-semibold text-brand-700">
               Members &amp; invites
@@ -147,7 +147,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
             .
           </p>
         ) : (
-          <div className="rounded-xl bg-white p-8 text-center ring-1 ring-zinc-200">
+          <div className="rounded-xl bg-surface p-8 text-center ring-1 ring-zinc-200">
             <p className="font-semibold">No players yet</p>
             <p className="mx-auto mt-1 max-w-md text-sm text-zinc-600">
               Once players join, this page shows who&apos;s keeping up with workouts, who has no
@@ -155,7 +155,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
             </p>
             <Link
               href="/roster/manage"
-              className="mt-4 inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-600"
+              className="mt-4 inline-flex h-11 items-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-on-brand hover:bg-brand-600"
             >
               Invite your players
             </Link>
@@ -170,7 +170,7 @@ export default async function RosterOverviewPage({ searchParams }: PageProps<"/r
           </div>
         )
       ) : (
-        <div className="relative overflow-x-auto rounded-xl bg-white ring-1 ring-zinc-200">
+        <div className="relative overflow-x-auto rounded-xl bg-surface ring-1 ring-zinc-200">
           <table className="w-full min-w-[60rem] text-sm [&_td]:whitespace-nowrap">
             <thead>
               <tr className="border-b border-zinc-200 text-left text-xs font-medium text-zinc-500">

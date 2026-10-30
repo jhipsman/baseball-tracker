@@ -39,9 +39,9 @@ export function ImportWizard() {
       )
     : [];
   const checked = validateRows(kind, rows, season);
-  const cls = "rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm";
+  const cls = "rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm";
   const primary =
-    "rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-white disabled:opacity-40";
+    "rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-on-brand disabled:opacity-40";
   async function loadFile(next: File, sheetNumber = 1) {
     setReading(true);
     setError("");
@@ -96,7 +96,7 @@ export function ImportWizard() {
   }
   return (
     <section
-      className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-7"
+      className="rounded-2xl border border-zinc-200 bg-surface p-5 sm:p-7"
       aria-label="Team import wizard"
     >
       <ol className="mb-7 flex flex-wrap gap-4 text-xs text-zinc-400">

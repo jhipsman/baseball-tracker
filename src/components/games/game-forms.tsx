@@ -44,7 +44,7 @@ export type GameDefaults = {
 };
 
 const textareaClass =
-  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
+  "block w-full rounded-lg border-0 bg-surface px-3 py-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
 
 const t5 = (t: string | null | undefined) => t?.slice(0, 5) ?? "";
 
@@ -334,7 +334,7 @@ export function QuickEntryForm({
   };
 
   const cellInput =
-    "block h-10 w-full rounded-md border-0 bg-white px-2 text-base ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600 sm:text-sm";
+    "block h-10 w-full rounded-md border-0 bg-surface px-2 text-base ring-1 ring-inset ring-zinc-300 focus:ring-2 focus:ring-brand-600 sm:text-sm";
 
   return (
     <form onSubmit={submit} className="space-y-4">
@@ -404,7 +404,7 @@ export function QuickEntryForm({
           <li
             key={i}
             data-testid="quick-row"
-            className="grid grid-cols-2 gap-2 rounded-xl bg-white p-3 ring-1 ring-zinc-200 sm:grid-cols-[2rem_9.5rem_7.5rem_minmax(0,1fr)_7rem_minmax(0,1fr)_2rem] sm:items-center sm:rounded-none sm:p-0 sm:ring-0"
+            className="grid grid-cols-2 gap-2 rounded-xl bg-surface p-3 ring-1 ring-zinc-200 sm:grid-cols-[2rem_9.5rem_7.5rem_minmax(0,1fr)_7rem_minmax(0,1fr)_2rem] sm:items-center sm:rounded-none sm:p-0 sm:ring-0"
           >
             <span className="col-span-2 text-xs font-semibold text-zinc-500 sm:col-span-1 sm:text-center">
               {i + 1}

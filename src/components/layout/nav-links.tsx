@@ -19,7 +19,7 @@ export function NavLinks({ items }: { items: NavItem[] }) {
           return (
             <span
               key={item.href}
-              className="flex shrink-0 items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm text-zinc-400"
+              className="flex shrink-0 items-center justify-between gap-2 rounded-full px-4 py-2 text-sm text-zinc-400"
             >
               {item.label}
               <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium uppercase">
@@ -34,8 +34,10 @@ export function NavLinks({ items }: { items: NavItem[] }) {
             href={item.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "shrink-0 rounded-lg px-3 py-2 text-sm font-medium",
-              active ? "bg-brand-50 text-brand-900" : "text-zinc-700 hover:bg-zinc-100",
+              "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              active
+                ? "bg-zinc-900 text-zinc-50 shadow-sm"
+                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
             )}
           >
             {item.label}

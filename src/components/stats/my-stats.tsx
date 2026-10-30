@@ -103,7 +103,7 @@ export async function MyStats({
           </section>
         ) : null
       ) : (
-        <p className="rounded-2xl bg-white p-4 text-xs text-zinc-600 ring-1 ring-zinc-200">
+        <p className="rounded-2xl bg-surface p-4 text-xs text-zinc-600 ring-1 ring-zinc-200">
           🔒 Your team keeps stats private to each family, so only{" "}
           {firstName ? `${firstName}'s` : "your"} numbers are shown here.
         </p>

@@ -12,13 +12,13 @@ export function PageSkeleton({ compact = false }: { compact?: boolean }) {
         )}
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-28 rounded-xl border border-zinc-200 bg-white p-5">
+            <div key={i} className="h-28 rounded-xl border border-zinc-200 bg-surface p-5">
               <div className="h-3 w-16 rounded bg-zinc-100" />
               <div className="mt-4 h-6 w-10 rounded bg-zinc-200" />
             </div>
           ))}
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-5">
+        <div className="rounded-xl border border-zinc-200 bg-surface p-5">
           <div className="mb-5 h-4 w-32 rounded bg-zinc-200" />
           {[0, 1, 2].map((i) => (
             <div

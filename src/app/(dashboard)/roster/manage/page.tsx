@@ -76,14 +76,14 @@ export default async function RosterPage() {
   return (
     <div className="max-w-5xl space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Members &amp; invites</h1>
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Members &amp; invites</h1>
         <p className="mt-1 text-sm text-zinc-600">
           {members.length} member{members.length === 1 ? "" : "s"} in {org.name}
         </p>
       </div>
 
       {isStaff ? (
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="font-semibold">{isAdmin ? "Invite someone" : "Invite a parent"}</h2>
           <p className="mt-1 mb-4 text-sm text-zinc-600">
             They&apos;ll join once they sign in with this email and open the invite link. Pending
@@ -135,7 +135,7 @@ export default async function RosterPage() {
       ) : null}
 
       {isStaff ? (
-        <section className="rounded-xl bg-white p-5 ring-1 ring-zinc-200">
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="font-semibold">Groups</h2>
           <p className="mt-1 mb-4 text-sm text-zinc-600">
             Save sets of players (Pitchers, JV…) to assign programs and filter the calendar in one
@@ -205,7 +205,7 @@ export default async function RosterPage() {
                           </div>
                           <button
                             type="submit"
-                            className="h-9 rounded-lg bg-brand-700 px-3 text-sm font-semibold text-white hover:bg-brand-600"
+                            className="h-9 rounded-lg bg-brand-700 px-3 text-sm font-semibold text-on-brand hover:bg-brand-600"
                           >
                             Save players
                           </button>
@@ -220,7 +220,7 @@ export default async function RosterPage() {
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-xl bg-white ring-1 ring-zinc-200">
+      <section className="overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200">
         <ul className="divide-y divide-zinc-100">
           {members.map((m) => {
             const isOwner = m.profile_id === orgRow?.owner_id;

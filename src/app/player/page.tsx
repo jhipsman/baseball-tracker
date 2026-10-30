@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Today" };
 
 const STATUS_CHIP = {
-  completed: { label: "Done", className: "bg-brand-700 text-white" },
+  completed: { label: "Done", className: "bg-brand-700 text-on-brand" },
   partial: { label: "Partial", className: "bg-amber-400 text-amber-950" },
   skipped: { label: "Skipped", className: "bg-zinc-300 text-zinc-700" },
 } as const;
@@ -48,7 +48,7 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
     <div className="space-y-6">
       <div>
         <p className="text-sm text-zinc-500">{dateLabel}</p>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">
           {firstName ? `Let's go, ${firstName}` : "Today"}
         </h1>
       </div>
@@ -75,7 +75,7 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
       ) : null}
 
       {assignments.length === 0 ? (
-        <div className="rounded-2xl bg-white p-6 text-center ring-1 ring-zinc-200">
+        <div className="rounded-2xl bg-surface p-6 text-center ring-1 ring-zinc-200">
           <p className="font-medium">No program assigned yet</p>
           <p className="mt-1 text-sm text-zinc-500">
             When your coach assigns you a program, today&apos;s workout shows up here.
@@ -167,7 +167,7 @@ function AssignmentCard({ assignment: a, today }: { assignment: PlayerAssignment
                 <Link
                   href={logHref(d)}
                   className={cn(
-                    "flex min-h-14 items-center gap-3 rounded-xl bg-white px-4 py-3 ring-1",
+                    "flex min-h-14 items-center gap-3 rounded-xl bg-surface px-4 py-3 ring-1",
                     isToday ? "ring-2 ring-brand-600" : "ring-zinc-200",
                   )}
                 >
@@ -217,18 +217,18 @@ function TodayWorkout({
   totalWeeks: number;
 }) {
   return (
-    <div className="rounded-2xl bg-zinc-900 p-5 text-white">
-      <p className="text-xs font-semibold tracking-wide text-brand-100 uppercase">
+    <div className="hero rounded-2xl p-5">
+      <p className="text-xs font-semibold tracking-wide text-[#8af0b8] uppercase">
         Today · Week {week}/{totalWeeks}
       </p>
       <h3 className="mt-1 text-2xl font-semibold">{day.name}</h3>
-      <p className="mt-1 text-sm text-zinc-300">
+      <p className="mt-1 text-sm text-white/70">
         {SESSION_LABELS[day.sessionType]} · {day.exerciseCount} exercise
         {day.exerciseCount === 1 ? "" : "s"}
       </p>
       <Link
         href={href}
-        className="mt-4 flex h-14 items-center justify-center rounded-xl bg-brand-700 text-lg font-semibold text-white active:bg-brand-900"
+        className="mt-4 flex h-14 items-center justify-center rounded-xl bg-[#3ddc84] text-lg font-semibold text-[#04140b] active:bg-[#5ee89c]"
       >
         {day.log ? "View / edit log" : "Start workout"}
       </Link>
@@ -238,7 +238,7 @@ function TodayWorkout({
 
 function HeroMessage({ title, body }: { title: string; body: string }) {
   return (
-    <div className="rounded-2xl bg-white p-5 ring-1 ring-zinc-200">
+    <div className="rounded-2xl bg-surface p-5 ring-1 ring-zinc-200">
       <h3 className="text-lg font-semibold">{title}</h3>
       <p className="mt-1 text-sm text-zinc-600">{body}</p>
     </div>

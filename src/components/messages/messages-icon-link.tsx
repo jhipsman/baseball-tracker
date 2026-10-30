@@ -38,7 +38,7 @@ function MessageLink({ href, unread = 0 }: { href: string; unread?: number }) {
         <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z" />
       </svg>
       {unread ? (
-        <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-brand-600 ring-2 ring-white" />
+        <span className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-brand-600 ring-2 ring-surface" />
       ) : null}
     </Link>
   );

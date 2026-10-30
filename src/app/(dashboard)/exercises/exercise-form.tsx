@@ -26,7 +26,7 @@ import { parseDemoVideo } from "@/lib/exercise-video";
 import { deleteExercise, saveExercise } from "./actions";
 
 const textareaClass =
-  "block w-full rounded-lg border-0 bg-white px-3 py-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
+  "block w-full rounded-lg border-0 bg-surface px-3 py-2 text-base text-zinc-900 ring-1 ring-inset ring-zinc-300 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-brand-600 sm:text-sm";
 
 function CheckboxGroup({
   legend,
@@ -46,7 +46,7 @@ function CheckboxGroup({
         {options.map((o) => (
           <label
             key={o}
-            className="flex cursor-pointer items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-sm ring-1 ring-inset ring-zinc-300 has-checked:bg-brand-50 has-checked:ring-brand-600"
+            className="flex cursor-pointer items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm ring-1 ring-inset ring-zinc-300 has-checked:bg-brand-50 has-checked:ring-brand-600"
           >
             <input
               type="checkbox"
@@ -76,7 +76,7 @@ export function ExerciseForm({ exercise }: { exercise?: Tables<"exercises"> }) {
     <div className="space-y-6">
       <form
         onSubmit={save.onSubmit}
-        className="space-y-5 rounded-xl bg-white p-5 ring-1 ring-zinc-200"
+        className="space-y-5 rounded-xl bg-surface p-5 ring-1 ring-zinc-200"
       >
         {exercise ? <input type="hidden" name="id" value={exercise.id} /> : null}
         <div className="grid gap-4 sm:grid-cols-[1fr_12rem]">
