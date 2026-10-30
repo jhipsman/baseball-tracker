@@ -1,0 +1,346 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>9D commercial (16:9)</title>
+<script src="timeline4.js"></script>
+<style>
+  @font-face { font-family: M; font-weight: 500; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk7PFO_F.ttf); }
+  @font-face { font-family: M; font-weight: 600; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4jE-_F.ttf); }
+  @font-face { font-family: M; font-weight: 700; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4aE-_F.ttf); }
+  @font-face { font-family: M; font-weight: 800; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk59E-_F.ttf); }
+  @font-face { font-family: W; font-weight: 700; font-style: italic; src: url(fonts/barlow-cond-700i.ttf); }
+  :root { --g: #3ddc84; --a: #f5b83c; --r: #ff5d5d; --card: #17191c; --line: rgba(255,255,255,.08); --mut: rgba(255,255,255,.55); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #050607; }
+  body { font-family: M, system-ui, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; perspective: 2600px; }
+  .abs { position: absolute; }
+  .layer { position: absolute; inset: 0; }
+  #bg { background: radial-gradient(1000px 700px at var(--gx, 10%) var(--gy, 10%), rgba(61,220,132,.18), transparent 65%), radial-gradient(900px 700px at var(--ax, 95%) 80%, rgba(245,184,60,.09), transparent 65%), #050607; }
+  #lines { opacity: .05; background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 96px 96px; mask-image: radial-gradient(circle at 50% 50%, #000, transparent 70%); }
+  .wm { font-family: W, M, sans-serif; font-style: italic; font-weight: 700; line-height: .92; letter-spacing: -0.005em; text-transform: uppercase; }
+  .cap { left: 120px; top: 360px; width: 640px; font-size: 128px; }
+  .cap em { font-style: inherit; color: var(--g); display: block; }
+  .card { background: var(--card); border-radius: 32px; box-shadow: inset 0 0 0 2px var(--line), inset 0 2px 0 rgba(255,255,255,.06), 0 40px 80px -24px rgba(0,0,0,.9); padding: 30px 34px; }
+  .row { display: flex; align-items: center; gap: 18px; }
+  .av { width: 62px; height: 62px; border-radius: 50%; display: grid; place-items: center; font-size: 25px; font-weight: 800; flex: none; }
+  .nm { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
+  .mut { color: var(--mut); font-size: 24px; font-weight: 500; }
+  .pill { margin-left: auto; padding: 10px 20px; border-radius: 999px; font-size: 25px; font-weight: 700; white-space: nowrap; }
+  .pg { background: rgba(61,220,132,.16); color: #8af0b8; } .pa { background: rgba(245,184,60,.16); color: #f8ca6b; }
+  .pr { background: rgba(255,93,93,.18); color: #ff9b9b; } .pz { background: rgba(255,255,255,.07); color: var(--mut); }
+  .sep { height: 2px; background: var(--line); margin: 18px 0; }
+  .big { font-size: 84px; font-weight: 800; line-height: 1; letter-spacing: -0.03em; }
+  .flash { background: #fff; mix-blend-mode: overlay; }
+  .sweep { background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.1) 50%, transparent 65%); }
+  .word { display: block; white-space: nowrap; position: relative; font-size: 150px; }
+  .strike { position: absolute; left: -10px; top: 52%; height: 16px; width: 0; background: var(--r); border-radius: 8px; box-shadow: 0 0 24px rgba(255,93,93,.6); }
+  .feed { position: absolute; left: 0; right: 0; border-radius: 22px; padding: 18px 22px; background: #17191c; box-shadow: inset 0 0 0 2px var(--line); font-size: 25px; font-weight: 600; }
+  .feed small { display: block; font-size: 19px; color: var(--mut); font-weight: 600; letter-spacing: .08em; margin-bottom: 4px; }
+  .phoneL { width: 470px; height: 1000px; border-radius: 74px; padding: 14px; background: linear-gradient(145deg, #3a3d42, #101113 40%, #2a2c30); box-shadow: 0 0 0 2px rgba(255,255,255,.08) inset, 0 50px 100px -20px rgba(0,0,0,.9), 0 0 120px -30px rgba(61,220,132,.35); }
+  .phoneL .scr { position: relative; width: 100%; height: 100%; border-radius: 62px; overflow: hidden; }
+  .notif { position: absolute; left: 18px; right: 18px; border-radius: 26px; padding: 16px 18px; background: rgba(60,64,70,.72); backdrop-filter: blur(18px); display: flex; gap: 14px; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .notif .ic { width: 46px; height: 46px; border-radius: 12px; background: linear-gradient(160deg,#1d2a22,#0a0d0c); flex: none; padding: 6px; }
+  .notif b { display: block; font-size: 19px; } .notif span { font-size: 18px; color: rgba(255,255,255,.82); line-height: 1.25; display: block; }
+  .mini { width: 210px; height: 430px; border-radius: 40px; padding: 9px; background: linear-gradient(145deg, #3a3d42, #101113 40%, #2a2c30); box-shadow: 0 30px 60px -20px rgba(0,0,0,.9); }
+  .mini .scr { width: 100%; height: 100%; border-radius: 32px; background: linear-gradient(180deg, #0f1412, #0a0b0d); position: relative; overflow: hidden; }
+  .banner { position: absolute; left: 10px; right: 10px; top: 34px; border-radius: 18px; padding: 11px; background: rgba(48,51,56,.95); font-size: 15px; line-height: 1.25; }
+  .banner b { display: block; font-size: 16px; color: var(--g); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg" class="layer"></div>
+  <div id="lines" class="layer"></div>
+  <div id="scenes"></div>
+  <div id="sweep" class="layer sweep"></div>
+  <div id="flash" class="layer flash"></div>
+  <div class="layer" style="background: radial-gradient(ellipse at 50% 50%, transparent 60%, rgba(0,0,0,.5))"></div>
+</div>
+<script>
+const TL = window.TL, S = TL.scenes, E = TL.events, LV = TL.live;
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const outBack = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const set = (el, o) => { el = typeof el === "string" ? $(el) : el; if (el) for (const k in o) el.style[k] = o[k]; };
+const MARK = (c = "#3ddc84") => `<svg viewBox="0 1 48 48" width="100%" height="100%"><path d="M17.5 34 L8.5 25 L24 9.5 L39.5 25 L30.5 34" fill="none" stroke="${c}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M19.4 38.6h9.2v3.6L24 46.2l-4.6-4z" fill="${c}" stroke="${c}" stroke-linejoin="round"/></svg>`;
+const add = (id, html) => { const d = document.createElement("div"); d.id = id; d.className = "layer"; d.innerHTML = html; $("scenes").appendChild(d); };
+const cap = (id, a, b) => `<div class="abs wm cap" id="${id}">${a}<em>${b}</em></div>`;
+const R = 1060; // right column left edge
+const dots = (k, on, c, size = 20) => Array.from({ length: k }, (_, i) => `<span style="display:inline-block;width:${size}px;height:${size}px;border-radius:50%;margin:0 4px;background:${i < on ? c : "rgba(255,255,255,.16)"}"></span>`).join("");
+const miniBases = (b, s = 54) => `<svg viewBox="0 0 54 54" width="${s}" height="${s}">${[[27, 9], [45, 27], [9, 27]].map(([x, y], i) => `<rect x="${x - 7}" y="${y - 7}" width="14" height="14" transform="rotate(45 ${x} ${y})" fill="${b[i] ? "#f5b83c" : "rgba(255,255,255,.18)"}"/>`).join("")}</svg>`;
+
+// ---------------------------------------------------------------- build
+add("hook", `<div class="abs wm" style="left:160px; top:270px">
+  <span class="word" id="hw0">Group texts.<i class="strike" id="hs0"></i></span>
+  <span class="word" id="hw1">Spreadsheets.<i class="strike" id="hs1"></i></span>
+  <span class="word" id="hw2">Napkin math.<i class="strike" id="hs2"></i></span></div>`);
+add("reveal", `<div class="abs" id="rvMark" style="left:850px; top:230px; width:220px; height:220px; filter: drop-shadow(0 0 40px rgba(61,220,132,.6))">${MARK()}</div>
+  <div class="abs wm" id="rvWord" style="left:0; right:0; top:470px; text-align:center; font-size:260px">9D</div>
+  <div class="abs" id="rvTag" style="left:0; right:0; top:760px; text-align:center; font-size:48px; font-weight:700">Your whole program. <span style="color:var(--g)">One app.</span></div>`);
+
+// dashboard
+add("dash", `${cap("c_dash", "Your program.", "At a glance.")}
+  <div class="abs card" id="d0" style="left:${R - 60}px; top:120px; width:820px; background:linear-gradient(160deg,#1b2620,#0c0f0e)">
+    <div class="mut" style="color:#8af0b8; letter-spacing:.12em; font-weight:700">NEXT GAME · SAT 10:00 AM</div><div class="big" style="font-size:64px; margin-top:8px">vs Lakeside Hawks</div>
+    <div class="row" style="margin-top:14px"><span class="pill pg" style="margin-left:0" id="d0r">✓ 0 of 12 going</span><span class="mut">Riverside Park · Field 1</span></div></div>
+  <div class="abs card" id="d1" style="left:${R - 60}px; top:430px; width:400px; height:300px"><div class="mut">Workouts this week</div>
+    <div style="display:flex; align-items:center; gap:24px; margin-top:18px"><svg width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="62" stroke="rgba(255,255,255,.1)" stroke-width="16" fill="none"/><circle id="ring" cx="75" cy="75" r="62" stroke="#3ddc84" stroke-width="16" fill="none" stroke-linecap="round" transform="rotate(-90 75 75)" stroke-dasharray="389.6" stroke-dashoffset="389.6"/></svg><div class="big" id="d1n">0%</div></div></div>
+  <div class="abs card" id="d2" style="left:${R + 360}px; top:430px; width:400px; height:300px; background:rgba(255,93,93,.12); box-shadow: inset 0 0 0 2px rgba(255,93,93,.45)"><div class="mut" style="color:#ffb3b3">Arm alerts</div><div class="big" style="margin-top:18px; color:#ff9b9b">⛔ 1</div><div class="mut" style="margin-top:12px">Noah · arm pain</div></div>
+  <div class="abs card" id="d3" style="left:${R - 60}px; top:760px; width:400px; height:220px"><div class="mut">Dues collected</div><div class="big" id="d3n" style="margin-top:16px; color:#8af0b8">$0</div></div>
+  <div class="abs card" id="d4" style="left:${R + 360}px; top:760px; width:400px; height:220px"><div class="mut">Season record</div><div class="big" style="margin-top:16px">8–3</div></div>`);
+
+// live game
+add("live", `<div class="abs card" id="sbar" style="left:120px; top:56px; width:1680px; height:120px; padding:0 40px; display:flex; align-items:center; gap:40px; background:linear-gradient(90deg,#14231b,#0c0f0e 60%)">
+    <span class="mut" style="color:#f5b83c; font-weight:800; letter-spacing:.1em"><span style="display:inline-block;width:16px;height:16px;border-radius:50%;background:#f5b83c;margin-right:10px" id="liveDot"></span>LIVE</span>
+    <span class="nm" style="font-size:40px">RAYS <b id="sUs" style="font-size:56px; margin-left:12px">3</b></span>
+    <span class="nm" style="font-size:40px; color:var(--mut)">HAWKS <b style="font-size:56px; margin-left:12px; color:#fff">2</b></span>
+    <span class="nm" style="font-size:40px">▲ 5</span>
+    <span id="sCount" style="font-size:28px; font-weight:700"></span>
+    <span id="sOuts" style="font-size:28px; font-weight:700"></span>
+    <span id="sBases" style="margin-left:auto"></span></div>
+  <svg class="abs" id="field" style="left:120px; top:210px" width="1040" height="820" viewBox="0 0 1040 820">
+    <defs><radialGradient id="grass" cx="50%" cy="100%" r="90%"><stop offset="0" stop-color="#2e6b47"/><stop offset="1" stop-color="#173826"/></radialGradient></defs>
+    <path d="M520 790 L60 330 A650 650 0 0 1 980 330 Z" fill="url(#grass)" stroke="rgba(255,255,255,.25)" stroke-width="3"/>
+    <path d="M520 790 L330 600 L520 410 L710 600 Z" fill="#a57c55" opacity=".9"/>
+    <path d="M520 760 L360 600 L520 440 L680 600 Z" fill="#2e6b47"/>
+    <circle cx="520" cy="610" r="26" fill="#a57c55"/>
+    <path d="M520 790 L60 330 M520 790 L980 330" stroke="rgba(255,255,255,.7)" stroke-width="3"/>
+    <g id="spray"></g>
+    <path id="ballPath" d="M520 770 Q 330 300 250 330" fill="none" stroke="#f5b83c" stroke-width="7" stroke-linecap="round" stroke-dasharray="900" stroke-dashoffset="900" filter="drop-shadow(0 0 10px #f5b83c)"/>
+    <circle id="ball" r="12" fill="#fff" opacity="0"/>
+    ${[[520, 790], [710, 600], [520, 410], [330, 600]].map(([x, y], i) => `<rect x="${x - 15}" y="${y - 15}" width="30" height="30" transform="rotate(45 ${x} ${y})" fill="#fff" ${i === 0 ? 'opacity=".95"' : ""}/>`).join("")}
+    <g id="r1"><circle r="34" fill="#2b3f8f" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="10" font-size="28" font-weight="800" fill="#fff" font-family="M">JR</text></g>
+    <g id="r2"><circle r="34" fill="#12b76a" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="10" font-size="28" font-weight="800" fill="#04140b" font-family="M">CH</text></g>
+  </svg>
+  <div class="abs wm" id="runPop" style="left:300px; top:420px; font-size:180px; color:var(--g); text-shadow: 0 0 60px rgba(61,220,132,.7)">RUN!</div>
+  <div class="abs" id="feedWrap" style="left:1200px; top:210px; width:600px; height:600px; overflow:hidden"></div>
+  <div class="abs wm" id="c_live" style="left:1200px; top:840px; font-size:104px">Every pitch. <span style="color:var(--g)">Live.</span></div>`);
+
+// lock screen
+add("lock", `${cap("c_lock", "On every", "lock screen.")}
+  <div class="abs phoneL" id="lockPhone" style="left:1180px; top:40px"><div class="scr" style="background:linear-gradient(180deg,#1b3326 0%,#0d1712 55%,#07090a)">
+    <div class="abs" id="island" style="left:50%; top:20px; height:44px; width:150px; margin-left:-75px; border-radius:24px; background:#000; z-index:5; display:flex; align-items:center; justify-content:space-between; padding:0 18px; font-size:18px; font-weight:800; overflow:hidden"><span id="isL" style="color:#3ddc84"></span><span id="isR"></span></div>
+    <div class="abs" style="left:0; right:0; top:110px; text-align:center; font-size:22px; font-weight:600; color:rgba(255,255,255,.8)">Saturday, October 31</div>
+    <div class="abs" style="left:0; right:0; top:138px; text-align:center; font-size:118px; font-weight:600; letter-spacing:-0.03em">10:42</div>
+    <div class="abs" id="la" style="left:18px; right:18px; top:300px; border-radius:30px; padding:20px 22px; background:rgba(30,33,37,.78); backdrop-filter: blur(18px); box-shadow: 0 10px 30px rgba(0,0,0,.4)">
+      <div class="row" style="gap:12px"><div style="width:34px; height:34px">${MARK()}</div><span style="font-size:18px; font-weight:700; color:var(--mut)">9D · LIVE</span><span style="margin-left:auto; font-size:18px; font-weight:800; color:#f5b83c" id="laInn">▲5 · 1 out</span></div>
+      <div class="row" style="margin-top:12px; gap:12px"><span style="font-size:28px; font-weight:800">RAYS</span><span id="laUs" style="font-size:54px; font-weight:800">4</span><span style="font-size:28px; color:var(--mut)">–</span><span style="font-size:54px; font-weight:800">2</span><span style="font-size:28px; font-weight:800; color:var(--mut)">HAWKS</span><span style="margin-left:auto; flex:none" id="laBases"></span></div>
+      <div id="laPlay" style="margin-top:8px; font-size:19px; color:rgba(255,255,255,.85)">Hayes doubles, Reed scores</div></div>
+    <div class="notif" id="n0" style="top:520px"><div class="ic">${MARK()}</div><div><b>Game day · Riverside Rays</b><span>vs Lakeside at 10:00 AM. Arrive by 9:00.</span></div></div>
+    <div class="notif" id="n1" style="top:630px"><div class="ic">${MARK()}</div><div><b>Schedule change</b><span>Tuesday practice moved to 6:00 PM.</span></div></div>
+    <div class="notif" id="n2" style="top:740px"><div class="ic">${MARK()}</div><div><b>Fall dues</b><span>Next installment ($150) due Friday.</span></div></div>
+  </div></div>`);
+
+// schedule
+add("schedule", `${cap("c_sched", "Schedule", "it.")}
+  <div class="abs card" id="calCard" style="left:${R - 60}px; top:120px; width:820px"><div class="row" style="justify-content:space-between"><span class="nm">This week</span><span class="mut">Oct 26 – Nov 1</span></div><div class="sep"></div>
+    <div id="days" style="display:grid; grid-template-columns:repeat(7,1fr); gap:10px; text-align:center"></div>
+    <div class="abs" id="gameChip" style="left:560px; top:250px; width:220px; padding:14px; border-radius:18px; background:linear-gradient(160deg,#1f4a33,#14301f); box-shadow: inset 0 0 0 2px rgba(61,220,132,.6), 0 20px 40px rgba(0,0,0,.6); font-size:21px; font-weight:700; line-height:1.25">⚾ vs Lakeside<br/><span style="color:#8af0b8">Sat · 10:00 AM</span></div></div>
+  <div class="abs card" id="rsvpCard" style="left:${R - 60}px; top:560px; width:820px">${[["PP", "#2b3f8f", "Priya", "Noah's mom"], ["SA", "#7a3b8f", "Sofia", "Mateo's mom"], ["MW", "#8f5a2b", "Mike", "Owen's dad"]].map(([i, c, n, w], k) => `${k ? '<div class="sep"></div>' : ""}<div class="row"><div class="av" style="background:${c}">${i}</div><div><div class="nm">${n}</div><div class="mut">${w}</div></div><div class="pill pz" id="rp${k}">–</div></div>`).join("")}</div>`);
+
+// health
+add("health", `${cap("c_health", "Protect", "arms.")}
+  <div class="abs card" id="alertBar" style="left:${R - 60}px; top:120px; width:820px; background:rgba(255,93,93,.14); box-shadow: inset 0 0 0 2px rgba(255,93,93,.5)"><div class="row"><span style="font-size:40px">⛔</span><div><div class="nm" style="color:#ffb3b3">Noah reported arm pain</div><div class="mut">Hold him from throwing until he's checked.</div></div></div></div>
+  <div class="abs card" id="rosterCard" style="left:${R - 60}px; top:330px; width:820px">${[["OW", "Owen", "pg", "✓ Ready · 95 left"], ["MA", "Mateo", "pa", "⏸ Rest until Tue"], ["NP", "Noah", "pg", "✓ Ready · 95 left"], ["EB", "Ethan", "pg", "✓ Ready · 105 left"]].map(([i, n, c, txt], k) => `${k ? '<div class="sep"></div>' : ""}<div class="row" id="hr${k}" style="border-radius:20px"><div class="av" id="hav${k}" style="background:${c === "pa" ? "#4a3a1f" : "#1f4a33"}; color:${c === "pa" ? "#f8ca6b" : "#8af0b8"}">${i}</div><div class="nm">${n}</div><div class="pill ${c}" id="hp${k}">${txt}</div></div>`).join("")}</div>`);
+
+// develop
+add("develop", `${cap("c_dev", "Develop", "players.")}
+  <div class="abs card" id="progCard" style="left:${R - 60}px; top:100px; width:820px"><div class="row" style="justify-content:space-between"><span class="nm">Bullpen progression</span><span class="mut">pitches</span></div>
+    <div id="bars" style="margin-top:30px; height:390px; display:flex; align-items:flex-end; gap:34px; padding:0 16px"></div></div>
+  <div class="abs card" id="doneCard" style="left:${R - 60}px; top:720px; width:820px"><div class="row"><div class="av" style="background:#1f4a33; color:#8af0b8">OW</div><div><div class="nm">Today's bullpen</div><div class="mut">Owen · Week 3 · 30 pitches</div></div><div class="pill pz" id="donePill" style="font-size:32px">Start</div></div></div>`);
+
+// stats
+add("stats", `${cap("c_stats", "Stats,", "automatic.")}
+  <div class="abs card" id="lineCard" style="left:${R - 60}px; top:110px; width:820px"><div class="row"><div class="av" style="background:#2b3f8f">CH</div><div><div class="nm">Carter Hayes</div><div class="mut">vs Valley Storm</div></div><div class="pill pg">2-for-3 · 2B · RBI</div></div></div>
+  <div class="abs card" id="seasonCard" style="left:${R - 60}px; top:330px; width:500px; height:440px"><div class="row" style="justify-content:space-between"><span class="nm">Season</span><span class="mut">11 games</span></div>
+    ${[["sAvg", ".000", "AVG", "#8af0b8"], ["sH", "0", "HITS", "#fff"], ["sRbi", "0", "RBI", "#fff"]].map(([id, v, l, c]) => `<div class="row" style="margin-top:34px; justify-content:space-between"><span class="mut" style="font-size:28px">${l}</span><span id="${id}" class="big" style="color:${c}">${v}</span></div>`).join("")}</div>
+  <div class="abs card" id="sprayCard" style="left:${R + 460}px; top:330px; width:300px; height:440px"><div class="nm">Spray chart</div>
+    <svg width="236" height="236" viewBox="0 0 236 236" style="margin-top:40px"><path d="M118 226 L8 116 A156 156 0 0 1 228 116 Z" fill="#1f4a33" stroke="rgba(255,255,255,.2)" stroke-width="2"/><path d="M118 226 L72 180 L118 134 L164 180 Z" fill="#6b5238"/><g id="sprayS"></g></svg></div>`);
+
+// paid
+add("paid", `${cap("c_paid", "Get", "paid.")}
+  <div class="abs card" id="duesCard" style="left:${R - 60}px; top:110px; width:820px"><div class="row" style="justify-content:space-between"><span class="nm">Fall travel dues</span><span class="mut">9 families</span></div><div class="sep"></div><div id="inst"></div></div>
+  <div class="abs card" id="collCard" style="left:${R - 60}px; top:680px; width:820px; background:linear-gradient(160deg,#1b2620,#0c0f0e)"><div class="mut">Collected</div><div id="collNum" class="big" style="font-size:130px; color:#8af0b8">$0</div></div>`);
+
+// reach
+add("reach", `${cap("c_reach", "Reach", "everyone.")}
+  <div class="abs card" id="compose" style="left:${R - 60}px; top:110px; width:820px"><div class="mut">Announcement to the team &amp; parents</div>
+    <div class="row" style="margin-top:18px"><div id="typed" style="flex:1; font-size:40px; font-weight:700; min-height:52px"></div><div id="sendBtn" style="width:130px; height:80px; border-radius:22px; display:grid; place-items:center; background:var(--g); color:#04140b; font-size:28px; font-weight:800">Send</div></div></div>
+  <div class="abs" style="left:${R - 60}px; top:420px; width:820px; display:flex; justify-content:space-between">${[0, 1, 2].map((i) => `<div class="mini" id="mp${i}"><div class="scr"><div style="position:absolute;left:0;right:0;top:150px;text-align:center;font-size:62px;font-weight:600;color:rgba(255,255,255,.85)">9:41</div><div class="banner" id="bn${i}"><b>Riverside Rays</b>Fall Classic: arrive 8 AM ⚾</div></div></div>`).join("")}</div>`);
+
+// real
+add("real", `<div class="abs" id="laptop" style="left:120px; top:150px; width:1180px; border-radius:26px; overflow:hidden; box-shadow: 0 0 0 2px rgba(255,255,255,.1), 0 60px 120px -30px rgba(0,0,0,.95)"><div style="height:40px; background:#15171a"></div><img src="shots2/dash.png" style="width:100%; display:block"/></div>
+  <div class="abs phoneL" id="realPhone" style="left:1350px; top:60px; transform: scale(.92); transform-origin: top left"><div class="scr" style="background:#000"><img src="shots2/phone-player.png" style="width:100%"/></div></div>
+  <div class="abs wm" id="aud" style="left:0; right:0; top:860px; text-align:center; font-size:150px"></div>`);
+
+// end
+add("end", `<div class="abs" id="endMark" style="left:860px; top:200px; width:200px; height:200px; filter: drop-shadow(0 0 50px rgba(61,220,132,.65))">${MARK()}</div>
+  <div class="abs wm" id="endWord" style="left:0; right:0; top:420px; text-align:center; font-size:270px">9D</div>
+  <div class="abs" id="endTag" style="left:0; right:0; top:720px; text-align:center; font-size:58px; font-weight:800; color:var(--g); letter-spacing:-0.03em">Built for baseball.</div>
+  <div class="abs" id="endAud" style="left:0; right:0; top:810px; text-align:center; font-size:30px; font-weight:600; color:rgba(255,255,255,.65)">Coaches · Clubs · Parents · Players</div>
+  <div class="abs" id="endCo" style="left:0; right:0; top:1010px; text-align:center; font-size:22px; font-weight:600; color:rgba(255,255,255,.35); letter-spacing:.14em">9D SYSTEMS</div>`);
+
+// static fills
+["M", "T", "W", "T", "F", "S", "S"].forEach((d, i) => $("days").insertAdjacentHTML("beforeend", `<div id="day${i}" style="padding:16px 0; border-radius:18px; background:${i === 5 ? "rgba(61,220,132,.1)" : "rgba(255,255,255,.04)"}"><div class="mut">${d}</div><div style="font-size:42px; font-weight:800; margin-top:6px">${26 + i > 31 ? 26 + i - 31 : 26 + i}</div><div style="height:120px"></div></div>`));
+[20, 25, 30, 35].forEach((v, i) => $("bars").insertAdjacentHTML("beforeend", `<div style="flex:1; text-align:center"><div id="bv${i}" style="font-size:34px; font-weight:800; margin-bottom:10px">${v}</div><div id="bar${i}" style="height:0; border-radius:16px 16px 6px 6px; background:${i === 2 ? "linear-gradient(180deg,#5ee89c,#12b76a)" : "rgba(61,220,132,.35)"}"></div><div class="mut" style="margin-top:12px">Wk ${i + 1}</div></div>`));
+["Aug", "Sep", "Oct", "Nov"].forEach((m, i) => $("inst").insertAdjacentHTML("beforeend", `<div class="row" style="margin-top:${i ? 20 : 0}px"><div class="nm" style="width:110px">${m}</div><div class="mut">Installment ${i + 1} · $150 × 9</div><div class="pill pz" id="ip${i}">Due</div></div>`));
+const SPRAY = [[300, 380], [700, 360], [560, 300], [430, 520], [820, 460], [620, 560], [380, 300]];
+SPRAY.forEach(([x, y], i) => $("spray").insertAdjacentHTML("beforeend", `<circle cx="${x}" cy="${y}" r="11" fill="${i % 3 ? "#5ee89c" : "#f5b83c"}" opacity=".55"/>`));
+[[60, 80], [180, 90], [130, 60], [90, 140], [160, 130], [118, 40], [40, 120], [200, 120]].forEach(([x, y], i) => $("sprayS").insertAdjacentHTML("beforeend", `<circle id="ss${i}" cx="${x}" cy="${y}" r="8" fill="${i % 3 ? "#5ee89c" : "#f5b83c"}" opacity="0"/>`));
+const FEED = [
+  [LV.pitches[0], "PITCH 1", "Ball · 1–0", 0],
+  [LV.pitches[1], "PITCH 2", "Called strike · 1–1", 0],
+  [LV.pitches[2], "PITCH 3", "Ball · 2–1", 0],
+  [LV.hit, "HIT", "Carter Hayes doubles to left-center", 1],
+  [LV.run, "RUN", "Jackson Reed scores · Rays 4–2", 2],
+  [LV.feedNext, "ON DECK", "Aiden Murphy · .412 this season", 0]];
+FEED.forEach(([, k, txt, hl], i) => $("feedWrap").insertAdjacentHTML("beforeend", `<div class="feed" id="f${i}" style="${hl ? `background:${hl === 2 ? "rgba(61,220,132,.2)" : "rgba(245,184,60,.16)"}; box-shadow: inset 0 0 0 2px ${hl === 2 ? "rgba(61,220,132,.7)" : "rgba(245,184,60,.6)"};` : ""}"><small style="${hl ? `color:${hl === 2 ? "#8af0b8" : "#f8ca6b"}` : ""}">${k}</small>${txt}</div>`));
+$("rvMark").innerHTML = MARK();
+
+// ---------------------------------------------------------------- render
+function vis(id, t, fade = 0.12) { const [a, b] = S[id]; const v = Math.min(prog(t, a, a + fade), 1 - prog(t, b - fade, b)); set(id, { opacity: v, visibility: v <= 0 ? "hidden" : "visible" }); return t - a; }
+function slam(id, l, at = 0, dur = 0.35) { const x = outExpo(prog(l, at, at + dur)); set(id, { opacity: clamp(x * 2), transform: `scale(${lerp(1.4, 1, x)}) skewX(${lerp(-12, 0, x)}deg)`, filter: `blur(${lerp(16, 0, x)}px)`, transformOrigin: "left center" }); }
+function rise(id, l, at = 0, dur = 0.5, dy = 100) { const x = outExpo(prog(l, at, at + dur)); set(id, { opacity: clamp(x * 1.6), transform: `translateY(${lerp(dy, 0, x)}px) rotateX(${lerp(16, 0, x)}deg)` }); }
+const pop = (t, at, dur = 0.35) => outBack(prog(t, at, at + dur));
+const BASE = { home: [520, 790], 1: [710, 600], 2: [520, 410], 3: [330, 600] };
+function along(path, p) { // position along a list of base keys
+  const pts = path.map((k) => BASE[k]); const seg = (pts.length - 1) * clamp(p); const i = Math.min(Math.floor(seg), pts.length - 2); const f = seg - i;
+  return [lerp(pts[i][0], pts[i + 1][0], f), lerp(pts[i][1], pts[i + 1][1], f)];
+}
+
+window.DURATION = TL.duration;
+window.render = (t) => {
+  set("bg", { "--gx": `${10 + 30 * Math.sin(t / 6)}%`, "--gy": `${10 + 10 * Math.cos(t / 4)}%`, "--ax": `${92 - 20 * Math.sin(t / 5)}%` });
+  set("lines", { transform: `translateY(${(t * 32) % 96}px)` });
+
+  let l = vis("hook", t, 0.05);
+  TL.hookWords.forEach((at, i) => { const x = prog(l, at, at + 0.25); set("hw" + i, { opacity: x, transform: `scale(${lerp(1.6, 1, outExpo(x))})`, transformOrigin: "left center", filter: `blur(${lerp(12, 0, x)}px)` }); set("hs" + i, { width: `${prog(l, TL.strike + i * 0.1, TL.strike + 0.25 + i * 0.1) * 104}%` }); });
+  set("hook", { transform: `scale(${lerp(1, 0.85, inOut(prog(l, 3.3, 4)))})`, filter: `blur(${prog(l, 3.35, 3.75) * 20}px)` });
+
+  l = vis("reveal", t, 0.05);
+  const r = outBack(prog(l, 0, 0.55)); set("rvMark", { transform: `rotate(${lerp(-180, 0, r)}deg) scale(${lerp(0.2, 1, r)})`, opacity: clamp(r * 3) });
+  const rw = outExpo(prog(l, 0.35, 0.9)); set("rvWord", { opacity: rw, transform: `translateY(${lerp(70, 0, rw)}px) skewX(${lerp(-14, 0, rw)}deg)` });
+  const rt = outExpo(prog(l, 1.1, 1.6)); set("rvTag", { opacity: rt, transform: `translateY(${lerp(30, 0, rt)}px)` });
+
+  // dashboard
+  l = vis("dash", t); slam("c_dash", l);
+  ["d0", "d1", "d2", "d3", "d4"].forEach((id, i) => { const p = outBack(prog(t, E.land[i] - 0.15, E.land[i] + 0.3)); set(id, { opacity: clamp(p * 2), transform: `translateY(${lerp(80, 0, clamp(p, 0, 1.1))}px) scale(${lerp(0.85, 1, clamp(p, 0, 1.05))})` }); });
+  const dc = outExpo(prog(t, E.land[1], E.land[1] + 1.4));
+  $("d1n").textContent = Math.round(83 * dc) + "%"; $("ring").setAttribute("stroke-dashoffset", 389.6 * (1 - 0.83 * dc));
+  $("d3n").textContent = "$" + Math.round(5400 * outExpo(prog(t, E.land[3], E.land[3] + 1.4))).toLocaleString("en-US");
+  $("d0r").textContent = `✓ ${Math.round(11 * outExpo(prog(t, E.land[0] + 0.2, E.land[0] + 1.6)))} of 12 going`;
+
+  // live game
+  l = vis("live", t);
+  rise("sbar", l, 0, 0.5, -60);
+  set("field", { opacity: outExpo(prog(l, 0.1, 0.6)), transform: `scale(${lerp(0.94, 1, outExpo(prog(l, 0.1, 0.8)))})` });
+  const pitchesIn = LV.pitches.filter((x) => t >= x).length;
+  const balls = [0, 1, 1, 2][pitchesIn], strikes = [0, 0, 1, 1][pitchesIn];
+  const afterHit = t >= LV.hit;
+  $("sCount").innerHTML = afterHit ? "" : `B ${dots(3, balls, "#3ddc84")} S ${dots(2, strikes, "#f5b83c")}`;
+  $("sOuts").innerHTML = `OUT ${dots(2, 1, "#ff5d5d")}`;
+  const runP = prog(t, LV.hit + 0.2, LV.runnerDone);
+  const bases = !afterHit ? [true, false, false] : runP < 1 ? [false, false, false] : [false, true, false];
+  $("sBases").innerHTML = miniBases(bases, 66);
+  $("sUs").textContent = t >= LV.run ? 4 : 3;
+  set("sUs", { color: t >= LV.run ? "#3ddc84" : "#fff", display: "inline-block", transform: `scale(${t >= LV.run ? lerp(1.6, 1, pop(t, LV.run, 0.4)) : 1})` });
+  const bp = inOut(prog(t, LV.hit, LV.hit + 0.6));
+  $("ballPath").setAttribute("stroke-dashoffset", 900 * (1 - bp));
+  const bt = $("ballPath").getTotalLength(), bpt = $("ballPath").getPointAtLength(bt * bp);
+  $("ball").setAttribute("cx", bpt.x); $("ball").setAttribute("cy", bpt.y); $("ball").setAttribute("opacity", t >= LV.hit ? 1 : 0);
+  const [x1, y1] = along(["1", "2", "3", "home"], inOut(runP));
+  $("r1").setAttribute("transform", `translate(${x1} ${y1})`); $("r1").setAttribute("opacity", t >= LV.run + 0.6 ? 0 : 1);
+  const [x2, y2] = along(["home", "1", "2"], inOut(runP));
+  $("r2").setAttribute("transform", `translate(${x2} ${y2})`); $("r2").setAttribute("opacity", afterHit ? 1 : 0);
+  const rp = prog(t, LV.run, LV.run + 1.1);
+  set("runPop", { opacity: rp > 0 && rp < 1 ? Math.min(1, (1 - rp) * 3) : 0, transform: `scale(${lerp(0.5, 1.15, outBack(clamp(rp * 2.5)))}) rotate(-6deg)` });
+  FEED.forEach(([at], i) => { const shown = FEED.filter(([a]) => t >= a).length; const p = outExpo(prog(t, at, at + 0.35)); const slot = shown - 1 - i; set("f" + i, { top: `${slot * 104 + lerp(-90, 0, p)}px`, opacity: t >= at ? clamp(p * 2) * (slot > 4 ? 0 : 1) : 0, transform: `scale(${i === 3 || i === 4 ? lerp(1.12, 1, p) : 1})` }); });
+  set("liveDot", { opacity: 0.4 + 0.6 * Math.abs(Math.sin(t * 3)) });
+  slam("c_live", l, 5.4);
+
+  // lock screen
+  l = vis("lock", t); slam("c_lock", l);
+  set("lockPhone", { transform: `translateY(${lerp(700, 0, outExpo(prog(l, 0, 0.7)))}px) rotateY(${-10 + 4 * Math.sin(l)}deg) rotateX(4deg)` });
+  const up = TL.lockUpdates.filter((x) => t >= x).length;
+  $("laUs").textContent = up >= 2 ? 5 : 4; $("laInn").textContent = up >= 1 ? "▲5 · 2 outs" : "▲5 · 1 out";
+  $("laPlay").textContent = ["Hayes doubles, Reed scores", "Murphy strikes out swinging", "Chen singles, Hayes scores"][up];
+  $("laBases").innerHTML = miniBases(up >= 2 ? [true, false, false] : [false, true, false], 40);
+  const lu = TL.lockUpdates[up - 1]; set("la", { boxShadow: `0 10px 30px rgba(0,0,0,.4), 0 0 0 ${up ? 3 * clamp(1 - (t - lu) * 1.5) : 0}px rgba(61,220,132,.9)` });
+  const isw = up ? lerp(150, 380, outBack(clamp(1 - Math.abs(t - lu - 0.4) * 1.2))) : 150;
+  set("island", { width: `${isw}px`, marginLeft: `${-isw / 2}px` }); $("isL").textContent = isw > 260 ? "RAYS" : ""; $("isR").textContent = isw > 260 ? `${up >= 2 ? 5 : 4}–2` : "";
+  [0, 1, 2].forEach((i) => { const p = pop(t, E.dings[i], 0.4); set("n" + i, { opacity: clamp(p * 2), transform: `translateY(${lerp(-60, 0, clamp(p))}px) scale(${lerp(0.92, 1, p)})` }); });
+
+  // schedule
+  l = vis("schedule", t); slam("c_sched", l); rise("calCard", l, 0.05); rise("rsvpCard", l, 0.2);
+  const gc = pop(t, E.land[5] - 0.25, 0.4);
+  set("gameChip", { opacity: clamp(gc * 2), transform: `translateY(${lerp(-360, 0, outExpo(prog(t, E.land[5] - 0.35, E.land[5])))}px) scale(${lerp(1.3, 1, gc)})` });
+  [0, 1, 2].forEach((i) => { const at = E.taps[3 + i], on = t >= at; $("rp" + i).className = "pill " + (on ? "pg" : "pz"); $("rp" + i).textContent = on ? "✓ Going" : "–"; set("rp" + i, { transform: `scale(${on ? lerp(1.35, 1, pop(t, at, 0.35)) : 1})` }); });
+
+  // health
+  l = vis("health", t); slam("c_health", l); rise("rosterCard", l, 0.05);
+  const al = E.alert[0], on = t >= al, ap = outExpo(prog(t, al, al + 0.4));
+  set("alertBar", { opacity: ap, transform: `translateY(${lerp(-60, 0, ap)}px)` });
+  $("hp2").className = "pill " + (on ? "pr" : "pg"); $("hp2").textContent = on ? "⛔ Arm pain" : "✓ Ready · 95 left";
+  set("hav2", { background: on ? "#4a1f1f" : "#1f4a33", color: on ? "#ff9b9b" : "#8af0b8" });
+  set("hr2", { transform: `translateX(${on ? Math.sin((t - al) * 60) * 12 * clamp(1 - (t - al) * 2.2) : 0}px)`, background: on ? `rgba(255,93,93,${0.1 * clamp(1 - (t - al) * 0.6)})` : "transparent" });
+
+  // develop
+  l = vis("develop", t); slam("c_dev", l); rise("progCard", l, 0.05); rise("doneCard", l, 0.2);
+  [20, 25, 30, 35].forEach((v, i) => { const p = outBack(prog(t, E.land[6 + i] - 0.1, E.land[6 + i] + 0.35)); set("bar" + i, { height: `${(v / 35) * 300 * clamp(p, 0, 1.2)}px` }); set("bv" + i, { opacity: clamp(p * 2) }); });
+  const dn = t >= E.stamp[0]; $("donePill").className = "pill " + (dn ? "pg" : "pz"); $("donePill").textContent = dn ? "✓ Done" : "Start";
+  set("donePill", { transform: `scale(${dn ? lerp(1.5, 1, pop(t, E.stamp[0], 0.35)) : 1}) rotate(${dn ? lerp(-10, 0, pop(t, E.stamp[0], 0.35)) : 0}deg)` });
+
+  // stats
+  l = vis("stats", t); slam("c_stats", l);
+  const li = outExpo(prog(t, E.land[10] - 0.3, E.land[10] + 0.1)), merge = inOut(prog(t, E.stamp[5] - 0.35, E.stamp[5]));
+  set("lineCard", { opacity: clamp(li * 2) * (1 - merge * 0.7), transform: `translateX(${lerp(800, 0, li)}px) translateY(${merge * 220}px) scale(${1 - merge * 0.15})` });
+  rise("seasonCard", l, 0.15); rise("sprayCard", l, 0.25);
+  const c = outExpo(prog(t, E.count[0], E.count[1]));
+  $("sAvg").textContent = (0.412 * c).toFixed(3).replace(/^0/, ""); $("sH").textContent = Math.round(14 * c); $("sRbi").textContent = Math.round(11 * c);
+  for (let i = 0; i < 8; i++) $("ss" + i).setAttribute("opacity", clamp(prog(t, E.count[0] + i * 0.14, E.count[0] + 0.2 + i * 0.14)));
+  set("seasonCard", { boxShadow: `inset 0 0 0 ${3 * clamp(1 - Math.abs(t - E.stamp[5]) * 2)}px rgba(61,220,132,.9), 0 40px 80px -24px rgba(0,0,0,.9)` });
+
+  // paid
+  l = vis("paid", t); slam("c_paid", l); rise("duesCard", l, 0.05); rise("collCard", l, 0.2);
+  let paidN = 0;
+  [0, 1, 2, 3].forEach((i) => { const at = E.stamp[1 + i], ok = t >= at; if (ok) paidN++; $("ip" + i).className = "pill " + (ok ? "pg" : "pz"); $("ip" + i).textContent = ok ? "✓ Paid" : "Due"; set("ip" + i, { transform: `scale(${ok ? lerp(1.4, 1, pop(t, at, 0.3)) : 1})` }); });
+  const last = paidN ? E.stamp[paidN] : null;
+  $("collNum").textContent = "$" + Math.round(paidN ? lerp((paidN - 1) * 1350, paidN * 1350, outExpo(prog(t, last, last + 0.45))) : 0).toLocaleString("en-US");
+
+  // reach
+  l = vis("reach", t); slam("c_reach", l); rise("compose", l, 0.05);
+  const msg = "Fall Classic: arrive 8 AM ⚾", send = E.taps[6];
+  $("typed").innerHTML = msg.slice(0, Math.round(msg.length * prog(t, E.typing[0], E.typing[1]))) + (t < send ? `<span style="opacity:${Math.floor(t * 4) % 2}">|</span>` : "");
+  set("sendBtn", { transform: `scale(${t >= send ? lerp(0.85, 1, outExpo(prog(t, send, send + 0.25))) : 1})` });
+  [0, 1, 2].forEach((i) => { rise("mp" + i, l, 0.2 + i * 0.08, 0.5, 160); const b = pop(t, E.dings[3 + i], 0.4); set("bn" + i, { opacity: clamp(b * 2), transform: `translateY(${lerp(-100, 0, clamp(b))}px) scale(${lerp(0.9, 1, b)})` }); });
+
+  // real
+  l = vis("real", t, 0.1);
+  set("laptop", { transform: `translateX(${lerp(-400, 0, outExpo(prog(l, 0, 0.7)))}px) rotateY(${lerp(14, 6, outExpo(prog(l, 0, 0.7)))}deg) scale(${lerp(1, 1.04, prog(l, 0.5, 4))})`, opacity: outExpo(prog(l, 0, 0.5)) });
+  set("realPhone", { transform: `translateY(${lerp(600, 0, outExpo(prog(l, 0.15, 0.8)))}px) rotateY(-10deg) scale(.92)` });
+  const words = ["Coaches.", "Clubs.", "Parents.", "Players."], wi = E.beats.filter((x) => t >= x).length - 1;
+  $("aud").innerHTML = wi >= 0 ? `<span style="color:${wi % 2 ? "#3ddc84" : "#fff"}; text-shadow: 0 10px 40px rgba(0,0,0,.9)">${words[wi]}</span>` : "";
+  if (wi >= 0) { const x = outExpo(prog(t, E.beats[wi], E.beats[wi] + 0.25)); set("aud", { opacity: clamp(x * 2), transform: `scale(${lerp(1.4, 1, x)}) skewX(${lerp(-12, 0, x)}deg)` }); }
+
+  // end
+  l = vis("end", t, 0.25);
+  const e = outBack(prog(l, 0.05, 0.65)); set("endMark", { transform: `rotate(${lerp(-90, 0, e)}deg) scale(${lerp(0.3, 1, e)})`, opacity: clamp(e * 3) });
+  const ew = outExpo(prog(l, 0.3, 0.9)); set("endWord", { opacity: ew, transform: `translateY(${lerp(50, 0, ew)}px) skewX(${lerp(-12, 0, ew)}deg)` });
+  [["endTag", 0.9], ["endAud", 1.3], ["endCo", 1.7]].forEach(([id, at]) => { const x = outExpo(prog(l, at, at + 0.5)); set(id, { opacity: x, transform: `translateY(${lerp(24, 0, x)}px)` }); });
+
+  let fl = 0; for (const [a] of Object.values(S)) if (a > 0) fl = Math.max(fl, 1 - Math.abs(t - a) / 0.09);
+  fl = Math.max(fl, 1 - Math.abs(t - TL.batCrack) / 0.07, 1 - Math.abs(t - LV.hit) / 0.06);
+  set("flash", { opacity: clamp(fl) * 0.45 });
+  set("sweep", { transform: `translateX(${(((t * 0.45) % 1.6) - 0.3) * 100}%)`, opacity: 0.5 });
+};
+window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+render(0);
+</script>
+</body>
+</html>

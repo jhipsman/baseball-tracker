@@ -1,5 +1,7 @@
 # 9D commercial
 
+**Widescreen 16:9 cut: `stage4.html` + `timeline4.js` + `music4.py` (58 s, 1920×1080).** Adds an animated coach dashboard, a GameChanger-style live game (score bar, animated field with ball path and runners, pitch-by-pitch feed, run celebration, spray chart), and iPhone lock-screen Live Activities with game-day notifications. Render: `SIZE=1920x1080 STAGE=stage4.html node render.mjs video silent4.mp4 30`, `python3 music4.py music4.wav timeline4.js`, then mux.
+
 **Current cut: `stage3.html` + `timeline3.js` + `music3.py` (46 s).** Each feature is a short animated scene in the app's own design where the thing actually happens (RSVPs flip to Going, pitch count ticks up, a status flips to Arm pain, bullpen bars grow, installments turn Paid, a message lands on phones, stats count up), with a 2–3 word caption. Render: `STAGE=stage3.html node render.mjs video silent3.mp4 30`, `python3 music3.py music3.wav timeline3.js`, then mux as below.
 
 ## Earlier cut (vertical 1080×1920, 70 s, with soundtrack)
