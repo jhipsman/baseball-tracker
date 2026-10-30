@@ -85,6 +85,7 @@
     --color-amber-700: #f8ca6b;
     --color-amber-800: #fad891;
     --color-amber-900: #fce6b6;
+    --color-amber-950: #fdf0d2;
 
     --color-red-50: rgb(248 94 94 / 0.1);
     --color-red-100: rgb(248 94 94 / 0.18);
@@ -96,6 +97,20 @@
     --color-red-700: #fb8585;
     --color-red-800: #fca5a5;
     --color-red-900: #fecaca;
+    --color-red-950: #fee2e2;
+
+    /* Accent families used for a few badges and chart keys. */
+    --color-emerald-50: rgb(52 211 153 / 0.1);
+    --color-emerald-900: #a7f3d0;
+    --color-orange-50: rgb(251 146 60 / 0.1);
+    --color-orange-300: rgb(251 146 60 / 0.45);
+    --color-orange-900: #fed7aa;
+    --color-orange-950: #ffedd5;
+    --color-rose-50: rgb(251 113 133 / 0.1);
+    --color-rose-900: #fecdd3;
+    --color-violet-50: rgb(167 139 250 / 0.1);
+    --color-violet-100: rgb(167 139 250 / 0.18);
+    --color-violet-900: #ddd6fe;
 
     --color-sky-50: rgb(86 182 242 / 0.1);
     --color-sky-100: rgb(86 182 242 / 0.18);

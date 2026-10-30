@@ -50,6 +50,13 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
     return q ? `/programs?${q}` : "/programs";
   };
 
+  const typeOptions = PROGRAM_TYPES.filter(
+    (t) => t === type || programs.some((p) => p.program_type === t),
+  );
+  const phaseOptions = SEASON_PHASES.filter(
+    (ph) => ph === phase || programs.some((p) => p.season_phase === ph),
+  );
+
   return (
     <div className="max-w-5xl">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -111,10 +118,12 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
         </form>
       ) : null}
 
-      {/* Filters only earn their space once there's something to filter. */}
-      {programs.length > 1 || type || phase ? (
+      {/* Filters only earn their space once there's something to filter, and only
+          offer the types and seasons this team's programs actually use (a group
+          with a single choice isn't a choice). */}
+      {programs.length > 1 && (typeOptions.length > 1 || phaseOptions.length > 1) ? (
         <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-          {[undefined, ...PROGRAM_TYPES].map((t) => (
+          {(typeOptions.length > 1 ? [undefined, ...typeOptions] : []).map((t) => (
             <Link
               key={t ?? "all"}
               href={href({ type: t })}
@@ -128,8 +137,10 @@ export default async function ProgramsPage({ searchParams }: PageProps<"/program
               {t ? PROGRAM_TYPE_LABELS[t] : "All types"}
             </Link>
           ))}
-          <span className="mx-1 h-5 w-px bg-zinc-300" aria-hidden />
-          {[undefined, ...SEASON_PHASES].map((ph) => (
+          {typeOptions.length > 1 && phaseOptions.length > 1 ? (
+            <span className="mx-1 h-5 w-px bg-zinc-300" aria-hidden />
+          ) : null}
+          {(phaseOptions.length > 1 ? [undefined, ...phaseOptions] : []).map((ph) => (
             <Link
               key={ph ?? "any"}
               href={href({ phase: ph })}
