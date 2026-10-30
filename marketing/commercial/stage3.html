@@ -1,0 +1,404 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>9D commercial (cut 3)</title>
+<script src="timeline3.js"></script>
+<style>
+  @font-face { font-family: M; font-weight: 500; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk7PFO_F.ttf); }
+  @font-face { font-family: M; font-weight: 600; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4jE-_F.ttf); }
+  @font-face { font-family: M; font-weight: 700; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4aE-_F.ttf); }
+  @font-face { font-family: M; font-weight: 800; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk59E-_F.ttf); }
+  @font-face { font-family: W; font-weight: 700; font-style: italic; src: url(fonts/barlow-cond-700i.ttf); }
+  :root { --g: #3ddc84; --a: #f5b83c; --r: #ff5d5d; --card: #17191c; --line: rgba(255,255,255,.08); --mut: rgba(255,255,255,.55); }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050607; }
+  body { font-family: M, system-ui, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; perspective: 2400px; }
+  .abs { position: absolute; }
+  .layer { position: absolute; inset: 0; }
+  #bg { background:
+      radial-gradient(900px 700px at var(--gx, 10%) var(--gy, 8%), rgba(61,220,132,.2), transparent 65%),
+      radial-gradient(800px 700px at var(--ax, 95%) 30%, rgba(245,184,60,.1), transparent 65%), #050607; }
+  #lines { opacity: .06; background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 120px 120px; mask-image: radial-gradient(circle at 50% 50%, #000, transparent 70%); }
+  .wm { font-family: W, M, sans-serif; font-style: italic; font-weight: 700; line-height: .9; letter-spacing: -0.005em; }
+  .title { left: 0; right: 0; top: 230px; text-align: center; font-size: 150px; text-transform: uppercase; }
+  .title em { font-style: inherit; color: var(--g); }
+  .card { background: var(--card); border-radius: 40px; box-shadow: inset 0 0 0 2px var(--line), inset 0 2px 0 rgba(255,255,255,.06), 0 50px 100px -30px rgba(0,0,0,.9); padding: 40px 44px; }
+  .row { display: flex; align-items: center; gap: 24px; }
+  .av { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; font-size: 34px; font-weight: 800; flex: none; }
+  .nm { font-size: 44px; font-weight: 700; letter-spacing: -0.02em; }
+  .mut { color: var(--mut); font-size: 32px; font-weight: 500; }
+  .pill { margin-left: auto; padding: 14px 26px; border-radius: 999px; font-size: 34px; font-weight: 700; white-space: nowrap; }
+  .pg { background: rgba(61,220,132,.16); color: #8af0b8; }
+  .pa { background: rgba(245,184,60,.16); color: #f8ca6b; }
+  .pr { background: rgba(255,93,93,.18); color: #ff9b9b; }
+  .pz { background: rgba(255,255,255,.07); color: var(--mut); }
+  .sep { height: 2px; background: var(--line); margin: 26px 0; }
+  .btn { border-radius: 28px; display: grid; place-items: center; font-weight: 800; }
+  .ripple { position: absolute; border-radius: 50%; border: 6px solid rgba(61,220,132,.8); pointer-events: none; }
+  .flash { background: #fff; mix-blend-mode: overlay; }
+  .sweep { background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.12) 50%, transparent 65%); }
+  .word { display: block; white-space: nowrap; position: relative; font-size: 130px; }
+  .strike { position: absolute; left: -10px; top: 52%; height: 14px; width: 0; background: var(--r); border-radius: 7px; box-shadow: 0 0 24px rgba(255,93,93,.6); }
+  .phone { width: 520px; height: 1120px; border-radius: 80px; padding: 16px; background: linear-gradient(145deg, #3a3d42, #101113 40%, #2a2c30); box-shadow: 0 0 0 2px rgba(255,255,255,.08) inset, 0 60px 120px -20px rgba(0,0,0,.9), 0 0 120px -30px rgba(61,220,132,.35); }
+  .phone .scr { position: relative; width: 100%; height: 100%; border-radius: 66px; overflow: hidden; background: #000; }
+  .phone .scr img { position: absolute; left: 0; top: 0; width: 100%; height: auto; }
+  .mini { width: 250px; height: 500px; border-radius: 46px; padding: 10px; background: linear-gradient(145deg, #3a3d42, #101113 40%, #2a2c30); box-shadow: 0 40px 80px -20px rgba(0,0,0,.9); }
+  .mini .scr { width: 100%; height: 100%; border-radius: 38px; background: linear-gradient(180deg, #0f1412, #0a0b0d); position: relative; overflow: hidden; }
+  .banner { position: absolute; left: 12px; right: 12px; top: 40px; border-radius: 22px; padding: 14px; background: rgba(48,51,56,.95); font-size: 19px; line-height: 1.25; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .banner b { display: block; font-size: 20px; color: var(--g); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg" class="layer"></div>
+  <div id="lines" class="layer"></div>
+
+  <!-- HOOK -->
+  <div id="hook" class="layer">
+    <div class="abs wm" style="left:90px; top:640px; text-transform:uppercase">
+      <span class="word" id="hw0">Group texts.<i class="strike" id="hs0"></i></span>
+      <span class="word" id="hw1">Spreadsheets.<i class="strike" id="hs1"></i></span>
+      <span class="word" id="hw2">Napkin math.<i class="strike" id="hs2"></i></span>
+    </div>
+  </div>
+
+  <!-- REVEAL -->
+  <div id="reveal" class="layer">
+    <div class="abs" id="rvMark" style="left:400px; top:560px; width:280px; height:280px; filter: drop-shadow(0 0 40px rgba(61,220,132,.6))"></div>
+    <div class="abs wm" id="rvWord" style="left:0; right:0; top:860px; text-align:center; font-size:320px">9D</div>
+    <div class="abs" id="rvTag" style="left:0; right:0; top:1200px; text-align:center; font-size:54px; font-weight:700; letter-spacing:-0.02em">Your whole program. <span style="color:var(--g)">One app.</span></div>
+  </div>
+
+  <!-- SCHEDULE IT -->
+  <div id="schedule" class="layer">
+    <div class="abs wm title" id="t_schedule">Schedule <em>it.</em></div>
+    <div class="abs card" id="calCard" style="left:70px; top:540px; width:940px">
+      <div class="row" style="justify-content:space-between"><span class="nm">This week</span><span class="mut">Oct 26 – Nov 1</span></div>
+      <div class="sep"></div>
+      <div id="days" style="display:grid; grid-template-columns:repeat(7,1fr); gap:12px; text-align:center"></div>
+      <div class="abs" id="gameChip" style="left:640px; top:300px; width:260px; padding:18px; border-radius:22px; background:linear-gradient(160deg,#1f4a33,#14301f); box-shadow: inset 0 0 0 2px rgba(61,220,132,.6), 0 20px 40px rgba(0,0,0,.6); font-size:26px; font-weight:700; line-height:1.25">⚾ vs Lakeside<br/><span style="color:#8af0b8">Sat · 10:00 AM</span></div>
+    </div>
+    <div class="abs card" id="rsvpCard" style="left:70px; top:1080px; width:940px; padding:34px 44px">
+      <div class="row" id="rs0"><div class="av" style="background:#2b3f8f">PP</div><div><div class="nm">Priya</div><div class="mut">Noah's mom</div></div><div class="pill pz" id="rp0">–</div></div>
+      <div class="sep"></div>
+      <div class="row" id="rs1"><div class="av" style="background:#7a3b8f">SA</div><div><div class="nm">Sofia</div><div class="mut">Mateo's mom</div></div><div class="pill pz" id="rp1">–</div></div>
+      <div class="sep"></div>
+      <div class="row" id="rs2"><div class="av" style="background:#8f5a2b">MW</div><div><div class="nm">Mike</div><div class="mut">Owen's dad</div></div><div class="pill pz" id="rp2">–</div></div>
+    </div>
+  </div>
+
+  <!-- SCORE IT LIVE -->
+  <div id="live" class="layer">
+    <div class="abs wm title" id="t_live">Score it <em>live.</em></div>
+    <div class="abs card" id="sbCard" style="left:70px; top:540px; width:940px; background:linear-gradient(160deg,#1b2620,#0c0f0e)">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="mut">RAYS</div><div style="font-size:120px; font-weight:800; line-height:1">3</div></div>
+        <div style="text-align:center"><div style="font-size:36px; font-weight:700; color:var(--a)"><span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:var(--a);margin-right:10px"></span>LIVE · ▲5</div>
+          <div id="counts" style="margin-top:18px; font-size:34px; font-weight:700; letter-spacing:.06em"></div></div>
+        <div style="text-align:right"><div class="mut">HAWKS</div><div style="font-size:120px; font-weight:800; line-height:1">2</div></div>
+      </div>
+    </div>
+    <div class="abs card" id="pcCard" style="left:70px; top:880px; width:940px">
+      <div class="row"><div class="av" style="background:#1f4a33; color:#8af0b8">OW</div><div><div class="nm">Owen Walsh</div><div class="mut">Pitching</div></div>
+        <div style="margin-left:auto; text-align:right"><div id="pcNum" style="font-size:110px; font-weight:800; line-height:1">68</div><div class="mut">pitches</div></div></div>
+      <div style="margin-top:30px; height:26px; border-radius:13px; background:rgba(255,255,255,.08); overflow:hidden"><div id="pcBar" style="height:100%; width:70%; border-radius:13px; background:linear-gradient(90deg,#3ddc84,#5ee89c)"></div></div>
+      <div class="row" style="margin-top:16px; justify-content:space-between"><span class="mut">Pitch Smart · max 95</span><span id="pcLeft" style="font-size:32px; font-weight:700; color:#8af0b8">27 left</span></div>
+    </div>
+    <div class="abs" id="pitchBtns" style="left:70px; top:1300px; width:940px; display:grid; grid-template-columns:repeat(4,1fr); gap:20px">
+      <div class="btn card" id="pb0" style="height:200px; font-size:80px; padding:0">B</div>
+      <div class="btn card" id="pb1" style="height:200px; font-size:80px; padding:0">K</div>
+      <div class="btn card" id="pb2" style="height:200px; font-size:80px; padding:0">F</div>
+      <div class="btn" id="pb3" style="height:200px; font-size:44px; background:var(--g); color:#04140b">In play</div>
+    </div>
+    <div class="abs ripple" id="rip"></div>
+  </div>
+
+  <!-- PROTECT ARMS -->
+  <div id="health" class="layer">
+    <div class="abs wm title" id="t_health">Protect <em>arms.</em></div>
+    <div class="abs card" id="alertBar" style="left:70px; top:540px; width:940px; padding:30px 40px; background:rgba(255,93,93,.14); box-shadow: inset 0 0 0 2px rgba(255,93,93,.5)">
+      <div class="row"><span style="font-size:52px">⛔</span><div><div class="nm" style="color:#ffb3b3">Noah reported arm pain</div><div class="mut">Hold him from throwing until he's checked.</div></div></div>
+    </div>
+    <div class="abs card" id="rosterCard" style="left:70px; top:800px; width:940px">
+      <div class="row" id="hr0"><div class="av" style="background:#1f4a33; color:#8af0b8">OW</div><div class="nm">Owen</div><div class="pill pg">✓ Ready · 95</div></div>
+      <div class="sep"></div>
+      <div class="row" id="hr1"><div class="av" style="background:#4a3a1f; color:#f8ca6b">MA</div><div class="nm">Mateo</div><div class="pill pa">⏸ Rest until Tue</div></div>
+      <div class="sep"></div>
+      <div class="row" id="hr2"><div class="av" id="noahAv" style="background:#1f4a33; color:#8af0b8">NP</div><div class="nm">Noah</div><div class="pill pg" id="noahPill">✓ Ready · 95</div></div>
+      <div class="sep"></div>
+      <div class="row" id="hr3"><div class="av" style="background:#1f4a33; color:#8af0b8">EB</div><div class="nm">Ethan</div><div class="pill pg">✓ Ready · 105</div></div>
+    </div>
+  </div>
+
+  <!-- DEVELOP PLAYERS -->
+  <div id="develop" class="layer">
+    <div class="abs wm title" id="t_develop" style="font-size:132px">Develop <em>players.</em></div>
+    <div class="abs card" id="progCard" style="left:70px; top:540px; width:940px">
+      <div class="row" style="justify-content:space-between"><span class="nm">Bullpen progression</span><span class="mut">pitches</span></div>
+      <div id="bars" style="margin-top:40px; height:430px; display:flex; align-items:flex-end; gap:40px; padding:0 20px"></div>
+    </div>
+    <div class="abs card" id="doneCard" style="left:70px; top:1260px; width:940px">
+      <div class="row"><div class="av" style="background:#1f4a33; color:#8af0b8">OW</div><div><div class="nm">Today's bullpen</div><div class="mut">Owen · Week 3 · 30 pitches</div></div>
+        <div class="pill pz" id="donePill" style="font-size:40px">Start</div></div>
+    </div>
+  </div>
+
+  <!-- GET PAID -->
+  <div id="paid" class="layer">
+    <div class="abs wm title" id="t_paid">Get <em>paid.</em></div>
+    <div class="abs card" id="duesCard" style="left:70px; top:540px; width:940px">
+      <div class="row" style="justify-content:space-between"><span class="nm">Fall travel dues</span><span class="mut">9 families</span></div>
+      <div class="sep"></div>
+      <div id="inst"></div>
+    </div>
+    <div class="abs card" id="collCard" style="left:70px; top:1330px; width:940px; background:linear-gradient(160deg,#1b2620,#0c0f0e)">
+      <div class="mut">Collected</div><div id="collNum" style="font-size:150px; font-weight:800; line-height:1.05; color:#8af0b8">$0</div>
+    </div>
+  </div>
+
+  <!-- REACH EVERYONE -->
+  <div id="reach" class="layer">
+    <div class="abs wm title" id="t_reach" style="font-size:136px">Reach <em>everyone.</em></div>
+    <div class="abs card" id="compose" style="left:70px; top:540px; width:940px">
+      <div class="mut">Announcement to the team &amp; parents</div>
+      <div class="row" style="margin-top:22px"><div id="typed" style="flex:1; font-size:48px; font-weight:700; min-height:60px"></div>
+        <div class="btn" id="sendBtn" style="width:150px; height:96px; background:var(--g); color:#04140b; font-size:34px">Send</div></div>
+    </div>
+    <div class="abs" id="phones" style="left:70px; top:880px; width:940px; display:flex; justify-content:space-between">
+      <div class="mini" id="mp0"><div class="scr"><div style="position:absolute;left:0;right:0;top:170px;text-align:center;font-size:76px;font-weight:600;color:rgba(255,255,255,.85)">9:41</div><div style="position:absolute;left:0;right:0;top:255px;text-align:center;font-size:20px;color:rgba(255,255,255,.5)">Friday, October 30</div><div class="banner" id="bn0"><b>Riverside Rays</b>Fall Classic: arrive 8 AM ⚾</div></div></div>
+      <div class="mini" id="mp1"><div class="scr"><div style="position:absolute;left:0;right:0;top:170px;text-align:center;font-size:76px;font-weight:600;color:rgba(255,255,255,.85)">9:41</div><div style="position:absolute;left:0;right:0;top:255px;text-align:center;font-size:20px;color:rgba(255,255,255,.5)">Friday, October 30</div><div class="banner" id="bn1"><b>Riverside Rays</b>Fall Classic: arrive 8 AM ⚾</div></div></div>
+      <div class="mini" id="mp2"><div class="scr"><div style="position:absolute;left:0;right:0;top:170px;text-align:center;font-size:76px;font-weight:600;color:rgba(255,255,255,.85)">9:41</div><div style="position:absolute;left:0;right:0;top:255px;text-align:center;font-size:20px;color:rgba(255,255,255,.5)">Friday, October 30</div><div class="banner" id="bn2"><b>Riverside Rays</b>Fall Classic: arrive 8 AM ⚾</div></div></div>
+    </div>
+  </div>
+
+  <!-- STATS, AUTOMATIC -->
+  <div id="stats" class="layer">
+    <div class="abs wm title" id="t_stats" style="font-size:132px">Stats, <em>automatic.</em></div>
+    <div class="abs card" id="lineCard" style="left:70px; top:560px; width:940px; padding:30px 40px">
+      <div class="row"><div class="av" style="background:#2b3f8f">CH</div><div><div class="nm">Carter Hayes</div><div class="mut">vs Valley Storm</div></div><div class="pill pg">2-for-3 · 2B · RBI</div></div>
+    </div>
+    <div class="abs card" id="seasonCard" style="left:70px; top:860px; width:940px">
+      <div class="row" style="justify-content:space-between"><span class="nm">Season</span><span class="mut">3 games</span></div>
+      <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:30px; text-align:center">
+        <div><div id="sAvg" style="font-size:120px; font-weight:800; color:#8af0b8">.000</div><div class="mut">AVG</div></div>
+        <div><div id="sH" style="font-size:120px; font-weight:800">0</div><div class="mut">HITS</div></div>
+        <div><div id="sRbi" style="font-size:120px; font-weight:800">0</div><div class="mut">RBI</div></div>
+      </div>
+      <div id="spark" style="margin-top:40px; height:140px; display:flex; align-items:flex-end; gap:16px"></div>
+    </div>
+  </div>
+
+  <!-- REAL APP + AUDIENCES -->
+  <div id="real" class="layer">
+    <div class="abs phone" id="realPhone" style="left:280px; top:640px"><div class="scr"><img src="shots2/phone-player.png"/></div></div>
+    <div class="abs wm title" id="aud" style="top:250px; font-size:170px"></div>
+  </div>
+
+  <!-- END -->
+  <div id="end" class="layer">
+    <div class="abs" id="endMark" style="left:400px; top:560px; width:280px; height:280px; filter: drop-shadow(0 0 50px rgba(61,220,132,.65))"></div>
+    <div class="abs wm" id="endWord" style="left:0; right:0; top:860px; text-align:center; font-size:330px">9D</div>
+    <div class="abs" id="endTag" style="left:0; right:0; top:1210px; text-align:center; font-size:64px; font-weight:800; color:var(--g); letter-spacing:-0.03em">Built for baseball.</div>
+    <div class="abs" id="endCo" style="left:0; right:0; top:1780px; text-align:center; font-size:26px; font-weight:600; color:rgba(255,255,255,.4); letter-spacing:.12em">9D SYSTEMS</div>
+  </div>
+
+  <div id="sweep" class="layer sweep"></div>
+  <div id="flash" class="layer flash"></div>
+  <div class="layer" style="background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.55))"></div>
+</div>
+<script>
+const TL = window.TL, S = TL.scenes, E = TL.events;
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const outBack = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const set = (el, o) => { el = typeof el === "string" ? $(el) : el; if (el) for (const k in o) el.style[k] = o[k]; };
+const MARK = `<svg viewBox="0 1 48 48" width="100%" height="100%"><path d="M17.5 34 L8.5 25 L24 9.5 L39.5 25 L30.5 34" fill="none" stroke="#3ddc84" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M19.4 38.6h9.2v3.6L24 46.2l-4.6-4z" fill="#3ddc84" stroke="#3ddc84" stroke-linejoin="round"/></svg>`;
+$("rvMark").innerHTML = MARK; $("endMark").innerHTML = MARK;
+
+// static builds
+["M", "T", "W", "T", "F", "S", "S"].forEach((d, i) => $("days").insertAdjacentHTML("beforeend",
+  `<div style="padding:20px 0; border-radius:22px; background:${i === 5 ? "rgba(61,220,132,.1)" : "rgba(255,255,255,.04)"}" id="day${i}"><div class="mut" style="font-size:28px">${d}</div><div style="font-size:52px; font-weight:800; margin-top:8px">${26 + i > 31 ? 26 + i - 31 : 26 + i}</div><div style="height:150px"></div></div>`));
+[20, 25, 30, 35].forEach((v, i) => $("bars").insertAdjacentHTML("beforeend",
+  `<div style="flex:1; text-align:center"><div id="bv${i}" style="font-size:40px; font-weight:800; margin-bottom:12px">${v}</div><div id="bar${i}" style="height:0; border-radius:20px 20px 8px 8px; background:${i === 2 ? "linear-gradient(180deg,#5ee89c,#12b76a)" : "rgba(61,220,132,.35)"}"></div><div class="mut" style="margin-top:14px">Wk ${i + 1}</div></div>`));
+["Aug", "Sep", "Oct", "Nov"].forEach((m, i) => $("inst").insertAdjacentHTML("beforeend",
+  `<div class="row" style="margin:${i ? 26 : 0}px 0 0"><div class="nm" style="width:140px">${m}</div><div class="mut">Installment ${i + 1} · $150 × 9</div><div class="pill pz" id="ip${i}">Due</div></div>`));
+[0.3, 0.55, 0.8, 0.45, 0.7, 1].forEach((h, i) => $("spark").insertAdjacentHTML("beforeend",
+  `<div id="sp${i}" style="flex:1; height:0; border-radius:12px; background:${i === 5 ? "#3ddc84" : "rgba(61,220,132,.3)"}" data-h="${h}"></div>`));
+
+function vis(id, t, fade = 0.12) {
+  const [a, b] = S[id];
+  const v = Math.min(prog(t, a, a + fade), 1 - prog(t, b - fade, b));
+  set(id, { opacity: v, visibility: v <= 0 ? "hidden" : "visible" });
+  return t - a;
+}
+function slam(id, l, at = 0, dur = 0.35) {
+  const x = outExpo(prog(l, at, at + dur));
+  set(id, { opacity: clamp(x * 2), transform: `scale(${lerp(1.5, 1, x)}) skewX(${lerp(-12, 0, x)}deg)`, filter: `blur(${lerp(16, 0, x)}px)` });
+}
+function rise(id, l, at = 0, dur = 0.5, dy = 120) {
+  const x = outExpo(prog(l, at, at + dur));
+  set(id, { opacity: clamp(x * 1.6), transform: `translateY(${lerp(dy, 0, x)}px) rotateX(${lerp(18, 0, x)}deg)` });
+}
+const pop = (t, at, dur = 0.35) => outBack(prog(t, at, at + dur));
+const count = (n) => E.taps.filter((x) => x <= n).length;
+
+window.DURATION = TL.duration;
+window.render = (t) => {
+  set("bg", { "--gx": `${10 + 30 * Math.sin(t / 6)}%`, "--gy": `${8 + 10 * Math.cos(t / 4)}%`, "--ax": `${92 - 20 * Math.sin(t / 5)}%` });
+  set("lines", { transform: `translateY(${(t * 40) % 120}px)` });
+
+  // hook
+  let l = vis("hook", t, 0.05);
+  TL.hookWords.forEach((at, i) => {
+    const x = prog(l, at, at + 0.25);
+    set("hw" + i, { opacity: x, transform: `scale(${lerp(1.6, 1, outExpo(x))}) translateX(${lerp(-60, 0, outExpo(x))}px)`, transformOrigin: "left center", filter: `blur(${lerp(12, 0, x)}px)` });
+    set("hs" + i, { width: `${prog(l, TL.strike + i * 0.1, TL.strike + 0.25 + i * 0.1) * 104}%` });
+  });
+  set("hook", { transform: `scale(${lerp(1, 0.85, inOut(prog(l, 3.3, 4)))})`, filter: `blur(${prog(l, 3.35, 3.75) * 20}px)` });
+
+  // reveal
+  l = vis("reveal", t, 0.05);
+  const r = outBack(prog(l, 0, 0.55));
+  set("rvMark", { transform: `rotate(${lerp(-180, 0, r)}deg) scale(${lerp(0.2, 1, r)})`, opacity: clamp(r * 3) });
+  const rw = outExpo(prog(l, 0.35, 0.9));
+  set("rvWord", { opacity: rw, transform: `translateY(${lerp(80, 0, rw)}px) skewX(${lerp(-14, 0, rw)}deg)` });
+  const rt = outExpo(prog(l, 1.1, 1.6));
+  set("rvTag", { opacity: rt, transform: `translateY(${lerp(30, 0, rt)}px)` });
+  set("reveal", { transform: `scale(${lerp(1, 1.06, prog(l, 0, 4))})` });
+
+  // SCHEDULE IT
+  l = vis("schedule", t);
+  slam("t_schedule", l);
+  rise("calCard", l, 0.05); rise("rsvpCard", l, 0.2);
+  const gc = pop(t, E.land[0] - 0.25, 0.4);
+  set("gameChip", { opacity: clamp(gc * 2), transform: `translateY(${lerp(-420, 0, outExpo(prog(t, E.land[0] - 0.35, E.land[0])))}px) scale(${lerp(1.3, 1, gc)}) rotate(${lerp(-8, 0, gc)}deg)` });
+  set("day5", { boxShadow: `inset 0 0 0 ${4 * clamp(1 - Math.abs(t - E.land[0]) * 2)}px rgba(61,220,132,.9)` });
+  [0, 1, 2].forEach((i) => {
+    const at = E.taps[i], on = t >= at, p = pop(t, at, 0.35);
+    $("rp" + i).className = "pill " + (on ? "pg" : "pz"); $("rp" + i).textContent = on ? "✓ Going" : "–";
+    set("rp" + i, { transform: `scale(${on ? lerp(1.35, 1, p) : 1})` });
+  });
+
+  // SCORE IT LIVE
+  l = vis("live", t);
+  slam("t_live", l);
+  rise("sbCard", l, 0.05); rise("pcCard", l, 0.15); rise("pitchBtns", l, 0.25);
+  const liveTaps = E.taps.slice(3, 8), seq = [0, 1, 2, 1, 0];
+  const n = liveTaps.filter((x) => t >= x).length;
+  const balls = seq.slice(0, n).filter((s) => s === 0).length, strikes = Math.min(2, seq.slice(0, n).filter((s) => s !== 0).length);
+  const dots = (k, on, c) => Array.from({ length: k }, (_, i) => `<span style="display:inline-block;width:26px;height:26px;border-radius:50%;margin:0 5px;background:${i < on ? c : "rgba(255,255,255,.15)"}"></span>`).join("");
+  $("counts").innerHTML = `B ${dots(3, balls, "#3ddc84")} &nbsp; S ${dots(2, strikes, "#f5b83c")}`;
+  const pc = 68 + n;
+  $("pcNum").textContent = pc; $("pcLeft").textContent = `${95 - pc} left today`;
+  set("pcBar", { width: `${(pc / 95) * 100}%` });
+  const lastTap = liveTaps.filter((x) => t >= x).at(-1);
+  [0, 1, 2, 3].forEach((i) => set("pb" + i, { transform: "scale(1)" }));
+  if (lastTap !== undefined) {
+    const k = seq[n - 1], p = prog(t, lastTap, lastTap + 0.35);
+    set("pb" + k, { transform: `scale(${lerp(0.9, 1, outExpo(p))})` });
+    const bx = 70 + k * 240 + 110, by = 1400;
+    set("rip", { left: `${bx - 150 * p}px`, top: `${by - 150 * p}px`, width: `${300 * p}px`, height: `${300 * p}px`, opacity: 1 - p });
+  } else set("rip", { opacity: 0 });
+  set("pcNum", { transform: `scale(${lastTap !== undefined ? lerp(1.25, 1, outExpo(prog(t, lastTap, lastTap + 0.3))) : 1})` });
+
+  // PROTECT ARMS
+  l = vis("health", t);
+  slam("t_health", l);
+  rise("rosterCard", l, 0.05, 0.5);
+  const al = E.alert[0], on = t >= al, ap = outExpo(prog(t, al, al + 0.4));
+  set("alertBar", { opacity: ap, transform: `translateY(${lerp(-80, 0, ap)}px)` });
+  $("noahPill").className = "pill " + (on ? "pr" : "pg"); $("noahPill").textContent = on ? "⛔ Arm pain" : "✓ Ready · 95";
+  set("noahAv", { background: on ? "#4a1f1f" : "#1f4a33", color: on ? "#ff9b9b" : "#8af0b8" });
+  const sh = on ? Math.sin((t - al) * 60) * 14 * clamp(1 - (t - al) * 2.2) : 0;
+  set("hr2", { transform: `translateX(${sh}px)`, background: on ? `rgba(255,93,93,${0.1 * clamp(1 - (t - al) * 0.6)})` : "transparent", borderRadius: "24px" });
+
+  // DEVELOP PLAYERS
+  l = vis("develop", t);
+  slam("t_develop", l);
+  rise("progCard", l, 0.05); rise("doneCard", l, 0.2);
+  [20, 25, 30, 35].forEach((v, i) => {
+    const p = outBack(prog(t, E.land[1 + i] - 0.1, E.land[1 + i] + 0.35));
+    set("bar" + i, { height: `${(v / 35) * 330 * clamp(p, 0, 1.2)}px` });
+    set("bv" + i, { opacity: clamp(p * 2) });
+  });
+  const dn = t >= E.stamp[0], dp = pop(t, E.stamp[0], 0.35);
+  $("donePill").className = "pill " + (dn ? "pg" : "pz"); $("donePill").textContent = dn ? "✓ Done" : "Start";
+  set("donePill", { transform: `scale(${dn ? lerp(1.5, 1, dp) : 1}) rotate(${dn ? lerp(-10, 0, dp) : 0}deg)` });
+
+  // GET PAID
+  l = vis("paid", t);
+  slam("t_paid", l);
+  rise("duesCard", l, 0.05); rise("collCard", l, 0.2);
+  let paidN = 0;
+  [0, 1, 2, 3].forEach((i) => {
+    const at = E.stamp[1 + i], ok = t >= at; if (ok) paidN++;
+    $("ip" + i).className = "pill " + (ok ? "pg" : "pz"); $("ip" + i).textContent = ok ? "✓ Paid" : "Due";
+    set("ip" + i, { transform: `scale(${ok ? lerp(1.4, 1, pop(t, at, 0.3)) : 1})` });
+  });
+  const last = paidN ? E.stamp[paidN] : null;
+  const shown = paidN ? lerp((paidN - 1) * 1350, paidN * 1350, outExpo(prog(t, last, last + 0.45))) : 0;
+  $("collNum").textContent = "$" + Math.round(shown).toLocaleString("en-US");
+
+  // REACH EVERYONE
+  l = vis("reach", t);
+  slam("t_reach", l);
+  rise("compose", l, 0.05);
+  const msg = "Fall Classic: arrive 8 AM ⚾";
+  const chars = Math.round(msg.length * prog(t, E.typing[0], E.typing[1]));
+  $("typed").innerHTML = msg.slice(0, chars) + (t < E.taps[8] ? `<span style="opacity:${Math.floor(t * 4) % 2}">|</span>` : "");
+  const sp = prog(t, E.taps[8], E.taps[8] + 0.25);
+  set("sendBtn", { transform: `scale(${t >= E.taps[8] ? lerp(0.85, 1, outExpo(sp)) : 1})` });
+  [0, 1, 2].forEach((i) => {
+    rise("mp" + i, l, 0.25 + i * 0.08, 0.5, 200);
+    const b = pop(t, E.dings[i], 0.4);
+    set("bn" + i, { opacity: clamp(b * 2), transform: `translateY(${lerp(-120, 0, clamp(b))}px) scale(${lerp(0.9, 1, b)})` });
+    set("mp" + i, { boxShadow: `0 40px 80px -20px rgba(0,0,0,.9), 0 0 ${70 * clamp(1 - Math.abs(t - E.dings[i]) * 2)}px rgba(61,220,132,.8)` });
+  });
+
+  // STATS, AUTOMATIC
+  l = vis("stats", t);
+  slam("t_stats", l);
+  const li = outExpo(prog(t, E.land[5] - 0.3, E.land[5] + 0.1));
+  const merge = inOut(prog(t, E.stamp[5] - 0.35, E.stamp[5]));
+  set("lineCard", { opacity: clamp(li * 2) * (1 - merge * 0.8), transform: `translateX(${lerp(-900, 0, li)}px) translateY(${merge * 300}px) scale(${1 - merge * 0.2})` });
+  rise("seasonCard", l, 0.15);
+  const c = outExpo(prog(t, E.count[0], E.count[1]));
+  $("sAvg").textContent = (0.556 * c).toFixed(3).replace(/^0/, ""); $("sH").textContent = Math.round(5 * c); $("sRbi").textContent = Math.round(4 * c);
+  [0, 1, 2, 3, 4, 5].forEach((i) => set("sp" + i, { height: `${$("sp" + i).dataset.h * 140 * outBack(prog(t, E.count[0] + i * 0.12, E.count[0] + 0.4 + i * 0.12))}px` }));
+  set("seasonCard", { boxShadow: `inset 0 0 0 ${3 * clamp(1 - Math.abs(t - E.stamp[5]) * 2)}px rgba(61,220,132,.9), 0 50px 100px -30px rgba(0,0,0,.9)` });
+
+  // REAL + AUDIENCES
+  l = vis("real", t, 0.1);
+  const words = ["Coaches.", "Clubs.", "Parents.", "Players."];
+  const wi = E.beats.filter((x) => t >= x).length - 1;
+  $("aud").innerHTML = wi >= 0 ? `<span style="color:${wi % 2 ? "#3ddc84" : "#fff"}">${words[wi]}</span>` : "";
+  if (wi >= 0) slam("aud", t - E.beats[wi], 0, 0.25);
+  const rp = outExpo(prog(l, 0, 0.7));
+  set("realPhone", { transform: `translateY(${lerp(900, 0, rp)}px) rotateY(${-14 + 6 * Math.sin(l)}deg) rotateX(6deg) scale(${lerp(1, 1.08, prog(l, 0.5, 4))})` });
+
+  // END
+  l = vis("end", t, 0.25);
+  const e = outBack(prog(l, 0.05, 0.65));
+  set("endMark", { transform: `rotate(${lerp(-90, 0, e)}deg) scale(${lerp(0.3, 1, e)})`, opacity: clamp(e * 3) });
+  const ew = outExpo(prog(l, 0.3, 0.9));
+  set("endWord", { opacity: ew, transform: `translateY(${lerp(60, 0, ew)}px) skewX(${lerp(-12, 0, ew)}deg)` });
+  const et = outExpo(prog(l, 0.9, 1.4)); set("endTag", { opacity: et, transform: `translateY(${lerp(30, 0, et)}px)` });
+  set("endCo", { opacity: outExpo(prog(l, 1.5, 2.1)) });
+
+  let fl = 0;
+  for (const [a] of Object.values(S)) if (a > 0) fl = Math.max(fl, 1 - Math.abs(t - a) / 0.09);
+  fl = Math.max(fl, 1 - Math.abs(t - TL.batCrack) / 0.07);
+  set("flash", { opacity: clamp(fl) * 0.5 });
+  set("sweep", { transform: `translateX(${(((t * 0.5) % 1.6) - 0.3) * 100}%)`, opacity: 0.5 });
+};
+window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+render(0);
+</script>
+</body>
+</html>

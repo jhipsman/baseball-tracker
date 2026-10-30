@@ -1,4 +1,8 @@
-# 9D commercial (vertical 1080×1920, 70 s, with soundtrack)
+# 9D commercial
+
+**Current cut: `stage3.html` + `timeline3.js` + `music3.py` (46 s).** Each feature is a short animated scene in the app's own design where the thing actually happens (RSVPs flip to Going, pitch count ticks up, a status flips to Arm pain, bullpen bars grow, installments turn Paid, a message lands on phones, stats count up), with a 2–3 word caption. Render: `STAGE=stage3.html node render.mjs video silent3.mp4 30`, `python3 music3.py music3.wav timeline3.js`, then mux as below.
+
+## Earlier cut (vertical 1080×1920, 70 s, with soundtrack)
 
 Filmed from the real app running the demo team, in three acts: coaches, clubs & organizations, parents & players. Nothing here ships with the app.
 
