@@ -3,3 +3,5 @@ fonts/
 still-*.jpg
 *.mp4
 node_modules
+shots2/
+*.wav

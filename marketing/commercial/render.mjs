@@ -5,7 +5,7 @@ const dir = new URL(".", import.meta.url).pathname;
 const [mode, arg, fpsArg] = process.argv.slice(2);
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium", args: ["--allow-file-access-from-files"] });
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
-await page.goto("file://" + dir + "stage.html");
+await page.goto("file://" + dir + (process.env.STAGE ?? "stage.html"));
 await page.evaluate(() => window.ready);
 if (mode === "stills") {
   for (const t of arg.split(",").map(Number)) {

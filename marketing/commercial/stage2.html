@@ -1,0 +1,257 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>9D commercial</title>
+<script src="timeline.js"></script>
+<style>
+  @font-face { font-family: M; font-weight: 500; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk7PFO_F.ttf); }
+  @font-face { font-family: M; font-weight: 600; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4jE-_F.ttf); }
+  @font-face { font-family: M; font-weight: 700; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk4aE-_F.ttf); }
+  @font-face { font-family: M; font-weight: 800; src: url(fonts/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk59E-_F.ttf); }
+  @font-face { font-family: W; font-weight: 700; font-style: italic; src: url(fonts/barlow-cond-700i.ttf); }
+  :root { --g: #3ddc84; --a: #f5b83c; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: #050607; }
+  body { font-family: M, system-ui, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; inset: 0; overflow: hidden; perspective: 2200px; }
+  .abs { position: absolute; }
+  .layer { position: absolute; inset: 0; }
+  #bg { background:
+      radial-gradient(900px 700px at var(--gx, 10%) var(--gy, 8%), rgba(61,220,132,.22), transparent 65%),
+      radial-gradient(800px 700px at var(--ax, 95%) 30%, rgba(245,184,60,.12), transparent 65%),
+      radial-gradient(900px 900px at 50% 115%, rgba(86,182,242,.08), transparent 60%), #050607; }
+  #lines { opacity: .07; background-image: linear-gradient(rgba(255,255,255,.6) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.6) 1px, transparent 1px); background-size: 120px 120px; mask-image: radial-gradient(circle at 50% 45%, #000, transparent 70%); }
+  .wm { font-family: W, M, sans-serif; font-style: italic; font-weight: 700; letter-spacing: -0.01em; line-height: .9; }
+  .cap { left: 80px; right: 80px; top: 170px; }
+  .kicker { font-size: 30px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--g); }
+  .h1 { font-size: 100px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; margin-top: 22px; }
+  .h2 { font-size: 100px; font-weight: 800; letter-spacing: -0.045em; line-height: 1; color: var(--g); }
+  .sub { margin-top: 26px; font-size: 40px; font-weight: 500; color: rgba(255,255,255,.66); letter-spacing: -0.01em; }
+  .word { display: block; white-space: nowrap; position: relative; font-size: 112px; font-weight: 800; letter-spacing: -0.045em; line-height: 1.12; }
+  .strike { position: absolute; left: -10px; top: 54%; height: 12px; width: 0; background: #ff4d4d; border-radius: 6px; box-shadow: 0 0 24px rgba(255,77,77,.6); }
+  .phone { width: 600px; height: 1300px; border-radius: 92px; padding: 18px; background: linear-gradient(145deg, #3a3d42, #101113 40%, #2a2c30); box-shadow: 0 0 0 2px rgba(255,255,255,.08) inset, 0 60px 120px -20px rgba(0,0,0,.9), 0 0 120px -30px rgba(61,220,132,.35); }
+  .phone .scr { position: relative; width: 100%; height: 100%; border-radius: 76px; overflow: hidden; background: #000; }
+  .phone .scr img { position: absolute; left: 0; top: 0; width: 100%; height: auto; }
+  .phone .island { position: absolute; left: 50%; top: 22px; width: 170px; height: 48px; margin-left: -85px; border-radius: 30px; background: #000; z-index: 5; }
+  .phone .glare { position: absolute; inset: 0; border-radius: 76px; background: linear-gradient(115deg, rgba(255,255,255,.14), transparent 30%, transparent 70%, rgba(255,255,255,.05)); z-index: 4; }
+  .win { width: 960px; border-radius: 34px; overflow: hidden; background: #0b0c0e; box-shadow: 0 0 0 2px rgba(255,255,255,.08), 0 70px 140px -30px rgba(0,0,0,.95), 0 0 140px -40px rgba(61,220,132,.3); }
+  .win .bar { height: 50px; background: #15171a; display: flex; align-items: center; gap: 14px; padding-left: 26px; }
+  .win .bar i { width: 16px; height: 16px; border-radius: 50%; background: #3a3d42; display: block; }
+  .win .view { position: relative; height: 600px; overflow: hidden; }
+  .win .view img { position: absolute; left: 0; top: 0; width: 960px; transform-origin: 0 0; }
+  .pop { border-radius: 30px; overflow: hidden; background: #111; box-shadow: 0 0 0 3px rgba(61,220,132,.75), 0 50px 100px -20px rgba(0,0,0,.95), 0 0 90px -10px rgba(61,220,132,.5); }
+  .pop img { display: block; width: 100%; height: auto; }
+  .chip { padding: 22px 34px; border-radius: 999px; font-size: 38px; font-weight: 700; letter-spacing: -0.02em; background: rgba(255,255,255,.1); box-shadow: inset 0 1px 0 rgba(255,255,255,.25), inset 0 0 0 1.5px rgba(255,255,255,.14), 0 20px 40px -10px rgba(0,0,0,.6); white-space: nowrap; }
+  .callout { border-radius: 40px; padding: 34px 40px; background: rgba(12,26,18,.94); box-shadow: inset 0 0 0 3px rgba(61,220,132,.7), 0 40px 80px -20px rgba(0,0,0,.9), 0 0 80px -10px rgba(61,220,132,.5); font-size: 44px; font-weight: 700; letter-spacing: -0.02em; }
+  .callout small { display: block; font-size: 26px; font-weight: 700; letter-spacing: .18em; color: var(--g); margin-bottom: 10px; }
+  .dot { display: inline-block; width: 24px; height: 24px; border-radius: 50%; background: var(--a); vertical-align: middle; margin-right: 16px; }
+  .notif { left: 36px; right: 36px; top: 84px; z-index: 6; border-radius: 34px; padding: 22px 26px; background: rgba(40,42,46,.88); backdrop-filter: blur(20px); box-shadow: 0 20px 50px -10px rgba(0,0,0,.7), inset 0 0 0 1px rgba(255,255,255,.1); display: flex; gap: 18px; align-items: center; }
+  .notif .ic { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(160deg,#1d2a22,#0a0d0c); display: grid; place-items: center; flex: none; }
+  .notif b { display: block; font-size: 26px; } .notif span { font-size: 24px; color: rgba(255,255,255,.75); }
+  .chapter { inset: 0; display: grid; place-items: center; text-align: center; }
+  .flash { background: #fff; mix-blend-mode: overlay; }
+  .sweep { background: linear-gradient(100deg, transparent 35%, rgba(255,255,255,.14) 50%, transparent 65%); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg" class="layer"></div>
+  <div id="lines" class="layer"></div>
+  <div id="scenes"></div>
+  <div id="sweep" class="layer sweep"></div>
+  <div id="flash" class="layer flash"></div>
+  <div class="layer" style="background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(0,0,0,.55))"></div>
+</div>
+<script>
+const TL = window.TL, S = TL.scenes;
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
+const outBack = (x) => { const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const inOut = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+const set = (el, o) => { el = typeof el === "string" ? $(el) : el; if (el) for (const k in o) el.style[k] = o[k]; };
+const MARK = (c = "#3ddc84") => `<svg viewBox="0 1 48 48" width="100%" height="100%"><path d="M17.5 34 L8.5 25 L24 9.5 L39.5 25 L30.5 34" fill="none" stroke="${c}" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/><path d="M19.4 38.6h9.2v3.6L24 46.2l-4.6-4z" fill="${c}" stroke="${c}" stroke-linejoin="round"/></svg>`;
+const html = (s) => { const d = document.createElement("div"); d.innerHTML = s.trim(); return d.firstChild; };
+const scenesEl = $("scenes");
+const add = (id, inner) => { const el = html(`<div id="${id}" class="layer">${inner}</div>`); scenesEl.appendChild(el); return el; };
+const cap = (id, kicker, h1, h2, sub) => `<div class="abs cap" id="${id}">${kicker ? `<div class="kicker">${kicker}</div>` : ""}<div class="h1">${h1}</div>${h2 ? `<div class="h2">${h2}</div>` : ""}${sub ? `<div class="sub">${sub}</div>` : ""}</div>`;
+const phone = (id, imgs) => `<div class="abs phone" id="${id}" style="left:240px; top:600px"><div class="scr"><div class="island"></div>${imgs}<div class="glare"></div></div></div>`;
+
+// ---------------------------------------------------------------- build
+add("hook", `<div class="abs" style="left:80px; top:520px">
+  <div class="word" id="hw0" style="font-size:74px; color:rgba(255,255,255,.7); margin-bottom:40px">Running a team is<br/>a second job.</div>
+  <div class="word" id="hw1">Group texts.<i class="strike" id="hs1"></i></div>
+  <div class="word" id="hw2">Spreadsheets.<i class="strike" id="hs2"></i></div>
+  <div class="word" id="hw3">Dues reminders.<i class="strike" id="hs3"></i></div>
+  <div class="word" id="hw4" style="font-size:96px">Pitch counts on<br/>a napkin.<i class="strike" id="hs4" style="top:76%"></i></div>
+</div>`);
+add("reveal", `<div class="abs" id="rvMark" style="left:415px; top:560px; width:250px; height:250px; filter: drop-shadow(0 0 40px rgba(61,220,132,.6))">${MARK()}</div>
+  <div class="abs wm" id="rvWord" style="left:0; right:0; top:840px; text-align:center; font-size:300px">9D</div>
+  <div class="abs" id="rvTag" style="left:0; right:0; top:1160px; text-align:center; font-size:52px; font-weight:700; letter-spacing:-0.02em">One app for your <span style="color:var(--g)">whole program.</span></div>`);
+const chapter = (id, small, big) => add(id, `<div class="abs chapter"><div><div class="kicker" id="${id}k" style="font-size:36px">${small}</div><div class="wm" id="${id}w" style="font-size:250px; margin-top:20px">${big}</div></div></div>`);
+chapter("chCoach", "Built for", "COACHES");
+chapter("chOrg", "Built for", "CLUBS &amp;<br/>ORGS");
+chapter("chFam", "Built for", "PARENTS &amp;<br/>PLAYERS");
+
+/** Laptop window with the full screen, then the key part pops out. */
+const showcase = (id, full, focus, capHtml, popTop = 1240, popZoom = 1) => add(id, `${capHtml}
+  <div class="abs win" id="${id}Win" style="left:60px; top:640px"><div class="bar"><i></i><i></i><i></i></div><div class="view"><img id="${id}Img" src="shots2/${full}.png"/></div></div>
+  ${focus ? `<div class="abs pop" id="${id}Pop" style="left:50px; top:${popTop}px; width:980px"><img src="shots2/${focus}.png" style="width:${popZoom * 100}%"/></div>` : ""}`);
+showcase("schedule", "calendar", null, cap("scheduleCap", "Schedule", "Every game.", "Every practice.", "One calendar. RSVPs and changes reach every family."));
+add("live", `${cap("liveCap", "Game day", "Score every pitch.", "", "Pitch counts and Pitch Smart limits track themselves.")}
+  ${phone("livePhone", [0, 1, 2, 3, 4, 5].map((i) => `<img id="lv${i}" src="shots2/phone-live-${i}.png"/>`).join(""))}
+  <div class="abs callout" id="liveCall" style="left:60px; top:1520px; width:620px"><small>PITCH SMART, BUILT IN</small>Know when to pull him.</div>`);
+showcase("health", "health", "health-alerts", cap("healthCap", "Player health", "Who can pitch?", "You'll know first.", "Arm check-ins, rest days and alerts for every player."), 1300);
+showcase("training", "program", "program-builds", cap("trainingCap", "Training", "Build programs.", "Watch them build.", "Assign once. See every player's progress."), 1300);
+showcase("stats", "stats", "stats-table", cap("statsCap", "Stats", "Every game", "counts.", "Season stats built from your box scores."), 1290, 1.7);
+showcase("dash", "dash", "dash-top", cap("dashCap", "Command center", "Your whole program.", "At a glance.", ""), 1290);
+showcase("dues", "dues", "dues-totals", cap("duesCap", "Dues", "Get paid", "without chasing.", "Installments, reminders and autopay. Families pay from their phone."), 1340);
+add("notify", `${cap("notifyCap", "Announcements", "One post.", "Every family.", "")}
+  <div class="abs win" id="notifyWin" style="left:40px; top:620px; width:760px"><div class="bar"><i></i><i></i><i></i></div><div class="view" style="height:470px"><img src="shots2/messages.png" style="width:760px"/></div></div>
+  <div class="abs phone" id="notifyPhone" style="left:420px; top:900px; transform-origin: top left"><div class="scr"><div class="island"></div><img src="shots2/phone-parent.png"/>
+    <div class="abs notif" id="notifBanner"><div class="ic"><div style="width:44px;height:44px">${MARK()}</div></div><div><b>Riverside Rays</b><span>Fall Classic next weekend: arrive an hour early.</span></div></div>
+  <div class="glare"></div></div></div>`);
+showcase("imports", "imports", null, cap("importsCap", "Switching", "Switching is easy.", "", "Bring your roster, schedule and stats from spreadsheets or another app."));
+add("parent", `${cap("parentCap", "For parents", "Every game,", "live.", "Scores, schedules, RSVPs and dues, from the stands or the office.")}
+  ${phone("parentPhone", `<img id="pa0" src="shots2/phone-parent-live.png"/><img id="pa1" src="shots2/phone-parent-schedule.png"/>`)}
+  <div class="abs chip" id="paChip1" style="left:40px; top:900px"><span class="dot"></span>Live score</div>
+  <div class="abs chip" id="paChip2" style="left:700px; top:1220px">✓ RSVP</div>
+  <div class="abs chip" id="paChip3" style="left:60px; top:1560px">💳 Dues</div>`);
+add("player", `${cap("playerCap", "For players", "Today's work.", "Zero guesswork.", "")}
+  ${phone("playerPhone", `<img id="pl0" src="shots2/phone-player.png"/><img id="pl1" src="shots2/phone-workout.png"/>`)}`);
+add("daynight", `${cap("dnCap", "", "Day.", "Night.", "Built for the dugout and the drive home.")}
+  ${phone("dnPhone", `<img src="shots2/phone-player-light.png"/><img id="dnDark" src="shots2/phone-player.png"/>`)}`);
+add("end", `<div class="abs" id="endMark" style="left:400px; top:540px; width:280px; height:280px; filter: drop-shadow(0 0 50px rgba(61,220,132,.65))">${MARK()}</div>
+  <div class="abs wm" id="endWord" style="left:0; right:0; top:840px; text-align:center; font-size:320px">9D</div>
+  <div class="abs" id="endTag" style="left:0; right:0; top:1180px; text-align:center; font-size:64px; font-weight:800; color:var(--g); letter-spacing:-0.03em">Built for baseball.</div>
+  <div class="abs" id="endAud" style="left:0; right:0; top:1290px; text-align:center; font-size:36px; font-weight:600; color:rgba(255,255,255,.7)">Coaches · Clubs · Parents · Players</div>
+  <div class="abs" id="endCo" style="left:0; right:0; top:1780px; text-align:center; font-size:26px; font-weight:600; color:rgba(255,255,255,.4); letter-spacing:.12em">9D SYSTEMS</div>`);
+
+// ---------------------------------------------------------------- render
+function vis(id, t, fade = 0.2) {
+  const [a, b] = S[id];
+  const v = Math.min(prog(t, a, a + fade), 1 - prog(t, b - fade, b));
+  set(id, { opacity: v, visibility: v <= 0 ? "hidden" : "visible" });
+  return t - a;
+}
+function punch(id, l, at, dur = 0.45, dy = 60) {
+  const x = prog(l, at, at + dur);
+  set(id, { opacity: clamp(x * 2.2), transform: `translateY(${lerp(dy, 0, outExpo(x))}px) scale(${lerp(1.08, 1, outExpo(x))})`, filter: `blur(${lerp(14, 0, outExpo(x))}px)` });
+}
+function renderShowcase(id, t, zoom) {
+  const l = vis(id, t), len = S[id][1] - S[id][0];
+  punch(id + "Cap", l, 0.15);
+  const w = outExpo(prog(l, 0.05, 0.8));
+  set(id + "Win", { transform: `translateY(${lerp(500, 0, w)}px) rotateX(${lerp(25, 8, w)}deg) rotateY(${lerp(10, 3 * Math.sin(l / 2), w)}deg) scale(${$(id + "Pop") ? lerp(1, 0.94, inOut(prog(l, 1.8, 2.4))) : 1})` });
+  if (zoom) { const z = inOut(prog(l, 0.9, len - 0.3)); set(id + "Img", { transform: `translate(${-zoom[0] * z}px, ${-zoom[1] * z}px) scale(${lerp(1, zoom[2], z)})` }); }
+  const pop = $(id + "Pop");
+  if (pop) { const p = outBack(prog(l, 1.5, 2.1)); set(pop, { opacity: clamp(p * 2), transform: `translateY(${lerp(140, 0, p)}px) scale(${lerp(0.8, 1, p)}) rotate(${lerp(-4, -1, p)}deg)` }); }
+}
+const phoneIn = (id, l, from = "y") => {
+  const p = outExpo(prog(l, 0, 0.9));
+  const base = from === "x" ? `translateX(${lerp(900, 0, p)}px)` : `translateY(${lerp(900, 0, p)}px)`;
+  set(id, { transform: `${base} rotateY(${lerp(-28, -9, p) + 4 * Math.sin(l / 1.4)}deg) rotateX(${lerp(16, 5, p)}deg) rotateZ(${lerp(6, 1.5, p)}deg)` });
+};
+
+window.DURATION = TL.duration;
+window.render = (t) => {
+  set("bg", { "--gx": `${10 + 30 * Math.sin(t / 7)}%`, "--gy": `${8 + 10 * Math.cos(t / 5)}%`, "--ax": `${92 - 20 * Math.sin(t / 6)}%` });
+  set("lines", { transform: `translateY(${(t * 30) % 120}px)` });
+
+  // hook
+  let l = vis("hook", t, 0.1);
+  TL.hookWords.forEach((at, i) => {
+    const x = prog(l, at, at + 0.3);
+    set("hw" + i, { opacity: x, transform: `scale(${lerp(1.5, 1, outExpo(x))})`, transformOrigin: "left center", filter: `blur(${lerp(10, 0, x)}px)` });
+    if (i) set("hs" + i, { width: `${prog(l, TL.strike + (i - 1) * 0.12, TL.strike + 0.3 + (i - 1) * 0.12) * 104}%` });
+  });
+  set("hook", { transform: `scale(${lerp(1, 0.86, inOut(prog(l, 7.2, 8)))})`, filter: `blur(${prog(l, 7.3, 7.75) * 18}px)` });
+
+  // reveal (lands on the bat crack)
+  l = vis("reveal", t, 0.05);
+  const r = outBack(prog(l, 0, 0.6));
+  set("rvMark", { transform: `rotate(${lerp(-180, 0, r)}deg) scale(${lerp(0.2, 1, r)})`, opacity: clamp(r * 3) });
+  const rw = outExpo(prog(l, 0.4, 1.0));
+  set("rvWord", { opacity: rw, transform: `translateY(${lerp(80, 0, rw)}px) skewX(${lerp(-12, 0, rw)}deg)`, letterSpacing: `${lerp(0.3, -0.01, rw)}em` });
+  punch("rvTag", l, 1.2, 0.5, 30);
+  set("reveal", { transform: `scale(${lerp(1, 1.06, prog(l, 0, 4))})` });
+
+  // chapters
+  for (const id of ["chCoach", "chOrg", "chFam"]) {
+    const lc = vis(id, t, 0.12);
+    punch(id + "k", lc, 0.05, 0.35, 30);
+    const c = outExpo(prog(lc, 0.12, 0.6));
+    set(id + "w", { opacity: c, transform: `scale(${lerp(1.6, 1, c) * lerp(1, 1.05, prog(lc, 0.6, 2))}) skewX(${lerp(-10, 0, c)}deg)`, filter: `blur(${lerp(20, 0, c)}px)` });
+  }
+
+  // coaches
+  renderShowcase("schedule", t, [525, 330, 1.75]);
+  l = vis("live", t);
+  punch("liveCap", l, 0.15);
+  phoneIn("livePhone", l);
+  const fi = TL.pitchTaps.filter((x) => t >= x).length;
+  for (let i = 0; i < 6; i++) set("lv" + i, { opacity: i === fi ? 1 : 0, transform: `translateY(${-lerp(0, 120, prog(l, 1, 5))}px)` });
+  const lc = outBack(prog(t, TL.pops[1], TL.pops[1] + 0.5));
+  set("liveCall", { opacity: clamp(lc * 2), transform: `translate(${lerp(-60, 0, lc)}px, ${lerp(80, 0, lc)}px) scale(${lerp(0.7, 1, lc)}) rotate(-2deg)` });
+  renderShowcase("health", t);
+  renderShowcase("training", t);
+  renderShowcase("stats", t);
+
+  // clubs & orgs
+  renderShowcase("dash", t);
+  renderShowcase("dues", t);
+  l = vis("notify", t);
+  punch("notifyCap", l, 0.15);
+  const nw = outExpo(prog(l, 0, 0.8));
+  set("notifyWin", { transform: `translateX(${lerp(-700, 0, nw)}px) rotateY(${lerp(20, 10, nw)}deg) rotateX(6deg)` });
+  const np = outExpo(prog(l, 0.5, 1.3));
+  set("notifyPhone", { transform: `translateY(${lerp(900, 0, np)}px) rotateY(${-12 + 3 * Math.sin(l)}deg) scale(.82)` });
+  const nb = outBack(prog(t, TL.ding, TL.ding + 0.45));
+  set("notifBanner", { opacity: clamp(nb * 2), transform: `translateY(${lerp(-160, 0, nb)}px) scale(${lerp(0.9, 1, nb)})` });
+  renderShowcase("imports", t, [0, 40, 1.15]);
+
+  // parents & players
+  l = vis("parent", t);
+  punch("parentCap", l, 0.15);
+  phoneIn("parentPhone", l);
+  const sw = inOut(prog(l, 2.4, 2.9));
+  set("pa0", { transform: `translateX(${-sw * 100}%)` }); set("pa1", { transform: `translateX(${(1 - sw) * 100}%)` });
+  [["paChip1", 1.0, -4], ["paChip2", 1.3, 3], ["paChip3", 1.6, -2]].forEach(([id, at, rot]) => {
+    const x = outBack(prog(l, at, at + 0.4));
+    set(id, { opacity: clamp(x * 2), transform: `translateY(${lerp(60, 0, x) + 10 * Math.sin(l * 1.6 + at)}px) scale(${lerp(0.5, 1, x)}) rotate(${rot}deg)` });
+  });
+  l = vis("player", t);
+  punch("playerCap", l, 0.15);
+  phoneIn("playerPhone", l, "x");
+  const pw = inOut(prog(l, 2.0, 2.6));
+  set("pl0", { transform: `translateX(${-pw * 100}%)` });
+  set("pl1", { transform: `translateX(${(1 - pw) * 100}%) translateY(${-inOut(prog(l, 2.7, 4)) * 360}px)` });
+  l = vis("daynight", t, 0.15);
+  set("dnPhone", { transform: `rotateY(${-6 + 4 * Math.sin(l)}deg) rotateX(4deg)` });
+  const rp = inOut(prog(t, TL.ripple, TL.ripple + 0.8));
+  set("dnDark", { clipPath: `circle(${rp * 150}% at 82% 4%)` });
+  punch("dnCap", l, 0.05, 0.35);
+
+  // end card
+  l = vis("end", t, 0.3);
+  const e = outBack(prog(l, 0.05, 0.7));
+  set("endMark", { transform: `rotate(${lerp(-90, 0, e)}deg) scale(${lerp(0.3, 1, e)})`, opacity: clamp(e * 3) });
+  const ew = outExpo(prog(l, 0.35, 0.95));
+  set("endWord", { opacity: ew, transform: `translateY(${lerp(60, 0, ew)}px) skewX(${lerp(-10, 0, ew)}deg)` });
+  punch("endTag", l, 0.9, 0.5, 30); punch("endAud", l, 1.3, 0.6, 20); punch("endCo", l, 1.8, 0.6, 10);
+
+  // flashes on every scene start, light sweep
+  let fl = 0;
+  for (const [a] of Object.values(S)) if (a > 0) fl = Math.max(fl, 1 - Math.abs(t - a) / 0.1);
+  fl = Math.max(fl, 1 - Math.abs(t - TL.batCrack) / 0.08);
+  set("flash", { opacity: clamp(fl) * 0.5 });
+  set("sweep", { transform: `translateX(${(((t * 0.5) % 1.6) - 0.3) * 100}%)`, opacity: 0.55 });
+};
+window.ready = Promise.all([document.fonts.ready, ...[...document.images].map((i) => i.decode().catch(() => {}))]);
+render(0);
+</script>
+</body>
+</html>

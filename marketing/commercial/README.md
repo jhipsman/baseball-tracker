@@ -1,9 +1,15 @@
-# Diamond Program commercial (vertical, 42 s)
+# 9D commercial (vertical 1080×1920, 70 s, with soundtrack)
 
-A 1080×1920 promo built from the real app running the demo team. Nothing here ships with the app.
+Filmed from the real app running the demo team, in three acts: coaches, clubs & organizations, parents & players. Nothing here ships with the app.
 
-- `capture.mjs`: signs up a coach on a local app (`http://localhost:3000`), creates the demo team, scores a few live pitches, and screenshots desktop and phone screens (Day and Night) into `shots/`. Players and parents are captured through "View as" (read-only).
-- `stage.html`: the commercial itself. `render(t)` draws the frame at `t` seconds: the problem (kinetic type), logo reveal, game day (live scorer + Pitch Smart callout), player health (zoom into the arm-pain alert), player, parent, Day→Night ripple, montage, end card. Edit text and timings here (`T` holds the scene times).
-- `render.mjs`: `node render.mjs stills 5,12,30` writes preview frames; `node render.mjs video out.mp4 30` films every frame in headless Chromium and encodes H.264 with ffmpeg.
+| File | What it does |
+| --- | --- |
+| `timeline.js` | The single timeline (120 BPM, a bar = 2 s): scene times plus the moments sound hits (bat crack, pitch taps, notification ding, Day/Night ripple, pop-outs). Picture and music both read it. |
+| `capture2.mjs` | Signs up a coach on a local app (`http://localhost:3000`), builds the demo team, scores a few live pitches, and saves full screens plus close-ups (calendar, health alerts, "How it builds", stats, dashboard, dues, messages, imports) and parent/player phone screens via "View as" into `shots2/`. |
+| `stage2.html` | The commercial. `render(t)` draws the frame at `t` seconds. Edit captions and layout here. |
+| `music.py` | Original soundtrack and sound design, synthesized in code (no licensed audio): A-minor groove (Am–F–C–G), risers and impacts on chapter cards, bat crack on the reveal, taps, pops, ding, shimmer. `python3 music.py music.wav` (needs numpy + scipy). |
+| `render.mjs` | `STAGE=stage2.html node render.mjs stills 9.5,22` for previews; `STAGE=stage2.html node render.mjs video silent.mp4 30` films every frame. |
 
-Setup: a running local app + database, `playwright-core` (Chromium at `/opt/pw-browsers/chromium`), ffmpeg, and Manrope TTFs in `fonts/` (from Google Fonts; file names are referenced in `stage.html`). No music is included: add a licensed track in CapCut/iMovie.
+Final mix: `ffmpeg -i silent.mp4 -i music.wav -filter_complex "[1:a]loudnorm=I=-14:TP=-1.5[a]" -map 0:v -map "[a]" -c:v copy -c:a aac -b:a 256k -shortest 9D-commercial.mp4`
+
+Setup: running local app + database, `playwright-core` with Chromium at `/opt/pw-browsers/chromium`, ffmpeg, Manrope TTFs and Barlow Condensed 700 italic (`barlow-cond-700i.ttf`) in `fonts/` (Google Fonts). `stage.html`/`capture.mjs` are the first 42-second cut.
