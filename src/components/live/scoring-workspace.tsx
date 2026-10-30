@@ -20,6 +20,7 @@ import {
 } from "@/lib/live/runners";
 import type { ScorerProps, ScoringActions } from "./scoring-types";
 import { BaseballDiamond } from "./baseball-diamond";
+import { FIELD_POSITIONS, nearestFielder, opponentLabel, type FieldPos } from "@/lib/live/defense";
 import styles from "./scoring-workspace.module.css";
 
 const ordinalSlot = (n: number) =>
@@ -68,6 +69,12 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
   const [slot, setSlot] = useState(0);
   const [endRuns, setEndRuns] = useState(0);
   const [finishConfirm, setFinishConfirm] = useState(false);
+  const [fieldDraft, setFieldDraft] = useState(() => {
+    const d = { ...p.defense };
+    delete d.P;
+    return d;
+  });
+  const [oppDraft, setOppDraft] = useState(p.oppLineup);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [pending, start] = useTransition();
@@ -120,7 +127,13 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
   const batterId = p.weBat
     ? (p.lineup[p.batterIdx % p.lineup.length]?.id ?? "")
     : opponentBatterId(p.lastSeq + 1);
-  const batterName = p.weBat ? name(batterId) : `${p.opponent} batter`;
+  const batterName = p.weBat ? name(batterId) : opponentLabel(p, p.oppNext);
+  const first = (id?: string) => (id ? name(id).split(" ")[0] : "");
+  const fielderNames = Object.fromEntries(
+    FIELD_POSITIONS.flatMap((pos) => (p.defense[pos] ? [[pos, first(p.defense[pos])]] : [])),
+  ) as Partial<Record<FieldPos, string>>;
+  const fielderLabel = (pos: FieldPos) =>
+    !p.weBat && fielderNames[pos] ? `${pos} ${fielderNames[pos]}` : pos;
   const summary =
     draft && draft.step === "runners"
       ? resolveRunnerPlay({
@@ -247,7 +260,7 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
   }
   function pickResult(result: Result) {
     if (!draft?.hit) return begin(result, draft?.addPitch);
-    const { contact, location } = draft.details;
+    const { contact, location, fielder } = draft.details;
     setDraft({
       ...draft,
       result,
@@ -256,7 +269,9 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
       details: {
         version: 1,
         moves: proposeMoves(p.bases, batterId, result),
-        ...(isContactResult(result) ? { contact, ...(location ? { location } : {}) } : {}),
+        ...(isContactResult(result)
+          ? { contact, ...(location ? { location } : {}), ...(fielder ? { fielder } : {}) }
+          : {}),
       },
     });
   }
@@ -273,7 +288,12 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
   const chosen = () => (
     <div className={styles.selectedResult}>
       <b>{[resultLabel, hitLabel].filter(Boolean).join(" · ")}</b>
-      {draft?.details.location && <span>↗ {fieldZone(draft.details.location)}</span>}
+      {draft?.details.location && (
+        <span>
+          ↗ {fieldZone(draft.details.location)}
+          {draft.details.fielder ? ` · ${fielderLabel(draft.details.fielder)}` : ""}
+        </span>
+      )}
       <button onClick={back}>← Back</button>
     </div>
   );
@@ -394,9 +414,10 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
           <div className={styles.duel}>
             <div>
               <small>
-                AT BAT{p.weBat ? ` · ${ordinalSlot(p.batterIdx + 1)} in the order` : ""}
+                AT BAT · {ordinalSlot((p.weBat ? p.batterIdx : p.oppNext) + 1)} of{" "}
+                {p.weBat ? p.lineup.length : p.oppLineup.length}
               </small>
-              <b>{p.weBat ? batterName : "Their batter"}</b>
+              <b>{batterName}</b>
               <span aria-live="polite">
                 {p.balls}–{p.strikes} count · {p.atBatPitches} pitch
                 {p.atBatPitches === 1 ? "" : "es"}
@@ -462,17 +483,22 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
                 disabled={locked}
                 choosingLocation={draft?.step === "location"}
                 location={draft?.details.location}
-                onLocation={(location) =>
+                onLocation={(location, fielder) =>
                   setDraft((d) =>
                     d
                       ? {
                           ...d,
                           step: d.hit && !d.result ? "result" : "runners",
-                          details: { ...d.details, location },
+                          details: {
+                            ...d.details,
+                            location,
+                            fielder: fielder ?? nearestFielder(location.x, location.y),
+                          },
                         }
                       : d,
                   )
                 }
+                fielders={p.weBat ? undefined : fielderNames}
                 onBase={runner}
                 provisional={!!draft && draft.step === "runners"}
               />
@@ -841,6 +867,93 @@ export function ScoringWorkspace(p: ScorerProps & { actions: ScoringActions }) {
           ))}
           <button className={styles.secondary} onClick={() => setPanel("tools")}>
             Manage substitutions
+          </button>
+
+          <h3 className={styles.subhead}>On the field</h3>
+          <p className={styles.help}>
+            Who plays where. The mound follows your pitcher; change pitchers under substitutions.
+          </p>
+          <div className={styles.positionGrid}>
+            {FIELD_POSITIONS.filter((pos) => pos !== "P").map((pos) => (
+              <label key={pos}>
+                <b>{pos}</b>
+                <select
+                  aria-label={`Playing ${pos}`}
+                  value={fieldDraft[pos] ?? ""}
+                  onChange={(e) =>
+                    setFieldDraft((d) => {
+                      const next = { ...d };
+                      // One spot per player: moving someone clears their old spot.
+                      for (const k of FIELD_POSITIONS)
+                        if (next[k] === e.target.value) delete next[k];
+                      if (e.target.value) next[pos] = e.target.value;
+                      else delete next[pos];
+                      return next;
+                    })
+                  }
+                >
+                  <option value="">Nobody</option>
+                  {p.roster
+                    .filter((r) => r.id !== p.pitcher?.id)
+                    .map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                </select>
+              </label>
+            ))}
+          </div>
+          <button
+            className={styles.secondary}
+            disabled={locked}
+            onClick={() =>
+              run(
+                () => p.actions.setup({ defense: fieldDraft as Record<string, string> }),
+                "Fielders saved",
+              )
+            }
+          >
+            Save fielders
+          </button>
+
+          <h3 className={styles.subhead}>{p.opponent} · Their order</h3>
+          <p className={styles.help}>
+            Numbers or names are optional. Up next: {opponentLabel(p, p.oppNext)}.
+          </p>
+          <ol className={styles.oppList}>
+            {oppDraft.map((label, i) => (
+              <li key={i}>
+                <span>{i + 1}</span>
+                <input
+                  aria-label={`Their batter ${i + 1}`}
+                  placeholder="#12 or name"
+                  maxLength={24}
+                  value={label}
+                  onChange={(e) =>
+                    setOppDraft((o) => o.map((x, j) => (j === i ? e.target.value : x)))
+                  }
+                />
+              </li>
+            ))}
+          </ol>
+          <div className={styles.segment}>
+            <button disabled={oppDraft.length >= 15} onClick={() => setOppDraft((o) => [...o, ""])}>
+              + Add a batter
+            </button>
+            <button
+              disabled={oppDraft.length <= 1}
+              onClick={() => setOppDraft((o) => o.slice(0, -1))}
+            >
+              − Remove last
+            </button>
+          </div>
+          <button
+            className={styles.secondary}
+            disabled={locked}
+            onClick={() => run(() => p.actions.setup({ oppLineup: oppDraft }), "Their order saved")}
+          >
+            Save their order
           </button>
         </div>
       )}

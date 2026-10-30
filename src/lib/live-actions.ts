@@ -14,7 +14,14 @@ import {
   type Play,
   type Result,
 } from "@/lib/live/engine";
-import { loadPlays, parseLiveState, type LiveState, type LiveSummary } from "@/lib/live/data";
+import {
+  loadPlays,
+  parseDefense,
+  parseLiveState,
+  parseOppLineup,
+  type LiveState,
+  type LiveSummary,
+} from "@/lib/live/data";
 import { updatePitchCount, type PitchKind } from "@/lib/live/pitch-count";
 import {
   defaultRbi,
@@ -129,7 +136,13 @@ async function sync(
 
 export async function startLiveScoring(
   gameId: string,
-  input: { lineup: string[]; pitcherId: string | null; weBatFirst: boolean },
+  input: {
+    lineup: string[];
+    pitcherId: string | null;
+    weBatFirst: boolean;
+    defense?: Record<string, string>;
+    oppLineup?: string[];
+  },
 ): Promise<R> {
   const g = await staffGame(gameId);
   if ("error" in g) return { error: g.error };
@@ -145,7 +158,11 @@ export async function startLiveScoring(
     return { error: "The game has started. Use substitutions to change the lineup or pitcher." };
   }
 
-  const live = emptySetup(lineup, pitcherId, !!input.weBatFirst);
+  const live: LiveState = {
+    ...emptySetup(lineup, pitcherId, !!input.weBatFirst),
+    defense: parseDefense(input.defense),
+    oppLineup: parseOppLineup(input.oppLineup),
+  };
   const { error } = await g.supabase
     .from("games")
     .update({
@@ -172,7 +189,7 @@ export async function recordPitch(gameId: string, kind: PitchKind): Promise<R & 
   if ("error" in update) return update;
   const { live, auto } = update;
   if (auto) {
-    const res = await insertPlay(g, live, { kind: "pa", result: auto });
+    const res = await insertPlay(g, live, { kind: "pa", result: auto }, g.live);
     return { ...res, auto };
   }
   // The existing box-score RPC feeds throwing_logs, so workload updates on
@@ -220,6 +237,8 @@ async function insertPlay(
   g: Exclude<Awaited<ReturnType<typeof staffGame>>, { error: string }>,
   live: LiveState,
   input: PlayInput,
+  /** The count before the pitch that ended the at-bat (automatic walks and strikeouts). */
+  before: LiveState = live,
 ): Promise<R> {
   const plays = await loadPlays(g.supabase, g.game.id);
   const s = situation(live, plays);
@@ -405,6 +424,13 @@ async function insertPlay(
     };
   }
   if (input.kind === "pa" || input.kind === "half_end" || s.outs + Number(row.outs ?? 0) >= 3) {
+    live.restore = {
+      seq,
+      balls: before.balls,
+      strikes: before.strikes,
+      pitches: before.pitches,
+      pitchHistory: before.pitchHistory ?? [],
+    };
     live.balls = 0;
     live.strikes = 0;
     live.pitches = 0;
@@ -421,7 +447,7 @@ export async function undoLastPlay(gameId: string): Promise<R> {
   if (!g.live) return {};
   const { data: last } = await g.supabase
     .from("game_plays")
-    .select("id, kind, slot, pitches, we_bat, outs")
+    .select("id, seq, kind, slot, pitches, we_bat, outs")
     .eq("game_id", gameId)
     .order("seq", { ascending: false })
     .limit(1)
@@ -437,11 +463,38 @@ export async function undoLastPlay(gameId: string): Promise<R> {
   }
   const { error } = await g.supabase.from("game_plays").delete().eq("id", last.id);
   if (error) return { error: error.message };
-  const live = preservesCount
+  // Undo puts the count back to just before the last tap (e.g. 0–2 after undoing a strikeout).
+  const restore = g.live.restore?.seq === last.seq ? g.live.restore : null;
+  const live: LiveState = preservesCount
     ? { ...g.live }
     : pitchingChange
       ? { ...g.live, pitches: last.pitches, pitchHistory: [] }
-      : { ...g.live, balls: 0, strikes: 0, pitches: 0, pitchHistory: [] };
+      : restore
+        ? {
+            ...g.live,
+            balls: restore.balls,
+            strikes: restore.strikes,
+            pitches: restore.pitches,
+            pitchHistory: restore.pitchHistory,
+          }
+        : { ...g.live, balls: 0, strikes: 0, pitches: 0, pitchHistory: [] };
+  delete live.restore;
+  const res = await sync(g.supabase, gameId, live);
+  refresh(gameId);
+  return res;
+}
+
+/** Mid-game fixes that don't change what happened: who's playing where, their batting order. */
+export async function updateGameSetup(
+  gameId: string,
+  input: { defense?: Record<string, string>; oppLineup?: string[] },
+): Promise<R> {
+  const g = await staffGame(gameId);
+  if ("error" in g) return { error: g.error };
+  if (!g.live) return { error: "Set the lineup first." };
+  const live: LiveState = { ...g.live };
+  if (input.defense) live.defense = parseDefense(input.defense);
+  if (input.oppLineup) live.oppLineup = parseOppLineup(input.oppLineup);
   const res = await sync(g.supabase, gameId, live);
   refresh(gameId);
   return res;

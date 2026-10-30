@@ -1,3 +1,4 @@
+import { FIELD_POSITIONS, opponentLabel, opponentOrder } from "@/lib/live/defense";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -115,7 +116,7 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
       <div className="max-w-2xl">
         {header}
         <p className="mb-4 text-sm text-zinc-600">
-          Three quick steps, then tap each pitch and play from the dugout.
+          A few quick steps, then tap each pitch and play from the dugout.
         </p>
         <LineupSetup
           gameId={id}
@@ -123,6 +124,9 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
           defaultLineup={defaultLineup}
           pitchers={pitcherOptions}
           homeAway={game.homeAway}
+          positions={Object.fromEntries(
+            [...posOf].flatMap(([pid, pos]) => (pos ? [[pid, pos]] : [])),
+          )}
         />
       </div>
     );
@@ -135,6 +139,11 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
   const band = birth ? pitchSmartBand(ageOn(birth, game.date)) : null;
   const status = pitchSmartLive(pitches, band);
   const name = (pid: string | null) => (pid ? (names.get(pid) ?? "Player").split(" ")[0] : "—");
+  const opp = opponentOrder(live, plays);
+  // The mound follows pitching changes; everyone else stays where the coach put them.
+  const defense = { ...(live.defense ?? {}), ...(pitcherId ? { P: pitcherId } : {}) };
+  for (const pos of FIELD_POSITIONS)
+    if (pos !== "P" && defense[pos] === pitcherId) delete defense[pos];
 
   return (
     // data-focus: on phones the app menu steps aside while scoring (see globals.css).
@@ -165,13 +174,20 @@ export default async function LiveScoringPage({ params }: PageProps<"/games/[id]
         smart={status && band ? { ...status, ages: band.ages, dailyMax: band.dailyMax } : null}
         hasBirthdate={!!birth}
         roster={roster}
+        defense={defense}
+        oppLineup={Array.from({ length: opp.size }, (_, i) => live.oppLineup?.[i] ?? "")}
+        oppNext={opp.next}
         feed={plays
           .slice(-10)
           .reverse()
           .map((pl) => ({
             seq: pl.seq,
             label: `${pl.half === "top" ? "Top" : "Bot"} ${pl.inning}`,
-            text: describePlay(pl, name),
+            text: describePlay(
+              pl,
+              name,
+              opp.slots.has(pl.seq) ? opponentLabel(live, opp.slots.get(pl.seq)!) : undefined,
+            ),
           }))}
       />
       {batterUp(s) === null && !pitcherId ? (

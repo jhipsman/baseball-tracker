@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { startLiveScoring } from "@/lib/live-actions";
 import type { HomeAway } from "@/lib/games";
 import { cn } from "@/lib/utils";
+import {
+  defaultDefense,
+  FIELD_POSITIONS,
+  preferredSpots,
+  type Defense,
+  type FieldPos,
+} from "@/lib/live/defense";
 
 type P = { id: string; name: string };
 export type PitcherOption = P & {
@@ -62,18 +69,70 @@ export function LineupSetup({
   defaultLineup,
   pitchers,
   homeAway,
+  positions,
 }: {
   gameId: string;
   roster: P[];
   defaultLineup: string[];
   pitchers: PitcherOption[];
   homeAway: HomeAway;
+  /** Roster position per player, to fill the field. */
+  positions: Record<string, string>;
 }) {
   const router = useRouter();
   const [lineup, setLineup] = useState<string[]>(defaultLineup);
   const [pitcher, setPitcher] = useState<string>("");
   const [showAll, setShowAll] = useState(!pitchers.some((p) => p.isPitcher));
   const [weFirst, setWeFirst] = useState(homeAway === "away");
+  const [defense, setDefense] = useState<Defense>(() =>
+    defaultDefense(defaultLineup, null, (id) => positions[id]),
+  );
+  const [oppCount, setOppCount] = useState(9);
+  const [oppNames, setOppNames] = useState<string[]>([]);
+  const posOf = (id: string) => FIELD_POSITIONS.find((pos) => defense[pos] === id) ?? ("" as const);
+  /** Put a player at a spot; whoever had it takes the player's old spot (a swap). */
+  function assign(id: string, pos: FieldPos | "") {
+    setDefense((d) => {
+      const next = { ...d };
+      const old = FIELD_POSITIONS.find((p) => next[p] === id);
+      if (old) delete next[old];
+      if (pos) {
+        const other = next[pos];
+        next[pos] = id;
+        if (other && old) next[old] = other;
+      }
+      return next;
+    });
+  }
+  function pickPitcher(id: string) {
+    setPitcher(id);
+    setDefense((d) => {
+      const next = { ...d };
+      const old = FIELD_POSITIONS.find((p) => next[p] === id);
+      const was = next.P;
+      if (old) delete next[old];
+      next.P = id;
+      // Whoever was pitching takes the new pitcher's spot (or any open one).
+      const spot = old ?? FIELD_POSITIONS.find((p) => !next[p]);
+      if (was && was !== id && spot && lineup.includes(was)) next[spot] = was;
+      return next;
+    });
+  }
+  function addBatter(id: string) {
+    setLineup((l) => [...l, id]);
+    // Fill an open spot (their roster position if it's free).
+    setDefense((d) => {
+      if (FIELD_POSITIONS.some((p) => d[p] === id)) return d;
+      const open =
+        preferredSpots(positions[id]).find((p) => !d[p]) ??
+        FIELD_POSITIONS.find((p) => p !== "P" && !d[p]);
+      return open ? { ...d, [open]: id } : d;
+    });
+  }
+  function removeBatter(id: string) {
+    setLineup((l) => l.filter((x) => x !== id));
+    if (id !== pitcher) assign(id, "");
+  }
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const name = (id: string) => roster.find((p) => p.id === id)?.name ?? "Player";
@@ -115,7 +174,7 @@ export function LineupSetup({
                   name="pitcher"
                   value={p.id}
                   checked={pitcher === p.id}
-                  onChange={() => setPitcher(p.id)}
+                  onChange={() => pickPitcher(p.id)}
                   className="size-5 accent-brand-700"
                 />
                 <span className="min-w-0 flex-1">
@@ -159,8 +218,8 @@ export function LineupSetup({
 
       <Step
         n={2}
-        title="Batting order"
-        hint="Starts from your last game. Use the arrows to reorder."
+        title="Batting order and positions"
+        hint="Starts from your last game. Arrows reorder; pick where each player is on the field."
       >
         {lineup.length === 0 ? (
           <p className="text-sm text-zinc-500">Tap players on the bench to add them in order.</p>
@@ -170,14 +229,27 @@ export function LineupSetup({
             aria-label="Batting order"
           >
             {lineup.map((id, i) => (
-              <li key={id} className="flex items-center gap-2 px-3 py-1.5">
-                <span className="w-6 text-sm font-semibold text-zinc-500">{i + 1}</span>
+              <li key={id} className="flex items-center gap-1 px-2 py-1.5 sm:gap-2 sm:px-3">
+                <span className="w-5 shrink-0 text-sm font-semibold text-zinc-500">{i + 1}</span>
                 <span className="min-w-0 flex-1 truncate font-medium">{name(id)}</span>
+                <select
+                  aria-label={`Position for ${name(id)}`}
+                  value={posOf(id)}
+                  onChange={(e) => assign(id, e.target.value as FieldPos | "")}
+                  className="h-11 w-14 shrink-0 rounded-md bg-surface px-1 text-sm font-semibold ring-1 ring-zinc-300"
+                >
+                  <option value="">—</option>
+                  {FIELD_POSITIONS.map((pos) => (
+                    <option key={pos} value={pos}>
+                      {pos}
+                    </option>
+                  ))}
+                </select>
                 <button
                   type="button"
                   aria-label={`Move ${name(id)} up`}
                   onClick={() => move(i, -1)}
-                  className="size-11 rounded-md text-zinc-600 hover:bg-zinc-100"
+                  className="h-11 w-8 shrink-0 rounded-md text-zinc-600 hover:bg-zinc-100 sm:w-11"
                 >
                   ↑
                 </button>
@@ -185,15 +257,15 @@ export function LineupSetup({
                   type="button"
                   aria-label={`Move ${name(id)} down`}
                   onClick={() => move(i, 1)}
-                  className="size-11 rounded-md text-zinc-600 hover:bg-zinc-100"
+                  className="h-11 w-8 shrink-0 rounded-md text-zinc-600 hover:bg-zinc-100 sm:w-11"
                 >
                   ↓
                 </button>
                 <button
                   type="button"
                   aria-label={`Remove ${name(id)}`}
-                  onClick={() => setLineup((l) => l.filter((x) => x !== id))}
-                  className="size-11 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700"
+                  onClick={() => removeBatter(id)}
+                  className="h-11 w-8 shrink-0 rounded-md text-zinc-500 hover:bg-red-50 hover:text-red-700 sm:w-11"
                 >
                   ✕
                 </button>
@@ -201,6 +273,14 @@ export function LineupSetup({
             ))}
           </ol>
         )}
+        {(() => {
+          const open = FIELD_POSITIONS.filter((pos) => !defense[pos]);
+          return open.length && lineup.length ? (
+            <p className="text-sm text-amber-800">
+              Nobody at {open.join(", ")} yet. That&apos;s fine; set it from the scorer any time.
+            </p>
+          ) : null;
+        })()}
         {bench.length ? (
           <div className="space-y-2">
             <p className="text-xs font-semibold tracking-wide text-zinc-500 uppercase">
@@ -211,7 +291,7 @@ export function LineupSetup({
                 <button
                   key={p.id}
                   type="button"
-                  onClick={() => setLineup((l) => [...l, p.id])}
+                  onClick={() => addBatter(p.id)}
                   className="h-11 rounded-full bg-surface px-4 text-sm font-medium ring-1 ring-zinc-300 hover:bg-zinc-50"
                 >
                   + {p.name}
@@ -258,6 +338,53 @@ export function LineupSetup({
         </fieldset>
       </Step>
 
+      <Step
+        n={4}
+        title="Their lineup (optional)"
+        hint="So each of their hitters gets a spot in the order. Numbers or names are optional."
+      >
+        <label className="flex items-center justify-between gap-3 text-sm font-medium">
+          How many batters do they have?
+          <select
+            value={oppCount}
+            onChange={(e) => setOppCount(Number(e.target.value))}
+            className="h-11 rounded-md bg-surface px-2 ring-1 ring-zinc-300"
+          >
+            {Array.from({ length: 10 }, (_, i) => i + 6).map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+        <details className="group">
+          <summary className="min-h-11 cursor-pointer py-2 text-sm font-semibold text-brand-700">
+            Add their numbers or names
+          </summary>
+          <ol className="grid gap-2 sm:grid-cols-3">
+            {Array.from({ length: oppCount }, (_, i) => (
+              <li key={i} className="flex items-center gap-2">
+                <span className="w-5 text-right text-sm font-semibold text-zinc-500">{i + 1}</span>
+                <input
+                  aria-label={`Their batter ${i + 1}`}
+                  placeholder="#12 or name"
+                  maxLength={24}
+                  value={oppNames[i] ?? ""}
+                  onChange={(e) =>
+                    setOppNames((o) => {
+                      const n = [...o];
+                      n[i] = e.target.value;
+                      return n;
+                    })
+                  }
+                  className="h-11 min-w-0 flex-1 rounded-md bg-surface px-3 text-sm ring-1 ring-zinc-300"
+                />
+              </li>
+            ))}
+          </ol>
+        </details>
+      </Step>
+
       {error ? (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           {error}
@@ -275,6 +402,8 @@ export function LineupSetup({
                 lineup,
                 pitcherId: pitcher || null,
                 weBatFirst: weFirst,
+                defense: defense as Record<string, string>,
+                oppLineup: Array.from({ length: oppCount }, (_, i) => oppNames[i] ?? ""),
               });
               if (res.error) setError(res.error);
               else router.refresh();

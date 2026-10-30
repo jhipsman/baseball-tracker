@@ -1,4 +1,5 @@
 import type { Result } from "./engine";
+import { FIELD_POSITIONS, type FieldPos } from "./defense";
 
 export type Base = 1 | 2 | 3;
 export type Bases = Partial<Record<Base, string>>;
@@ -13,6 +14,8 @@ export type PlayDetails = {
   moves: RunnerMove[];
   contact?: Contact;
   location?: FieldLocation;
+  /** Who fielded it, from where the scorer tapped. */
+  fielder?: FieldPos;
   thirdOut?: "force" | "timing";
   reason?: RunnerReason;
   snapshot?: Bases;
@@ -92,6 +95,10 @@ export function parsePlayDetails(raw: unknown): PlayDetails | null {
     )
       return null;
     details.location = { x: Math.round(p.x * 1000) / 1000, y: Math.round(p.y * 1000) / 1000 };
+  }
+  if (r.fielder !== undefined) {
+    if (!FIELD_POSITIONS.includes(r.fielder as FieldPos)) return null;
+    details.fielder = r.fielder as FieldPos;
   }
   if (r.thirdOut !== undefined) {
     if (r.thirdOut !== "force" && r.thirdOut !== "timing") return null;

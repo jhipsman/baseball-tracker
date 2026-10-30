@@ -4,6 +4,7 @@
  * derived from it, so undo is just dropping the last play.
  */
 import type { Bases, PlayDetails } from "./runners";
+import type { Defense } from "./defense";
 
 export type Half = "top" | "bottom";
 export type PlayKind = "pa" | "steal" | "sub" | "half_end" | "runner" | "bases";
@@ -59,6 +60,20 @@ export type LiveSetup = {
   pitches: number;
   /** Count snapshots for pitches recorded during this pitcher's current at-bat. */
   pitchHistory?: PitchSnapshot[];
+  /** Our fielders by position (the pitcher spot follows the current pitcher). */
+  defense?: Defense;
+  /** Their batting order as the scorer typed it (numbers or names); empty = 9 unnamed spots. */
+  oppLineup?: string[];
+  /** The count just before the last play ended an at-bat, so undo can put it back. */
+  restore?: CountRestore;
+};
+
+export type CountRestore = {
+  seq: number;
+  balls: number;
+  strikes: number;
+  pitches: number;
+  pitchHistory: PitchSnapshot[];
 };
 
 export type PitchSnapshot = { balls: number; strikes: number; pitches: number };
@@ -352,10 +367,17 @@ export function pitchCount(setup: LiveSetup, plays: Play[], pitcherId: string) {
 export const halfLabel = (s: { half: Half; inning: number }) =>
   `${s.half === "top" ? "Top" : "Bottom"} ${s.inning}`;
 
+/** Results where naming the fielder reads naturally ("ground out to SS"). */
+const FIELDED = new Set<Result>(["GO", "FO", "LO", "PO", "E", "FC", "SAC", "SF", "DP"]);
 const LONG = Object.fromEntries(PA_RESULTS.map((r) => [r.key, r.long])) as Record<Result, string>;
 
 /** One-line description of a play for the live feed. */
-export function describePlay(p: Play, name: (id: string | null) => string) {
+export function describePlay(
+  p: Play,
+  name: (id: string | null) => string,
+  /** Their batter's label for this play (lineup spot or what the scorer typed). */
+  opponent?: string,
+) {
   const runs = p.runs ? ` · ${p.runs} run${p.runs === 1 ? "" : "s"} scored` : "";
   if (p.kind === "sub") {
     if (p.slot && p.batterId) return `Lineup: ${name(p.batterId)} now bats ${ordinal(p.slot)}`;
@@ -388,13 +410,17 @@ export function describePlay(p: Play, name: (id: string | null) => string) {
       ? `${name(p.batterId)} caught stealing`
       : `${name(p.batterId)} stole a base`;
   }
-  const what = p.result ? LONG[p.result] : "plate appearance";
+  const fielder =
+    p.details?.fielder && p.result && FIELDED.has(p.result)
+      ? `${p.result === "E" ? " by" : " to"} ${p.details.fielder}`
+      : "";
+  const what = (p.result ? LONG[p.result] : "plate appearance") + fielder;
   if (p.weBat) {
     const rbi = p.rbi ? ` · ${p.rbi} RBI` : "";
     return `${name(p.batterId)}: ${what}${rbi}${runs}`;
   }
   const pc = p.pitches ? ` (${p.pitches} pitch${p.pitches === 1 ? "" : "es"})` : "";
-  return `Their batter: ${what}${pc}${runs}`;
+  return `${opponent ?? "Their batter"}: ${what}${pc}${runs}`;
 }
 
 function ordinal(n: number) {

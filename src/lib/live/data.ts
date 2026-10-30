@@ -1,7 +1,8 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@/types/database";
-import type { Half, LiveSetup, Play, Result } from "./engine";
+import type { CountRestore, Half, LiveSetup, Play, Result } from "./engine";
+import { FIELD_POSITIONS, type Defense } from "./defense";
 import { parsePitchHistory } from "./pitch-count";
 import { parsePlayDetails } from "./runners";
 import { buildSnapshot } from "./snapshot";
@@ -30,6 +31,38 @@ const int = (v: unknown, max: number) => {
   return Number.isInteger(n) && n >= 0 ? Math.min(n, max) : 0;
 };
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Positions → player ids; unknown positions and malformed ids are dropped. */
+export function parseDefense(v: unknown): Defense | undefined {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
+  const d: Defense = {};
+  for (const pos of FIELD_POSITIONS) {
+    const id = (v as Record<string, unknown>)[pos];
+    if (typeof id === "string" && UUID.test(id)) d[pos] = id;
+  }
+  return d;
+}
+
+/** Up to 15 short labels ("#12", "Smith 12"); blanks keep their spot. */
+export function parseOppLineup(v: unknown): string[] | undefined {
+  if (!Array.isArray(v) || !v.length) return undefined;
+  return v.slice(0, 15).map((x) => (typeof x === "string" ? x.trim().slice(0, 24) : ""));
+}
+
+function parseRestore(v: unknown): CountRestore | undefined {
+  if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
+  const r = v as Record<string, unknown>;
+  if (!Number.isInteger(r.seq)) return undefined;
+  return {
+    seq: r.seq as number,
+    balls: int(r.balls, 3),
+    strikes: int(r.strikes, 2),
+    pitches: int(r.pitches, 40),
+    pitchHistory: parsePitchHistory(r.pitchHistory),
+  };
+}
+
 export function parseLiveState(raw: Json | null): LiveState | null {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
   const r = raw as Record<string, unknown>;
@@ -41,6 +74,9 @@ export function parseLiveState(raw: Json | null): LiveState | null {
     strikes: int(r.strikes, 2),
     pitches: int(r.pitches, 40),
     pitchHistory: parsePitchHistory(r.pitchHistory),
+    defense: parseDefense(r.defense),
+    oppLineup: parseOppLineup(r.oppLineup),
+    restore: parseRestore(r.restore),
     summary: (r.summary as LiveSummary | undefined) ?? undefined,
   };
 }

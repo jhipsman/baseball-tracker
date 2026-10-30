@@ -4,6 +4,7 @@
  * with big moments tagged, and every ball put in play with a location.
  * Pure (no data access) so it can be unit tested; see loadLiveSnapshot.
  */
+import { opponentLabel, opponentOrder } from "./defense";
 import {
   describePlay,
   halfLabel,
@@ -105,6 +106,7 @@ export function buildSnapshot(input: {
     !id ? "—" : id.startsWith("opponent:") ? "Opponent" : (names.get(id) ?? "Player");
   const first = (id: string | null) => full(id).split(" ")[0]!;
   const sit = setup ? situation(setup, plays) : null;
+  const opp = opponentOrder(setup, plays);
 
   const bases: LiveSnapshot["bases"] = {};
   if (sit?.basesKnown) {
@@ -126,7 +128,11 @@ export function buildSnapshot(input: {
     .map((p) => ({
       seq: p.seq,
       when: `${p.half === "top" ? "Top" : "Bot"} ${p.inning}`,
-      text: describePlay(p, first),
+      text: describePlay(
+        p,
+        first,
+        opp.slots.has(p.seq) ? opponentLabel(setup, opp.slots.get(p.seq)!) : undefined,
+      ),
       tag: tagFor(p),
       runs: p.runs,
       weBat: p.weBat,
@@ -163,7 +169,13 @@ export function buildSnapshot(input: {
     strikes: setup?.strikes ?? 0,
     weBat: sit?.weBat ?? false,
     bases,
-    batter: sit ? (sit.weBat ? (batterId ? full(batterId) : null) : "Their batter") : null,
+    batter: sit
+      ? sit.weBat
+        ? batterId
+          ? full(batterId)
+          : null
+        : opponentLabel(setup, opp.next)
+      : null,
     pitcher: pitcherId ? full(pitcherId) : null,
     pitcherPitches,
     atBat: pitchChips(setup?.pitchHistory),

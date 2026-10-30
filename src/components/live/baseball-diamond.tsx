@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import type { Base, Bases, FieldLocation } from "@/lib/live/runners";
+import type { FieldPos } from "@/lib/live/defense";
 import { baseLabel } from "@/lib/live/runners";
 import styles from "./scoring-workspace.module.css";
 
@@ -31,16 +32,19 @@ export function BaseballDiamond({
   onBase,
   disabled,
   provisional,
+  fielders,
 }: {
   bases: Bases;
   known: boolean;
   name: (id: string) => string;
   location?: FieldLocation;
   choosingLocation?: boolean;
-  onLocation?: (p: FieldLocation) => void;
+  onLocation?: (p: FieldLocation, fielder?: FieldPos) => void;
   onBase?: (base: Base) => void;
   disabled?: boolean;
   provisional?: boolean;
+  /** Our fielders' names by position, shown when we're in the field. */
+  fielders?: Partial<Record<FieldPos, string>>;
 }) {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   function clickLocation(event: React.MouseEvent<SVGSVGElement>) {
@@ -164,10 +168,24 @@ export function BaseballDiamond({
           className={styles.fielder}
           style={{ left: `${x / 6.4}%`, top: `${y / 5}%` }}
           disabled={!choosingLocation || disabled}
-          onClick={() => onLocation?.({ x: x / 640, y: y / 500 })}
-          aria-label={`Ball fielded at ${position}`}
+          onClick={() => onLocation?.({ x: x / 640, y: y / 500 }, position)}
+          aria-label={`Ball fielded at ${position}${fielders?.[position] ? ` by ${fielders[position]}` : ""}`}
         >
           {position}
+          {fielders?.[position] ? (
+            <span
+              className={styles.fielderName}
+              data-side={
+                position === "1B" || position === "C"
+                  ? "right"
+                  : position === "3B"
+                    ? "left"
+                    : "below"
+              }
+            >
+              {fielders[position]}
+            </span>
+          ) : null}
         </button>
       ))}
       {([1, 2, 3] as Base[]).map((base) => {

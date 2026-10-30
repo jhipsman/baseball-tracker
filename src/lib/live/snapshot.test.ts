@@ -128,7 +128,8 @@ describe("buildSnapshot", () => {
       names,
     });
     expect(opp.bases[1]).toMatchObject({ initials: "OP", name: "Opponent", ours: false });
-    expect(opp.batter).toBe("Their batter");
+    expect(opp.batter).toBe("Batter 2");
+    expect(opp.feed[0].text).toMatch(/^Batter 1: single/);
     expect(opp.pitcher).toBe("Owen Walsh");
   });
 });

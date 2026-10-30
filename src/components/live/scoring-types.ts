@@ -1,4 +1,5 @@
 import type { Bases } from "@/lib/live/runners";
+import type { Defense } from "@/lib/live/defense";
 import type { PitchKind, PlayInput } from "@/lib/live-actions";
 
 export type ScoringPlayer = { id: string; name: string };
@@ -37,10 +38,20 @@ export type ScorerProps = {
   basesKnown: boolean;
   lastSeq: number;
   lineScore: { us: number; them: number }[];
+  /** Our fielders by position (P is the current pitcher). */
+  defense: Defense;
+  /** Their batting order labels; blanks show as "Batter N". */
+  oppLineup: string[];
+  /** Their next batter's spot (0-based). */
+  oppNext: number;
 };
 export type ScoringActions = {
   record: (input: PlayInput) => Promise<{ error?: string }>;
   pitch: (kind: PitchKind) => Promise<{ error?: string }>;
   undo: () => Promise<{ error?: string }>;
   finish: () => Promise<{ error?: string }>;
+  setup: (input: {
+    defense?: Record<string, string>;
+    oppLineup?: string[];
+  }) => Promise<{ error?: string }>;
 };

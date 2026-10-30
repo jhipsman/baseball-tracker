@@ -196,6 +196,27 @@ describe("feed text", () => {
     expect(describePlay(play(false, "pa", { result: "KL", pitches: 6 }), name)).toBe(
       "Their batter: strikeout looking (6 pitches)",
     );
+    expect(
+      describePlay(
+        play(false, "pa", {
+          result: "GO",
+          pitches: 2,
+          details: { version: 1, moves: [], fielder: "SS" },
+        }),
+        name,
+        "#12 Smith",
+      ),
+    ).toBe("#12 Smith: ground out to SS (2 pitches)");
+    expect(
+      describePlay(
+        play(true, "pa", {
+          batterId: A,
+          result: "1B",
+          details: { version: 1, moves: [], fielder: "LF" },
+        }),
+        name,
+      ),
+    ).toBe("Pete: single");
     expect(describePlay(play(true, "sub", { slot: 3, batterId: A }), name)).toBe(
       "Lineup: Pete now bats 3rd",
     );

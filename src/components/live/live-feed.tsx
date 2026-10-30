@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { describePlay, halfLabel } from "@/lib/live/engine";
 import { loadPlayerNames, loadPlays, parseLiveState } from "@/lib/live/data";
+import { opponentLabel, opponentOrder } from "@/lib/live/defense";
 import { cn } from "@/lib/utils";
 
 const firstName = (n: string) => n.split(" ")[0];
@@ -27,6 +28,7 @@ export async function LiveFeed({
   if (!state && plays.length === 0) return null;
   const name = (id: string | null) => (id ? firstName(names.get(id) ?? "Player") : "—");
   const s = state?.summary;
+  const opp = opponentOrder(state, plays);
   const shown = plays
     .filter((p) => p.kind !== "sub" || p.slot || p.pitcherId)
     .slice(-limit)
@@ -75,7 +77,11 @@ export async function LiveFeed({
                   p.runs > 0 && "font-semibold",
                 )}
               >
-                {describePlay(p, name)}
+                {describePlay(
+                  p,
+                  name,
+                  opp.slots.has(p.seq) ? opponentLabel(state, opp.slots.get(p.seq)!) : undefined,
+                )}
               </span>
             </li>
           ))}
