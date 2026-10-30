@@ -211,7 +211,7 @@ export function PracticeBuilder({
 
   return (
     <section aria-label="Practice blocks" className="space-y-3">
-      <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface/95 px-3 py-2 ring-1 ring-zinc-200 backdrop-blur">
+      <div className="sticky top-0 z-20 -mx-1 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-surface-solid/95 px-3 py-2 ring-1 ring-zinc-200 backdrop-blur">
         <p className="text-sm">
           <span className="font-semibold tabular-nums" data-testid="practice-total">
             {formatDuration(total)}

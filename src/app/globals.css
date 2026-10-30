@@ -36,7 +36,7 @@
   --color-brand-900: #054f31;
 
   /* Panels ("bg-surface") sit on the page backdrop; text on brand fills. */
-  --color-surface: rgb(255 255 255 / 0.84);
+  --color-surface: #ffffff;
   --color-surface-solid: #ffffff;
   --color-on-brand: #ffffff;
   --color-backdrop: #eceef1;
@@ -47,8 +47,8 @@
   [data-theme="dark"] {
     color-scheme: dark;
 
-    --color-surface: rgb(27 29 33 / 0.78);
-    --color-surface-solid: #1a1c20;
+    --color-surface: #17191c;
+    --color-surface-solid: #17191c;
     --color-on-brand: #04140b;
     --color-backdrop: #0a0b0d;
 
@@ -115,22 +115,27 @@ html {
 }
 
 /* Stadium-light backdrop: color behind the glass so it has something to bend. */
+/* Soft stadium-light backdrop on its own fixed layer: painted once, not on
+   every scroll frame (fixed body backgrounds repaint and stutter on phones). */
 body {
   color: var(--color-zinc-900);
-  background:
-    radial-gradient(60rem 38rem at -10% -15%, rgb(18 183 106 / 0.16), transparent 60%),
-    radial-gradient(52rem 34rem at 110% -10%, rgb(245 158 11 / 0.11), transparent 60%),
-    radial-gradient(56rem 40rem at 60% 115%, rgb(86 182 242 / 0.1), transparent 60%),
-    var(--color-backdrop);
-  background-attachment: fixed;
+  /* Transparent so the glow layer (z-index -1) shows; <html> holds the color. */
+  background: transparent;
 }
-[data-theme="dark"] body {
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(60rem 38rem at -10% -15%, rgb(61 220 132 / 0.13), transparent 60%),
-    radial-gradient(52rem 34rem at 110% -10%, rgb(245 184 60 / 0.08), transparent 60%),
-    radial-gradient(56rem 40rem at 60% 115%, rgb(86 182 242 / 0.07), transparent 60%),
-    var(--color-backdrop);
-  background-attachment: fixed;
+    radial-gradient(56rem 34rem at -10% -15%, rgb(18 183 106 / 0.1), transparent 60%),
+    radial-gradient(48rem 30rem at 110% -10%, rgb(245 158 11 / 0.07), transparent 60%);
+}
+[data-theme="dark"] body::before {
+  background:
+    radial-gradient(56rem 34rem at -10% -15%, rgb(61 220 132 / 0.09), transparent 60%),
+    radial-gradient(48rem 30rem at 110% -10%, rgb(245 184 60 / 0.05), transparent 60%);
 }
 
 ::selection {
@@ -147,39 +152,37 @@ html {
    above, and a soft lifted shadow. Owns its box-shadow, so don't add ring-*
    or shadow-* utilities to a .glass element. */
 .glass {
-  background-color: rgb(255 255 255 / 0.55);
-  -webkit-backdrop-filter: blur(28px) saturate(1.9) brightness(1.04);
-  backdrop-filter: blur(28px) saturate(1.9) brightness(1.04);
+  background-color: rgb(255 255 255 / 0.68);
+  -webkit-backdrop-filter: blur(20px) saturate(1.5);
+  backdrop-filter: blur(20px) saturate(1.5);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.85),
-    inset 0 -1px 0 0 rgb(255 255 255 / 0.25),
-    inset 0 0 0 1px rgb(255 255 255 / 0.4),
-    0 1px 2px rgb(16 24 20 / 0.06),
-    0 12px 32px -12px rgb(16 24 20 / 0.22);
+    inset 0 1px 0 0 rgb(255 255 255 / 0.8),
+    inset 0 0 0 1px rgb(255 255 255 / 0.35),
+    0 0 0 1px rgb(16 24 20 / 0.04),
+    0 8px 24px -14px rgb(16 24 20 / 0.18);
 }
 [data-theme="dark"] .glass {
-  background-color: rgb(34 37 42 / 0.5);
-  -webkit-backdrop-filter: blur(28px) saturate(1.6);
-  backdrop-filter: blur(28px) saturate(1.6);
+  background-color: rgb(30 32 37 / 0.62);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
   box-shadow:
-    inset 0 1px 0 0 rgb(255 255 255 / 0.16),
-    inset 0 -1px 0 0 rgb(255 255 255 / 0.04),
-    inset 0 0 0 1px rgb(255 255 255 / 0.08),
-    0 16px 40px -12px rgb(0 0 0 / 0.7);
+    inset 0 1px 0 0 rgb(255 255 255 / 0.1),
+    inset 0 0 0 1px rgb(255 255 255 / 0.06),
+    0 10px 28px -14px rgb(0 0 0 / 0.6);
 }
-/* Glass buttons brighten under the pointer. */
-.glass-control:not(:disabled):hover {
-  background-color: rgb(255 255 255 / 0.8);
-}
-[data-theme="dark"] .glass-control:not(:disabled):hover {
-  background-color: rgb(52 56 62 / 0.6);
-}
-
 /* Without blur support, glass falls back to a solid panel (still readable). */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass {
     background-color: var(--color-surface-solid);
   }
+}
+
+/* Hairline panel edges: quieter than a full zinc-200 ring. */
+.bg-surface.ring-zinc-200 {
+  --tw-ring-color: rgb(16 24 20 / 0.07);
+}
+[data-theme="dark"] .bg-surface.ring-zinc-200 {
+  --tw-ring-color: rgb(255 255 255 / 0.07);
 }
 
 /* Panels catch a faint top highlight, like light on a glass edge.
@@ -197,17 +200,15 @@ dialog.bg-surface,
   background-color: var(--color-surface-solid);
 }
 dialog[open] {
-  animation: sheet-in 420ms var(--ease-out-spring) both;
+  animation: sheet-in 300ms var(--ease-out-spring) both;
 }
 dialog[open]::backdrop {
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
   animation: fade-in 240ms ease-out both;
 }
 @keyframes sheet-in {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(0.97);
+    transform: translateY(16px) scale(0.98);
   }
 }
 @keyframes fade-in {
@@ -242,28 +243,26 @@ a.hero:active {
 /* Page changes from the menus: the old page dissolves quickly, the new one
    rises into focus. Set by <PageTransition> + transitionTypes={["nav"]}. */
 ::view-transition-old(.page) {
-  animation: 140ms ease-in both page-out;
+  animation: 100ms ease-in both page-out;
 }
 ::view-transition-new(.page) {
-  animation: 380ms var(--ease-out-spring) 60ms both page-in;
+  animation: 240ms var(--ease-out-spring) both page-in;
 }
 @keyframes page-out {
   to {
     opacity: 0;
-    filter: blur(4px);
   }
 }
 @keyframes page-in {
   from {
     opacity: 0;
-    filter: blur(6px);
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
 }
 
 /* The selected-tab pill glides to the new tab instead of jumping. */
 ::view-transition-group(.pill) {
-  animation-duration: 420ms;
+  animation-duration: 320ms;
   animation-timing-function: var(--ease-out-spring);
 }
 ::view-transition-old(.pill),

@@ -338,7 +338,7 @@ export function WorkoutBuilder({
               + Week
             </button>
           </div>
-          <div className="ml-auto flex items-center gap-1 text-sm">
+          <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1 text-sm">
             <input
               value={week.label}
               onChange={(e) =>
@@ -350,7 +350,7 @@ export function WorkoutBuilder({
               }
               placeholder="Week label (e.g. Deload)"
               aria-label="Week label"
-              className="h-8 w-44 rounded-md border-0 bg-surface px-2 text-sm ring-1 ring-inset ring-zinc-200"
+              className="h-8 w-44 max-w-full min-w-0 rounded-md border-0 bg-surface px-2 text-sm ring-1 ring-inset ring-zinc-200"
             />
             <button
               type="button"

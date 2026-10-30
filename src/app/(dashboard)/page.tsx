@@ -188,7 +188,7 @@ async function DashboardContent({
         </section>
       ) : null}
 
-      <div className="mt-6 grid gap-4 lg:grid-cols-3">
+      <div className="mt-6 grid gap-4 lg:grid-cols-3 [&>*]:min-w-0">
         <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <h2 className="text-sm text-zinc-600">Team compliance, last 7 days</h2>
           <p className="mt-1 text-5xl font-semibold">

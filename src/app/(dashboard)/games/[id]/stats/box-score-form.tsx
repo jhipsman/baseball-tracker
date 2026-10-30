@@ -894,7 +894,7 @@ export function BoxScoreForm({
       </section>
 
       {/* -------------------------------------------------------------- Save */}
-      <div className="sticky bottom-0 -mx-4 space-y-2 border-t border-zinc-200 bg-surface/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
+      <div className="sticky bottom-0 -mx-4 space-y-2 border-t border-zinc-200 bg-surface-solid/95 px-4 py-3 backdrop-blur md:static md:mx-0 md:border-0 md:bg-transparent md:p-0">
         {errList(check.errors)}
         {check.warnings.length ? (
           <ul className="space-y-0.5 text-xs text-amber-800">

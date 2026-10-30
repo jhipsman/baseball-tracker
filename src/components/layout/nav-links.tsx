@@ -37,13 +37,15 @@ export function NavLinks({ items }: { items: NavItem[] }) {
             transitionTypes={NAV}
             className={cn(
               "relative shrink-0 rounded-full px-4 py-2 text-sm font-medium",
-              active ? "text-zinc-50" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
+              active
+                ? "font-semibold text-zinc-950"
+                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
             )}
           >
             {active ? (
               <TabPill
                 name="sidebar-pill"
-                className="absolute inset-0 rounded-full bg-zinc-900 shadow-sm"
+                className="absolute inset-0 rounded-full bg-zinc-900/[0.07]"
               />
             ) : null}
             <span className="relative">{item.label}</span>

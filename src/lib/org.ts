@@ -21,13 +21,21 @@ export async function setActiveOrgCookie(orgId: string) {
   });
 }
 
-/** The signed-in user, or a redirect to /login. Cached per request. */
+/**
+ * The signed-in user, or a redirect to /login. Cached per request.
+ * getClaims() verifies the session token's signature locally (no round trip
+ * to the auth server on every page), falling back to the server when needed.
+ */
 export const requireUser = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
+  if (!claims?.sub) redirect("/login");
+  const user = {
+    id: claims.sub,
+    email: claims.email,
+    user_metadata: (claims.user_metadata ?? {}) as Record<string, unknown>,
+  };
   return { supabase, user };
 });
 
@@ -36,7 +44,9 @@ export const getMemberships = cache(async () => {
   const { supabase, user } = await requireUser();
   const { data, error } = await supabase
     .from("org_memberships")
-    .select("id, role, status, org:organizations (id, name, slug, plan_tier, current_season_phase, modules, team_type)")
+    .select(
+      "id, role, status, org:organizations (id, name, slug, plan_tier, current_season_phase, modules, team_type)",
+    )
     .eq("profile_id", user.id)
     .order("created_at");
   if (error) throw error;

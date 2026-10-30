@@ -385,7 +385,7 @@ function WeekGrid({
       <table className="w-full min-w-[56rem] table-fixed border-collapse text-sm">
         <thead>
           <tr className="border-b border-zinc-200 text-left">
-            <th className="sticky left-0 z-10 w-48 bg-surface px-3 py-2 font-semibold">Player</th>
+            <th className="sticky left-0 z-10 w-48 bg-surface-solid px-3 py-2 font-semibold">Player</th>
             {days.map((d) => (
               <th
                 key={d}
@@ -407,7 +407,7 @@ function WeekGrid({
             <tr className="border-b border-zinc-200 bg-amber-50/40 align-top">
               <th
                 scope="row"
-                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium"
+                className="sticky left-0 z-10 bg-surface-solid px-3 py-2 text-left font-medium"
               >
                 Games & events
               </th>
@@ -443,7 +443,7 @@ function WeekGrid({
             <tr className="border-b border-zinc-200 bg-sky-50/40 align-top">
               <th
                 scope="row"
-                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium"
+                className="sticky left-0 z-10 bg-surface-solid px-3 py-2 text-left font-medium"
               >
                 Practices
               </th>
@@ -469,7 +469,7 @@ function WeekGrid({
               <tr key={p.id} className="border-b border-zinc-100 align-top last:border-0">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-normal"
+                  className="sticky left-0 z-10 bg-surface-solid px-3 py-2 text-left font-normal"
                 >
                   <span className="block truncate font-medium">{p.name}</span>
                   <span className="block text-xs text-zinc-500">

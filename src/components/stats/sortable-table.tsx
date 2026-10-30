@@ -83,7 +83,7 @@ export function SortableTable({
               <th
                 scope="col"
                 aria-sort={aria("name")}
-                className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium sm:px-4"
+                className="sticky left-0 z-10 bg-surface-solid px-3 py-2 text-left font-medium sm:px-4"
               >
                 <button
                   type="button"
@@ -129,7 +129,9 @@ export function SortableTable({
                   scope="row"
                   className={cn(
                     "sticky left-0 z-10 max-w-40 truncate px-3 py-2 text-left font-medium sm:px-4",
-                    r.highlight ? "bg-brand-50" : "bg-surface",
+                    r.highlight
+                      ? "bg-[color-mix(in_oklab,var(--color-brand-500)_10%,var(--color-surface-solid))]"
+                      : "bg-surface-solid",
                   )}
                 >
                   {r.href ? (
@@ -160,7 +162,7 @@ export function SortableTable({
               <tr className="border-t border-zinc-300 font-semibold">
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 bg-surface px-3 py-2 text-left sm:px-4"
+                  className="sticky left-0 z-10 bg-surface-solid px-3 py-2 text-left sm:px-4"
                 >
                   Team
                 </th>

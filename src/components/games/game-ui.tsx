@@ -246,7 +246,7 @@ export function LineScoreTable({
       >
         <thead>
           <tr className="border-b border-zinc-200 text-xs text-zinc-500">
-            <th className="sticky left-0 bg-surface px-3 py-2 text-left font-medium">Team</th>
+            <th className="sticky left-0 bg-surface-solid px-3 py-2 text-left font-medium">Team</th>
             {line.map((_, i) => (
               <th
                 key={i}
@@ -271,7 +271,7 @@ export function LineScoreTable({
             <tr key={side} className="border-b border-zinc-100 last:border-0">
               <th
                 scope="row"
-                className="sticky left-0 max-w-24 truncate bg-surface px-3 py-2 text-left font-medium sm:max-w-40"
+                className="sticky left-0 max-w-24 truncate bg-surface-solid px-3 py-2 text-left font-medium sm:max-w-40"
               >
                 {name}
               </th>

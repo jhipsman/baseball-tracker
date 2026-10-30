@@ -31,7 +31,7 @@ export default async function NotificationsPage() {
 
   return (
     <div className="flex min-h-full flex-1 flex-col bg-zinc-50">
-      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-surface/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-zinc-200 bg-surface-solid/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-xl items-center gap-2 px-4">
           <Link
             href={home}

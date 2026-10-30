@@ -576,7 +576,7 @@ export function LogForm({
         </p>
       ) : null}
 
-      <div className="sticky bottom-20 z-10 space-y-2 rounded-2xl bg-surface/95 p-3 shadow-lg ring-1 ring-zinc-200 backdrop-blur">
+      <div className="sticky bottom-20 z-10 space-y-2 rounded-2xl bg-surface-solid/95 p-3 shadow-lg ring-1 ring-zinc-200 backdrop-blur">
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium">
             {total > 0 ? `${done}/${total} sets done` : "Session"}

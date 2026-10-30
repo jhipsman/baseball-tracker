@@ -69,7 +69,7 @@ export function TabBar({
                 {active ? (
                   <TabPill
                     name={`tabbar-pill`}
-                    className="absolute inset-0 rounded-full bg-zinc-900/[0.07] dark:bg-white/10"
+                    className="absolute inset-0 rounded-full bg-zinc-900/[0.07]"
                   />
                 ) : null}
                 <svg

@@ -179,7 +179,7 @@ export default async function PlayerProfilePage({
         </a>
       ) : null}
 
-      <dl className="grid gap-3 sm:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           { label: "Compliance, 7 days", value: pct(c7), sub: `${c7.logged}/${c7.due} logged` },
           {

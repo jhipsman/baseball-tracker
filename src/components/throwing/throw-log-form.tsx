@@ -224,7 +224,7 @@ export function ThrowLogForm({
 
           <fieldset>
             <legend className="text-sm font-medium text-zinc-800">Intensity</legend>
-            <div className="mt-2 grid grid-cols-4 gap-2">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               {INTENSITIES.map((i) => (
                 <button
                   key={i.key}
