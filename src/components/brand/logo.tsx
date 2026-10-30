@@ -1,3 +1,4 @@
+import { BRAND } from "@/constants/brand";
 import { cn } from "@/lib/utils";
 
 /**
@@ -23,5 +24,17 @@ export function LogoMark({ className }: { className?: string }) {
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+/** The mark with the "9D" wordmark (Barlow Condensed Italic). */
+export function Logo({ className, markClassName }: { className?: string; markClassName?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-2", className)}>
+      <LogoMark className={cn("size-8 text-brand-600", markClassName)} />
+      <span className="font-wordmark text-[1.9em] leading-none tracking-tight italic">
+        {BRAND.name}
+      </span>
+    </span>
   );
 }

@@ -1,10 +1,18 @@
 import type { Metadata, Viewport } from "next";
 import { BRAND } from "@/constants/brand";
-import { Manrope } from "next/font/google";
+import { Barlow_Condensed, Manrope } from "next/font/google";
 import { THEME_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const display = Manrope({ subsets: ["latin"], variable: "--font-display", display: "swap" });
+// Only for the 9D wordmark.
+const wordmark = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: "700",
+  style: "italic",
+  variable: "--font-wordmark-face",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: { default: BRAND.name, template: `%s · ${BRAND.name}` },
@@ -25,7 +33,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // The theme script sets data-theme before React loads.
-    <html lang="en" className={`h-full antialiased ${display.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`h-full antialiased ${display.variable} ${wordmark.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
