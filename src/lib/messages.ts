@@ -107,7 +107,7 @@ export async function loadAnnouncements(
   const { data, error } = await supabase
     .from("announcements")
     .select(
-      "id, title, body, pinned, include_parents, created_at, group_id, group:player_groups (name), author:profiles!announcements_author_id_fkey (full_name, email)",
+      "id, title, body, pinned, include_parents, created_at, group_id, recipient_ids, group:player_groups (name), author:profiles!announcements_author_id_fkey (full_name, email)",
     )
     .eq("org_id", orgId)
     .order("pinned", { ascending: false })
@@ -169,7 +169,9 @@ export async function loadAnnouncements(
       read: seenBefore.has(a.id),
     };
     if (opts.staff && dir) {
-      const aud = audience(a.group_id, a.include_parents);
+      const aud = a.recipient_ids
+        ? new Set(a.recipient_ids)
+        : audience(a.group_id, a.include_parents);
       item.audienceSize = aud.size;
       item.readCount = [...who].filter((id) => aud.has(id)).length;
     }

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   blockTimes,
   formatDuration,
@@ -15,6 +16,25 @@ export function PracticeMeta({ plan }: { plan: PracticePlan }) {
   const range = practiceRange(plan.startTime, total);
   return (
     <dl className="mt-2 grid gap-1 text-sm text-zinc-700">
+      {plan.canceled && (
+        <div className="text-red-800">
+          <dt className="sr-only">Status</dt>
+          <dd>Canceled</dd>
+        </div>
+      )}
+      {!plan.isTemplate && (
+        <div>
+          <dt className="sr-only">Attendance</dt>
+          <dd>
+            <Link
+              href={`/events/practice/${plan.id}`}
+              className="inline-flex min-h-11 items-center font-semibold text-brand-700"
+            >
+              RSVP & attendance →
+            </Link>
+          </dd>
+        </div>
+      )}
       {plan.date ? (
         <div className="flex gap-2">
           <dt className="sr-only">Date</dt>

@@ -97,6 +97,21 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         <ChildSwitcher kids={kids} selected={child} basePath="/parent" />
       </div>
 
+      <div className="flex flex-wrap gap-3">
+        <Link
+          href="/events"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+        >
+          Team activities & RSVPs →
+        </Link>
+        <Link
+          href="/payments"
+          className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+        >
+          Team payments →
+        </Link>
+      </div>
+
       {has("games") && nextGame ? (
         <NextGameCard game={nextGame} today={today} href={href(`/parent/games/${nextGame.id}`)} />
       ) : null}

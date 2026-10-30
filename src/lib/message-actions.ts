@@ -1,5 +1,6 @@
 "use server";
 
+import { audienceFingerprint } from "@/lib/announcement-audience";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
@@ -40,8 +41,22 @@ export async function postAnnouncement(
   if (!body) return { error: "Write the announcement." };
   if (audience !== "team" && !UUID.test(audience)) return { error: "Choose who it's for." };
 
+  const { data: recipients, error: audienceError } = await supabase.rpc("announcement_recipients", {
+    p_org: org.id,
+    p_group: audience === "team" ? null : audience,
+    p_parents: formData.get("include_parents") === "on",
+    p_scope: String(formData.get("scope") ?? "audience"),
+  });
+  if (audienceError || !recipients?.length)
+    return { error: "No recipients match this audience. Check the group and parent selection." };
+  if (recipients.length > 500) return { error: "Choose a smaller group (up to 500 recipients)." };
+  const recipientIds = recipients.map((r) => r.profile_id);
+  if (audienceFingerprint(recipientIds) !== formData.get("audience_fingerprint"))
+    return { error: "Review the recipients again before posting; the audience may have changed." };
   const { error } = await supabase.from("announcements").insert({
     org_id: org.id,
+    recipient_ids: recipientIds,
+    audience_scope: String(formData.get("scope") ?? "audience"),
     author_id: user.id,
     group_id: audience === "team" ? null : audience,
     title,
@@ -49,7 +64,8 @@ export async function postAnnouncement(
     include_parents: formData.get("include_parents") === "on",
     pinned: formData.get("pinned") === "on",
   });
-  if (error) return { error: error.message };
+  if (error)
+    return { error: "The announcement did not post. Your text is still here; please try again." };
   pushSoon();
   refreshInboxes();
   return { message: "Announcement posted.", ok: Date.now() };
@@ -121,4 +137,65 @@ export async function sendMessage(
   pushSoon();
   refreshInboxes(threadId);
   return { ok: Date.now() };
+}
+
+export async function previewAnnouncement(input: {
+  audience: string;
+  parents: boolean;
+  scope: string;
+}): Promise<{
+  error?: string;
+  fingerprint?: string;
+  recipients?: { profile_id: string; display_name: string }[];
+}> {
+  const { supabase, org, isStaff } = await requireActiveOrg();
+  if (
+    !isStaff ||
+    !input ||
+    (input.audience !== "team" && !UUID.test(input.audience)) ||
+    typeof input.parents !== "boolean" ||
+    !["audience", "overdue"].includes(input.scope)
+  )
+    return { error: "Choose who should see this announcement." };
+  const { data, error } = await supabase.rpc("announcement_recipients", {
+    p_org: org.id,
+    p_group: input.audience === "team" ? null : input.audience,
+    p_parents: input.parents,
+    p_scope: input.scope,
+  });
+  if (error)
+    return { error: "This audience could not be loaded. Only admins can select overdue payers." };
+  if (!data?.length) return { error: "No recipients match this audience." };
+  if (data.length > 500) return { error: "Choose a smaller group (up to 500 recipients)." };
+  return { fingerprint: audienceFingerprint(data.map((r) => r.profile_id)), recipients: data };
+}
+export async function saveMessageTemplate(input: {
+  title: string;
+  body: string;
+}): Promise<{ error?: string; id?: string }> {
+  const { supabase, org, user, isStaff } = await requireActiveOrg();
+  if (!isStaff) return { error: "Only staff can save templates." };
+  if (
+    !input ||
+    typeof input.title !== "string" ||
+    typeof input.body !== "string" ||
+    !input.title.trim() ||
+    !input.body.trim() ||
+    input.title.length > 140 ||
+    input.body.length > 5000
+  )
+    return { error: "Write a title and message before saving a template." };
+  const { data, error } = await supabase
+    .from("message_templates")
+    .insert({
+      org_id: org.id,
+      title: input.title.trim(),
+      body: input.body.trim(),
+      created_by: user.id,
+    })
+    .select("id")
+    .single();
+  if (error) return { error: "Template could not be saved. Please try again." };
+  revalidatePath("/messages");
+  return { id: data.id };
 }

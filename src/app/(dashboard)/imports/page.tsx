@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
+import { ImportedPlayerLink } from "./player-link";
 import { ImportWizard } from "./wizard";
 export const metadata = { title: "Bring your team over" };
 export default async function ImportsPage() {
@@ -8,10 +9,23 @@ export default async function ImportsPage() {
   if (membership.role !== "admin") redirect("/");
   const { data, error } = await supabase
     .from("team_import_rows")
-    .select("id,kind,source,season,values,created_at")
+    .select("id,kind,source,season,values,created_at,player_id")
     .eq("org_id", org.id)
     .order("created_at", { ascending: false })
     .limit(100);
+  const { data: roster } = await supabase
+    .from("org_memberships")
+    .select("profile_id,profile:profiles(full_name,email)")
+    .eq("org_id", org.id)
+    .eq("role", "player");
+  const { data: groups } = await supabase
+    .from("player_groups")
+    .select("id,name")
+    .eq("org_id", org.id);
+  const players = (roster ?? []).map((r) => ({
+    id: r.profile_id,
+    name: r.profile.full_name || r.profile.email,
+  }));
   return (
     <div className="max-w-5xl space-y-6">
       <header>
@@ -22,7 +36,7 @@ export default async function ImportsPage() {
           export from the app you use today.
         </p>
       </header>
-      <ImportWizard />
+      <ImportWizard groups={groups ?? []} />
       <section className="rounded-xl border border-zinc-200 bg-surface p-5">
         <h2 className="font-semibold">Imported data</h2>
         <p className="mt-2 text-sm text-zinc-600">
@@ -30,7 +44,8 @@ export default async function ImportsPage() {
           <Link className="text-brand-700 underline" href="/games">
             Games
           </Link>
-          . Imported players stay here without creating accounts or sending invitations. Historical
+          . Imported players can be linked to roster accounts below; linking also attaches matching
+          historical snapshots. It does not create an account or send an invitation. Historical
           stats remain source snapshots, separate from live season totals. Use{" "}
           <Link className="text-brand-700 underline" href="/roster">
             Roster
@@ -51,6 +66,7 @@ export default async function ImportsPage() {
                   <th className="p-2">Type</th>
                   <th className="p-2">Season · source</th>
                   <th className="p-2">Imported values</th>
+                  <th className="p-2">Roster link</th>
                 </tr>
               </thead>
               <tbody>
@@ -68,6 +84,19 @@ export default async function ImportsPage() {
                           .filter(([key]) => !["name", "opponent", "email"].includes(key))
                           .map(([key, value]) => `${key}: ${value}`)
                           .join(" · ")}
+                      </td>
+                      <td className="p-2">
+                        {row.kind === "roster" ? (
+                          <ImportedPlayerLink
+                            rowId={row.id}
+                            linked={row.player_id}
+                            players={players}
+                          />
+                        ) : row.player_id ? (
+                          "Linked"
+                        ) : (
+                          "—"
+                        )}
                       </td>
                     </tr>
                   );

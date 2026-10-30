@@ -65,6 +65,12 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
         aria-label="My records"
         className="divide-y divide-zinc-100 rounded-2xl bg-surface ring-1 ring-zinc-200"
       >
+        <MeLink href="/events" hint="Respond to games, practices, and team events">
+          Team activities & RSVPs →
+        </MeLink>
+        <MeLink href="/payments" hint="Your installments, invoices, and receipts">
+          Team payments →
+        </MeLink>
         <MeLink href="/player/history" hint="Every workout you've logged">
           Workout history →
         </MeLink>

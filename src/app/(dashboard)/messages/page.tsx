@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = { title: "Messages" };
 
 export default async function MessagesPage({ searchParams }: PageProps<"/messages">) {
-  const { supabase, user, org, isStaff } = await requireActiveOrg();
+  const { supabase, user, org, isStaff, membership } = await requireActiveOrg();
   const sp = await searchParams;
   const highlight = typeof sp.a === "string" ? sp.a : undefined;
   if (!isStaff)
@@ -27,9 +27,15 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
   const { tz: rawTz } = await playerToday();
   const tz = rawTz ? decodeURIComponent(rawTz) : undefined;
   const dir = await loadDirectory(supabase, org.id);
-  const [threads, announcements] = await Promise.all([
+  const [threads, announcements, { data: templates }] = await Promise.all([
     loadThreads(supabase, org.id, user.id, dir),
     loadAnnouncements(supabase, org.id, user.id, { staff: true, directory: dir }),
+    supabase
+      .from("message_templates")
+      .select("id,title,body")
+      .eq("org_id", org.id)
+      .order("created_at", { ascending: false })
+      .limit(100),
   ]);
   const unread = threads.filter((t) => t.unread).length;
 
@@ -88,7 +94,11 @@ export default async function MessagesPage({ searchParams }: PageProps<"/message
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <aside className="h-fit rounded-xl bg-surface p-4 ring-1 ring-zinc-200 lg:col-start-2 lg:row-start-1">
             <h2 className="mb-3 font-semibold">New announcement</h2>
-            <AnnouncementForm groups={dir.groups} />
+            <AnnouncementForm
+              groups={dir.groups}
+              templates={templates ?? []}
+              isAdmin={membership.role === "admin"}
+            />
           </aside>
           <section className="min-w-0 space-y-3 lg:col-start-1 lg:row-start-1">
             <h2 className="font-semibold">Announcements</h2>

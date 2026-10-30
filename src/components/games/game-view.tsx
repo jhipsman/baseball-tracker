@@ -61,6 +61,12 @@ export function GameView({
       </div>
 
       <OffBanner status={g.status} />
+      <Link
+        href={`/events/game/${g.id}`}
+        className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+      >
+        RSVP & attendance →
+      </Link>
 
       {showScore && g.teamScore != null && g.opponentScore != null ? (
         <section className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">

@@ -15,13 +15,17 @@ const SOURCES: { id: ImportSource; title: string; detail: string }[] = [
   { id: "sheets", title: "Google Sheets", detail: "Download a sheet as CSV or Excel" },
   { id: "excel", title: "Excel", detail: "Upload an .xlsx workbook or CSV" },
   { id: "gamechanger", title: "GameChanger", detail: "Upload an available CSV / Excel export" },
+  { id: "leagueapps", title: "LeagueApps", detail: "Upload a CSV or Excel export" },
   { id: "other", title: "Another app", detail: "Use its spreadsheet export" },
 ];
-export function ImportWizard() {
+export function ImportWizard({ groups = [] }: { groups?: { id: string; name: string }[] }) {
   const [source, setSource] = useState<ImportSource>("sheets");
   const [kind, setKind] = useState<ImportKind>("roster");
   const [category, setCategory] = useState("batting");
   const [season, setSeason] = useState(String(new Date().getFullYear()));
+  const [overrides, setOverrides] = useState<Record<number, Record<string, string>>>({});
+  const [onlyErrors, setOnlyErrors] = useState(false);
+  const [reviewPage, setReviewPage] = useState(0);
   const [grid, setGrid] = useState<string[][]>([]);
   const [sheets, setSheets] = useState<{ sheet: string }[]>([]);
   const [sheet, setSheet] = useState(1);
@@ -33,12 +37,45 @@ export function ImportWizard() {
   const [reading, setReading] = useState(false);
   const [pending, start] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
-  const rows = grid.length
-    ? mapRows(grid, mapping).map((row) =>
-        kind === "stats" ? { ...row, category: row.category || category } : row,
+  const rows: Record<string, string>[] = grid.length
+    ? mapRows(grid, mapping).map((row, index) =>
+        kind === "stats"
+          ? { ...row, category: row.category || category, ...overrides[index] }
+          : { ...row, ...overrides[index] },
       )
     : [];
-  const checked = validateRows(kind, rows, season);
+  const checkedBase = validateRows(kind, rows, season);
+  const checked = {
+    ...checkedBase,
+    errors: [
+      ...checkedBase.errors,
+      ...(kind === "schedule"
+        ? rows.flatMap((row, index) =>
+            row.group?.trim() &&
+            groups.filter((g) => g.name.trim().toLowerCase() === row.group.trim().toLowerCase())
+              .length !== 1
+              ? [
+                  `Row ${index + 2}: Choose an existing team / roster group, or leave it empty for the whole team.`,
+                ]
+              : [],
+          )
+        : []),
+    ],
+  };
+  const errorRows = new Set(
+    checked.errors.flatMap((e) => {
+      const m = e.match(/^Row (\d+):/);
+      return m ? [Number(m[1]) - 2] : [];
+    }),
+  );
+  const reviewRows = rows
+    .map((values, index) => ({ values, index }))
+    .filter((r) => !onlyErrors || errorRows.has(r.index));
+
+  const currentReviewPage = Math.min(
+    reviewPage,
+    Math.max(0, Math.ceil(reviewRows.length / 50) - 1),
+  );
   const cls = "rounded-lg border border-zinc-300 bg-surface px-3 py-2 text-sm";
   const primary =
     "rounded-lg bg-brand-700 px-5 py-3 text-sm font-semibold text-on-brand disabled:opacity-40";
@@ -72,6 +109,9 @@ export function ImportWizard() {
       setFile(next);
       setSheet(sheetNumber);
       setGrid(cells);
+      setOverrides({});
+      setReviewPage(0);
+      setOnlyErrors(false);
       setMapping(guessMapping(cells[0], kind));
       setStage("map");
     } catch (e) {
@@ -237,7 +277,10 @@ export function ImportWizard() {
                 <select
                   className={cls}
                   value={mapping[c.key] ?? -1}
-                  onChange={(e) => setMapping((m) => ({ ...m, [c.key]: Number(e.target.value) }))}
+                  onChange={(e) => {
+                    setMapping((m) => ({ ...m, [c.key]: Number(e.target.value) }));
+                    setOverrides({});
+                  }}
                 >
                   <option value={-1}>Don’t import</option>
                   {grid[0]?.map((h, i) => (
@@ -300,6 +343,26 @@ export function ImportWizard() {
               {checked.errors.length > 20 && <p>Showing the first 20 issues.</p>}
             </div>
           )}
+          <datalist id="import-group-names">
+            {groups.map((g) => (
+              <option key={g.id} value={g.name} />
+            ))}
+          </datalist>
+          <label className="mt-4 flex min-h-11 items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={onlyErrors}
+              onChange={(e) => {
+                setOnlyErrors(e.target.checked);
+                setReviewPage(0);
+              }}
+            />
+            Show only rows with errors
+          </label>
+          <p className="mt-2 text-xs text-zinc-600">
+            Edit cells below to fix the import. Dates use YYYY-MM-DD or M/D/YYYY. Changes are
+            validated as you type.
+          </p>
           <div className="my-5 max-h-80 overflow-auto rounded-lg border border-zinc-200">
             <table className="w-full text-left text-xs">
               <thead>
@@ -316,26 +379,61 @@ export function ImportWizard() {
                 </tr>
               </thead>
               <tbody>
-                {checked.rows.slice(0, 50).map((row, i) => (
-                  <tr className="border-t border-zinc-100" key={i}>
-                    {COLUMNS[kind]
-                      .filter(
-                        (c) =>
-                          (mapping[c.key] ?? -1) >= 0 || (kind === "roster" && c.key === "name"),
-                      )
-                      .map((c) => (
-                        <td className="p-3 whitespace-nowrap" key={c.key}>
-                          {row.values[c.key] || "—"}
-                        </td>
-                      ))}
-                  </tr>
-                ))}
+                {reviewRows
+                  .slice(currentReviewPage * 50, (currentReviewPage + 1) * 50)
+                  .map((row) => (
+                    <tr className="border-t border-zinc-100" key={row.index}>
+                      {COLUMNS[kind]
+                        .filter(
+                          (c) =>
+                            (mapping[c.key] ?? -1) >= 0 || (kind === "roster" && c.key === "name"),
+                        )
+                        .map((c) => (
+                          <td className="p-3 whitespace-nowrap" key={c.key}>
+                            <input
+                              aria-label={`${c.label}, row ${row.index + 2}`}
+                              aria-invalid={errorRows.has(row.index)}
+                              disabled={pending}
+                              list={c.key === "group" ? "import-group-names" : undefined}
+                              value={row.values[c.key] ?? ""}
+                              onChange={(e) =>
+                                setOverrides((v) => ({
+                                  ...v,
+                                  [row.index]: { ...v[row.index], [c.key]: e.target.value },
+                                }))
+                              }
+                              className="h-11 min-w-28 max-w-48 rounded bg-surface px-2 ring-1 ring-zinc-200"
+                            />
+                          </td>
+                        ))}
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
+          <div className="my-3 flex items-center gap-3">
+            <button
+              className={cls}
+              disabled={currentReviewPage === 0}
+              onClick={() => setReviewPage(currentReviewPage - 1)}
+            >
+              Previous rows
+            </button>
+            <span className="text-xs text-zinc-600">
+              Rows {reviewRows.length ? currentReviewPage * 50 + 1 : 0}–
+              {Math.min(reviewRows.length, (currentReviewPage + 1) * 50)} of {reviewRows.length}
+            </span>
+            <button
+              className={cls}
+              disabled={(currentReviewPage + 1) * 50 >= reviewRows.length}
+              onClick={() => setReviewPage(currentReviewPage + 1)}
+            >
+              Next rows
+            </button>
+          </div>
           <p className="text-xs leading-5 text-zinc-500">
-            Showing up to 50 rows. Existing imports with the same player/game and season will be
-            skipped, never overwritten.{" "}
+            Showing up to 50 rows per page. Existing imports with the same player/game and season
+            will be skipped, never overwritten.{" "}
             {kind === "roster"
               ? "Players will be saved in Imported data; no accounts or invitations are created."
               : kind === "stats"

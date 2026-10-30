@@ -14,7 +14,8 @@
     "db:reset": "supabase db reset",
     "db:types": "node scripts/gen-types.mjs",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:db": "node scripts/check-team-operations.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.131.0",
@@ -28,9 +29,11 @@
     "react-dom": "19.2.8",
     "read-excel-file": "^9.3.14",
     "server-only": "^0.0.1",
+    "stripe": "^23.1.0",
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.13",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.5",
     "@types/react": "^19",

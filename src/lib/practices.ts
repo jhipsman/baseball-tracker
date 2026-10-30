@@ -67,6 +67,7 @@ export type PracticePlan = {
   location: string | null;
   notes: string | null;
   published: boolean;
+  canceled?: boolean;
   groupId: string | null;
   groupName: string | null;
   blocks: PracticeBlock[];
@@ -214,7 +215,7 @@ export function formatPracticeDate(date: string, opts?: Intl.DateTimeFormatOptio
 type Client = SupabaseClient<Database>;
 
 const SUMMARY_COLUMNS =
-  "id, title, is_template, date, start_time, location, published, group_id, group:player_groups (name), practice_blocks (duration_min)";
+  "id, title, is_template, date, start_time, location, published, canceled, group_id, group:player_groups (name), practice_blocks (duration_min)";
 
 type SummaryRow = {
   id: string;
@@ -224,6 +225,7 @@ type SummaryRow = {
   start_time: string | null;
   location: string | null;
   published: boolean;
+  canceled?: boolean;
   group_id: string | null;
   group: { name: string } | null;
   practice_blocks: { duration_min: number }[];
@@ -238,6 +240,7 @@ function toSummary(r: SummaryRow): PracticeSummary {
     startTime: r.start_time,
     location: r.location,
     published: r.published,
+    canceled: r.canceled ?? false,
     groupId: r.group_id,
     groupName: r.group?.name ?? null,
     blockCount: r.practice_blocks.length,
@@ -264,7 +267,7 @@ export async function loadPractices(
     .eq("is_template", false);
   if (from) q = q.gte("date", from);
   if (to) q = q.lte("date", to);
-  if (opts.publishedOnly) q = q.eq("published", true);
+  if (opts.publishedOnly) q = q.eq("published", true).eq("canceled", false);
   const asc = !opts.descending;
   q = q.order("date", { ascending: asc }).order("start_time", { ascending: asc, nullsFirst: asc });
   if (opts.limit) q = q.limit(opts.limit);
@@ -299,7 +302,7 @@ export async function loadPractice(supabase: Client, id: string): Promise<Practi
   const { data, error } = await supabase
     .from("practice_plans")
     .select(
-      `id, org_id, title, is_template, date, start_time, location, notes, published, group_id,
+      `id, org_id, title, is_template, date, start_time, location, notes, published, canceled, group_id,
        group:player_groups (name),
        practice_blocks (id, sort_order, kind, title, duration_min, details, stations)`,
     )
@@ -317,6 +320,7 @@ export async function loadPractice(supabase: Client, id: string): Promise<Practi
     location: data.location,
     notes: data.notes,
     published: data.published,
+    canceled: data.canceled,
     groupId: data.group_id,
     groupName: data.group?.name ?? null,
     blocks: data.practice_blocks

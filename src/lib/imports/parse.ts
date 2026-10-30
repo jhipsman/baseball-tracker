@@ -1,5 +1,5 @@
 export type ImportKind = "roster" | "schedule" | "stats";
-export type ImportSource = "sheets" | "excel" | "gamechanger" | "other";
+export type ImportSource = "sheets" | "excel" | "gamechanger" | "leagueapps" | "other";
 export type ImportRow = { key: string; values: Record<string, string> };
 export type Column = { key: string; label: string; aliases: string[]; required?: boolean };
 export const COLUMNS: Record<ImportKind, Column[]> = {
@@ -30,6 +30,11 @@ export const COLUMNS: Record<ImportKind, Column[]> = {
     },
   ],
   schedule: [
+    {
+      key: "group",
+      label: "Team / roster group (optional)",
+      aliases: ["group", "group name", "team", "team name"],
+    },
     {
       key: "opponent",
       label: "Opponent",
@@ -212,7 +217,7 @@ export function validateRows(
         : ["n", "neutral"].includes(ha)
           ? "neutral"
           : "home";
-      key = `${norm(v.opponent ?? "")}|${v.date}|${v.time}|${v.home_away}`;
+      key = `${norm(v.opponent ?? "")}|${v.date}|${v.time}|${v.home_away}|${(v.group ?? "").trim().toLowerCase()}`;
     } else {
       if (kind === "roster" && !v.name)
         v.name = [v.first_name, v.last_name].filter(Boolean).join(" ");

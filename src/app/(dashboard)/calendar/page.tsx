@@ -18,6 +18,8 @@ import {
   type Game,
   type Tournament,
 } from "@/lib/games";
+import { loadActivities, type Activity } from "@/lib/team-schedule";
+import { buttonClass } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Calendar" };
@@ -61,11 +63,12 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const from = view === "week" ? weekStartOf(anchor) : weekStartOf(monthStart);
   const to = view === "week" ? addDays(from, 6) : addDays(from, 41);
 
-  const [team, allPractices, allGames, allTournaments] = await Promise.all([
+  const [team, allPractices, allGames, allTournaments, allActivities] = await Promise.all([
     loadTeam(supabase, org.id, from, to, today),
     hasModule(org.modules, "practices") ? loadPractices(supabase, org.id, from, to) : [],
     hasModule(org.modules, "games") ? loadGames(supabase, org.id, from, to) : [],
     hasModule(org.modules, "games") ? loadTournaments(supabase, org.id, { from, to }) : [],
+    loadActivities(supabase, org.id, from, to),
   ]);
   const groups = team.groups;
 
@@ -78,7 +81,13 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const practices = allPractices.filter((p) => !group || !p.groupId || p.groupId === group.id);
   const games = allGames.filter((g) => !group || !g.groupId || g.groupId === group.id);
   const tournaments = allTournaments.filter((t) => !group || !t.groupId || t.groupId === group.id);
-  const events: DayEvents = { games, tournaments };
+  const events: DayEvents = {
+    games,
+    tournaments,
+    teamEvents: allActivities.filter(
+      (a) => a.kind === "event" && (!group || !a.group_id || a.group_id === group.id),
+    ),
+  };
 
   const href = (patch: Record<string, string | undefined>) => {
     const sp = new URLSearchParams();
@@ -182,9 +191,20 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
         <h2 className="ml-2 text-lg font-semibold">{title}</h2>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <Link href="/calendar/manage" className={buttonClass("secondary")}>
+          Manage events & attendance
+        </Link>
+        <Link href="/calendar/new" className={buttonClass("ghost")}>
+          Create team event
+        </Link>
+      </div>
       <Legend />
 
-      {roster.length === 0 && practices.length === 0 && games.length === 0 ? (
+      {roster.length === 0 &&
+      practices.length === 0 &&
+      games.length === 0 &&
+      events.teamEvents.length === 0 ? (
         <p className="rounded-xl bg-surface p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
           {group ? `No players in ${group.name} yet.` : "No players on the roster yet."}
         </p>
@@ -232,6 +252,7 @@ function Legend() {
       </li>
       <li className={cn("rounded px-2 py-0.5 font-medium", GAME_STYLE)}>🏟️ Game</li>
       <li className={cn("rounded px-2 py-0.5 font-medium", TOURNAMENT_STYLE)}>🏆 Tournament</li>
+      <li className="rounded bg-brand-50 px-2 py-0.5 font-medium text-brand-800">Team event</li>
     </ul>
   );
 }
@@ -245,7 +266,7 @@ function PracticePill({ p, compact }: { p: PracticeSummary; compact?: boolean })
     <Link
       href={`/practices/${p.id}`}
       data-testid="calendar-practice"
-      title={`${p.title}${p.groupName ? ` · ${p.groupName}` : ""}${p.published ? "" : " · Draft"}`}
+      title={`${p.canceled ? "Canceled · " : ""}${p.title}${p.groupName ? ` · ${p.groupName}` : ""}${p.published ? "" : " · Draft"}`}
       className={cn(
         "relative z-10 block truncate rounded px-1.5 py-0.5 font-medium",
         compact ? "text-[11px]" : "text-xs",
@@ -253,6 +274,7 @@ function PracticePill({ p, compact }: { p: PracticeSummary; compact?: boolean })
       )}
     >
       {p.published ? "⚾ " : <span className="mr-1 font-semibold text-amber-700">Draft</span>}
+      {p.canceled ? "Canceled · " : ""}
       {start != null ? `${formatClock(start)} ` : ""}
       {p.title}
     </Link>
@@ -262,9 +284,10 @@ function PracticePill({ p, compact }: { p: PracticeSummary; compact?: boolean })
 const GAME_STYLE = "bg-amber-100 text-amber-950 ring-1 ring-inset ring-amber-300";
 const TOURNAMENT_STYLE = "bg-violet-100 text-violet-900 ring-1 ring-inset ring-violet-300";
 
-type DayEvents = { games: Game[]; tournaments: Tournament[] };
+type DayEvents = { games: Game[]; tournaments: Tournament[]; teamEvents: Activity[] };
 
 const eventsOn = (ev: DayEvents, d: string) => ({
+  teamEvents: ev.teamEvents.filter((e) => e.date === d),
   games: ev.games.filter((g) => g.date === d),
   tournaments: ev.tournaments.filter((t) => t.startDate <= d && t.endDate >= d),
 });
@@ -378,13 +401,15 @@ function WeekGrid({
           </tr>
         </thead>
         <tbody>
-          {events.games.length > 0 || events.tournaments.length > 0 ? (
+          {events.games.length > 0 ||
+          events.tournaments.length > 0 ||
+          events.teamEvents.length > 0 ? (
             <tr className="border-b border-zinc-200 bg-amber-50/40 align-top">
               <th
                 scope="row"
                 className="sticky left-0 z-10 bg-surface px-3 py-2 text-left font-medium"
               >
-                Games
+                Games & events
               </th>
               {days.map((d) => {
                 const ev = eventsOn(events, d);
@@ -395,6 +420,16 @@ function WeekGrid({
                   >
                     {ev.tournaments.map((t) => (
                       <TournamentPill key={t.id} t={t} />
+                    ))}
+                    {ev.teamEvents.map((e) => (
+                      <Link
+                        key={e.id}
+                        href={`/events/event/${e.id}`}
+                        className="pointer-events-auto relative z-10 block truncate rounded bg-brand-50 px-2 py-1 text-xs text-brand-800"
+                      >
+                        {e.state === "canceled" ? "Canceled · " : ""}
+                        {e.title}
+                      </Link>
                     ))}
                     {ev.games.map((g) => (
                       <GamePill key={g.id} g={g} />
@@ -528,6 +563,16 @@ function MonthGrid({
                   <div key={t.id} className="pointer-events-auto">
                     <TournamentPill t={t} compact />
                   </div>
+                ))}
+                {ev.teamEvents.map((e) => (
+                  <Link
+                    key={e.id}
+                    href={`/events/event/${e.id}`}
+                    className="pointer-events-auto relative z-10 block truncate rounded bg-brand-50 px-2 py-1 text-xs text-brand-800"
+                  >
+                    {e.state === "canceled" ? "Canceled · " : ""}
+                    {e.title}
+                  </Link>
                 ))}
                 {ev.games.map((g) => (
                   <div key={g.id} className="pointer-events-auto">

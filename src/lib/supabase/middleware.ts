@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
   "/terms",
   // Stripe calls this with its own signature, not a user session.
   "/api/billing/webhook",
+  "/api/payments/webhook",
 ];
 
 function isPublicPath(pathname: string) {

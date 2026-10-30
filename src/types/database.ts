@@ -1,8 +1,13 @@
+import type {
+  TeamOperationsTables,
+  TeamOperationsViews,
+  TeamOperationsFunctions,
+} from "./team-operations";
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   public: {
-    Tables: {
+    Tables: TeamOperationsTables & {
       announcement_reads: {
         Row: {
           announcement_id: string;
@@ -38,6 +43,8 @@ export type Database = {
       };
       announcements: {
         Row: {
+          recipient_ids: string[] | null;
+          audience_scope: string;
           author_id: string | null;
           body: string;
           created_at: string;
@@ -49,6 +56,8 @@ export type Database = {
           title: string;
         };
         Insert: {
+          recipient_ids?: string[] | null;
+          audience_scope?: string;
           author_id?: string | null;
           body: string;
           created_at?: string;
@@ -60,6 +69,8 @@ export type Database = {
           title: string;
         };
         Update: {
+          recipient_ids?: string[] | null;
+          audience_scope?: string;
           author_id?: string | null;
           body?: string;
           created_at?: string;
@@ -1166,6 +1177,7 @@ export type Database = {
       };
       practice_plans: {
         Row: {
+          canceled: boolean;
           created_at: string;
           created_by: string | null;
           date: string | null;
@@ -1181,6 +1193,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          canceled?: boolean;
           created_at?: string;
           created_by?: string | null;
           date?: string | null;
@@ -1196,6 +1209,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          canceled?: boolean;
           created_at?: string;
           created_by?: string | null;
           date?: string | null;
@@ -2132,10 +2146,8 @@ export type Database = {
         ];
       };
     };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
+    Views: TeamOperationsViews;
+    Functions: TeamOperationsFunctions & {
       accept_invitation: { Args: { p_token: string }; Returns: string };
       consent_status: { Args: Record<PropertyKey, never>; Returns: string };
       create_organization: {
