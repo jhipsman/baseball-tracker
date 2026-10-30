@@ -908,6 +908,7 @@ export type Database = {
           created_at: string;
           current_season_phase: Database["public"]["Enums"]["season_phase"];
           id: string;
+          is_demo: boolean;
           modules: string[];
           name: string;
           owner_id: string;
@@ -926,6 +927,7 @@ export type Database = {
           created_at?: string;
           current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
+          is_demo?: boolean;
           modules?: string[];
           name: string;
           owner_id: string;
@@ -944,6 +946,7 @@ export type Database = {
           created_at?: string;
           current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
+          is_demo?: boolean;
           modules?: string[];
           name?: string;
           owner_id?: string;
@@ -2150,6 +2153,9 @@ export type Database = {
     Functions: TeamOperationsFunctions & {
       accept_invitation: { Args: { p_token: string }; Returns: string };
       consent_status: { Args: Record<PropertyKey, never>; Returns: string };
+      create_demo_team: { Args: { p_name: string; p_people: Json }; Returns: Json };
+      delete_demo_team: { Args: { p_org: string }; Returns: undefined };
+      seed_demo_activity: { Args: { p_org: string; p_rows: Json }; Returns: undefined };
       create_organization: {
         Args: { p_name: string; p_slug: string };
         Returns: {

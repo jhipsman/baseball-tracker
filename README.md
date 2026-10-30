@@ -278,3 +278,8 @@ Box scores and season stats, built on `game_batting` / `game_pitching` (see `sup
 - **Phone tabs:** players get Today · Schedule · Health · Videos · Me (profile, workout history, stats); parents get Home · Schedule (next 2 weeks, games & results) · Progress (stats, videos) · Messages.
 
 See the project brief for the full roadmap. Phases 1–7 are complete. Phone push notifications are optional and need the keys described in docs/DEPLOY.md.
+
+## Preview ("View as") & demo team
+
+- **View as (admins):** Settings → _Preview the app_ lists your players and parents. Pick one to see the app exactly as they do. It's read-only: every button on the page is turned off, and the proxy refuses any change (`403`) while the preview cookie (`dp_view_as`, 2 hours) is set. Data is read with the admin's own permissions, so their private messages and notifications aren't shown. Exit from the yellow bar. The identity switch lives in `requireActiveOrg` (`src/lib/org.ts`); `requireRealActiveOrg` always answers as the signed-in user.
+- **Demo team:** Settings → _Create demo team_ builds "Demo · Riverside Rays": 12 made-up players, 3 parents, three weeks of workouts, three final games with box scores (pitch counts flow into Player Health), an arm-pain report, upcoming games/tournament/practices, RSVPs, testing numbers, dues (one family overdue) and messages. The fake people are auth users with no password and `app_metadata.demo = true`; nobody can sign in as them. Only the demo's owner can seed or delete it (`create_demo_team`, `seed_demo_activity`, `delete_demo_team` in `20261108000000_demo_team.sql`), and deleting removes the team and its fake people only. Seeding code: `src/lib/demo.ts`.

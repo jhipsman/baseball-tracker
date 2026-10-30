@@ -8,7 +8,10 @@ process.on("uncaughtException", (e) => {
 });
 const db = new PGlite();
 await db.exec(`create schema auth;create schema storage;create role anon;create role authenticated;create role service_role bypassrls;
- create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}');
+ create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,raw_user_meta_data jsonb default '{}',
+  instance_id uuid,aud text,role text,encrypted_password text,raw_app_meta_data jsonb default '{}',created_at timestamptz,updated_at timestamptz,
+  confirmation_token text,recovery_token text,email_change_token_new text,email_change text,email_change_token_current text,
+  phone_change text,phone_change_token text,reauthentication_token text);
  create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('app.user',true),'')::uuid$$;
  create function auth.role() returns text language sql stable as $$select coalesce(nullif(current_setting('app.role',true),''),current_user)$$;
  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
@@ -508,6 +511,57 @@ await check(
     assert.equal(row.status, "void");
     assert.equal(row.paid_cents, 2500);
     assert.equal(row.refunded_cents, 1000);
+  },
+);
+await check(
+  "demo teams: only the owner can seed or delete them, and real people are never touched",
+  async () => {
+    await as("admin");
+    const people = JSON.stringify([
+      {
+        key: "a",
+        name: "Demo Pitcher",
+        role: "player",
+        birth_date: "2011-05-01",
+        position: "P",
+        jersey: "1",
+      },
+      { key: "m", name: "Demo Parent", role: "parent", parent_of: "a" },
+    ]);
+    const made = await call("create_demo_team", ["Demo", people]);
+    assert.equal(made.created, true);
+    const demo = made.org;
+    assert.equal((await call("create_demo_team", ["Demo", people])).org, demo);
+    const fake = made.people.a;
+    const throwRow = (player) =>
+      JSON.stringify({
+        throws: [{ player_id: player, date: "2026-10-01", type: "check_in", arm_feel: "good" }],
+      });
+    await call("seed_demo_activity", [demo, throwRow(fake)]);
+    await assert.rejects(call("seed_demo_activity", [org, throwRow(ids.player)]));
+    await assert.rejects(call("seed_demo_activity", [demo, throwRow(ids.player)]));
+    await assert.rejects(db.query("update organizations set is_demo=true where id=$1", [org]));
+    await as("coach");
+    await assert.rejects(call("seed_demo_activity", [demo, throwRow(fake)]));
+    await assert.rejects(call("delete_demo_team", [demo]));
+    await assert.rejects(call("delete_demo_team", [org]));
+    await as("admin");
+    await assert.rejects(call("delete_demo_team", [org]));
+    await call("delete_demo_team", [demo]);
+    await db.exec("reset role");
+    assert.equal(
+      (await db.query("select count(*)::int n from organizations where id=$1", [demo])).rows[0].n,
+      0,
+    );
+    assert.equal(
+      (await db.query("select count(*)::int n from auth.users where id=$1", [fake])).rows[0].n,
+      0,
+    );
+    assert.equal(
+      (await db.query("select count(*)::int n from auth.users where id=$1", [ids.player])).rows[0]
+        .n,
+      1,
+    );
   },
 );
 console.log(checks.length + " database scenarios passed.");

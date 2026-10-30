@@ -13,7 +13,8 @@ import { NotificationBell } from "@/components/notifications/bell";
 import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, org, membership, memberships, isStaff } = await requireActiveOrg();
+  const { user, org, membership, memberships, isStaff, preview } = await requireActiveOrg();
+  if (preview) redirect(preview.role === "parent" ? "/parent" : "/player");
   if (membership.role === "parent") redirect("/parent");
   const { tz } = await playerToday();
   const nav: NavItem[] = COACH_SECTIONS.flatMap((section) => {
@@ -36,7 +37,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
             />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold tracking-tight">{org.name}</p>
-              <p className="text-xs text-zinc-500">{ROLE_LABELS[membership.role]}</p>
+              <p className="text-xs text-zinc-500">
+                {ROLE_LABELS[membership.role]}
+                {org.is_demo ? (
+                  <span className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[11px] font-semibold text-amber-900">
+                    Demo
+                  </span>
+                ) : null}
+              </p>
             </div>
             <div className="ml-auto flex items-center">
               <ThemeToggle />
