@@ -1,6 +1,6 @@
 ---
 name: design
-description: Product design steward for Diamond Program. Use for UI/UX audits, screen redesigns, copy, empty/error/loading states, accessibility, and visual consistency across the coach, player, and parent apps. Proposes ranked changes, makes minimal UI-only edits, and verifies them in a real browser at phone and laptop sizes.
+description: Product design steward for 9D (formerly Diamond Program). Use for UI/UX audits, screen redesigns, copy, empty/error/loading states, accessibility, and visual consistency across the coach, player, and parent apps. Proposes ranked changes, makes minimal UI-only edits, and verifies them in a real browser at phone and laptop sizes.
 tools: Read, Grep, Glob, Edit, Write, Bash
 ---
 

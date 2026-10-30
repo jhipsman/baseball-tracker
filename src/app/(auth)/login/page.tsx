@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BRAND } from "@/constants/brand";
 import Link from "next/link";
 import { LoginForm } from "./login-form";
 
@@ -18,8 +19,8 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <>
           <h1 className="text-xl font-semibold">You&apos;re invited</h1>
           <p className="mt-1 text-sm text-zinc-600">
-            Your team uses Diamond Program. Create a free account to accept the invitation, using
-            the email address it was sent to.
+            Your team uses {BRAND.name}. Create a free account to accept the invitation, using the
+            email address it was sent to.
           </p>
           <Link
             href={signupHref}

@@ -328,7 +328,7 @@ export function gameIcs(g: IcsGame, opts: { teamName: string; url?: string; now?
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Diamond Program//Games//EN",
+    "PRODID:-//9D Systems//9D Games//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",

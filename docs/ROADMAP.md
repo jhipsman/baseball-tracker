@@ -4,7 +4,7 @@ Product decisions and ideas captured along the way. They supplement the build ph
 
 ## Positioning: why this beats a generic lifting app (Hevy, Boostcamp)
 
-Generic apps log lifts. Diamond Program should know about **the throwing arm and the baseball calendar**:
+Generic apps log lifts. 9D should know about **the throwing arm and the baseball calendar**:
 
 - Throwing workload: pitch counts, long-toss distances, bullpen plans, arm-feel check-ins (Phase 5)
 - Safety alerts: MLB Pitch Smart limits by age, acute:chronic workload spikes, multi-sport load (Phase 5)

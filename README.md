@@ -1,4 +1,4 @@
-# Diamond Program
+# 9D
 
 A training platform for baseball coaches, strength trainers, and facilities: build programs with a drag-and-drop workout builder, assign them to players, and track the work.
 

@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { BRAND } from "@/constants/brand";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Diamond Program",
-    short_name: "Diamond",
+    name: BRAND.name,
+    short_name: BRAND.name,
     description: "Your baseball training program, workouts, and logs.",
     start_url: "/player",
     scope: "/",

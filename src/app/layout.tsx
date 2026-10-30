@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { BRAND } from "@/constants/brand";
 import { Manrope } from "next/font/google";
 import { THEME_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -6,9 +7,9 @@ import "./globals.css";
 const display = Manrope({ subsets: ["latin"], variable: "--font-display", display: "swap" });
 
 export const metadata: Metadata = {
-  title: { default: "Diamond Program", template: "%s · Diamond Program" },
+  title: { default: BRAND.name, template: `%s · ${BRAND.name}` },
   description: "Build, assign, and track baseball training programs.",
-  appleWebApp: { capable: true, title: "Diamond", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: BRAND.name, statusBarStyle: "default" },
   icons: { apple: "/icons/apple-touch-icon.png" },
 };
 

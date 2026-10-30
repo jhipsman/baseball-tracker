@@ -1,4 +1,4 @@
-/* Diamond Program service worker: shows web push notifications and opens their link. */
+/* 9D service worker: shows web push notifications and opens their link. */
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
@@ -10,7 +10,7 @@ self.addEventListener("push", (event) => {
   } catch {
     data = { body: event.data ? event.data.text() : "" };
   }
-  const title = data.title || "Diamond Program";
+  const title = data.title || "9D";
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body || "",

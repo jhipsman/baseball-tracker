@@ -1,4 +1,4 @@
-# Deploying Diamond Program
+# Deploying 9D
 
 This puts the app on the internet so anyone (coaches, players, parents) can reach it from any device:
 
@@ -94,7 +94,7 @@ In Supabase:
 
    ```html
    <h2>Confirm your email</h2>
-   <p>Welcome to Diamond Program. Tap below to confirm your email and get started.</p>
+   <p>Welcome to 9D. Tap below to confirm your email and get started.</p>
    <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Confirm my email</a></p>
    ```
 
@@ -103,7 +103,7 @@ In Supabase:
 
    ```html
    <h2>Reset your password</h2>
-   <p>Tap below to choose a new password for Diamond Program.</p>
+   <p>Tap below to choose a new password for 9D.</p>
    <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">Choose a new password</a></p>
    ```
 

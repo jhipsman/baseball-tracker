@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Diamond Program mark: the infield drawn from its four base paths, open at
+ * 9D mark: the infield drawn from its four base paths, open at
  * home plate, which sits just below. Takes the current text color, so it
  * works in Day and Night mode. Same drawing as public/icons/*.
  */
