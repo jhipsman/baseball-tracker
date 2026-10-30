@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { LogoMark } from "@/components/brand/logo";
 import { redirect } from "next/navigation";
 import { ParentNav } from "@/components/layout/parent-nav";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
@@ -21,7 +22,7 @@ export default async function ParentLayout({ children }: { children: React.React
       {preview ? <PreviewBar preview={preview} /> : null}
       <header className={preview ? "glass" : "glass sticky top-0 z-20"}>
         <div className="mx-auto flex h-14 max-w-md items-center gap-2 px-4">
-          <span aria-hidden className="inline-block size-4 rotate-45 rounded-[4px] bg-brand-600" />
+          <LogoMark className="size-6 text-brand-600" />
           <span className="truncate text-sm font-semibold tracking-tight">{org.name}</span>
           <div className="ml-auto flex items-center gap-1">
             <ThemeToggle />

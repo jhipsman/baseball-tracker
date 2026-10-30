@@ -1,0 +1,27 @@
+import { cn } from "@/lib/utils";
+
+/**
+ * Diamond Program mark: the infield drawn from its four base paths, open at
+ * home plate, which sits just below. Takes the current text color, so it
+ * works in Day and Night mode. Same drawing as public/icons/*.
+ */
+export function LogoMark({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 1 48 48" aria-hidden className={cn("shrink-0", className)}>
+      <path
+        d="M17.5 34 L8.5 25 L24 9.5 L39.5 25 L30.5 34"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={5}
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <path
+        d="M19.4 38.6h9.2v3.6L24 46.2l-4.6-4z"
+        fill="currentColor"
+        stroke="currentColor"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}

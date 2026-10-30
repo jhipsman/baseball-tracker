@@ -1,4 +1,5 @@
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
+import { LogoMark } from "@/components/brand/logo";
 import { OrgSwitcher } from "@/components/layout/org-switcher";
 import { SeasonToggle } from "@/components/layout/season-toggle";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
@@ -31,10 +32,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <aside className="glass md:sticky md:top-3 md:m-3 md:mr-0 md:h-[calc(100dvh-1.5rem)] md:w-64 md:shrink-0 md:rounded-3xl md:border-0">
         <div className="flex h-full flex-col gap-4 p-4 md:overflow-y-auto md:p-5">
           <div className="flex items-center gap-2">
-            <span
-              aria-hidden
-              className="inline-block size-5 shrink-0 rotate-45 rounded-[5px] bg-brand-600 shadow-[0_0_18px_rgb(18_183_106/0.45)]"
-            />
+            <LogoMark className="size-7 text-brand-600 drop-shadow-[0_0_10px_rgb(18_183_106/0.45)]" />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold tracking-tight">{org.name}</p>
               <p className="text-xs text-zinc-500">
