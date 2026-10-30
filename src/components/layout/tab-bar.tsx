@@ -5,6 +5,7 @@ import { NavigationPending } from "./navigation-pending";
 import { usePathname, useSearchParams } from "next/navigation";
 import { isUnder } from "@/constants/sections";
 import { cn } from "@/lib/utils";
+import { NAV, TabPill } from "./page-transition";
 
 export type TabItem = {
   href: string;
@@ -48,7 +49,7 @@ export function TabBar({
       aria-label={label}
       className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.5rem)] z-30 print:hidden"
     >
-      <ul className="glass mx-auto flex max-w-md rounded-full p-1 shadow-lg ring-1 shadow-black/10 ring-zinc-200">
+      <ul className="glass relative mx-auto flex max-w-md rounded-full p-1">
         {items.map((item) => {
           const paths = [item.href, ...(item.match ?? [])];
           const active = paths.some((p) =>
@@ -59,14 +60,21 @@ export function TabBar({
               <Link
                 href={withParam(item.href)}
                 aria-current={active ? "page" : undefined}
+                transitionTypes={NAV}
                 className={cn(
-                  "flex h-14 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold transition-colors",
-                  active ? "bg-zinc-100 text-brand-700" : "text-zinc-500 hover:text-zinc-900",
+                  "relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-full text-xs font-semibold",
+                  active ? "text-brand-700" : "text-zinc-500 hover:text-zinc-900",
                 )}
               >
+                {active ? (
+                  <TabPill
+                    name={`tabbar-pill`}
+                    className="absolute inset-0 rounded-full bg-zinc-900/[0.07] dark:bg-white/10"
+                  />
+                ) : null}
                 <svg
                   viewBox="0 0 24 24"
-                  className="size-5"
+                  className="relative size-5"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth={1.8}
@@ -76,7 +84,7 @@ export function TabBar({
                 >
                   <path d={item.icon} />
                 </svg>
-                {item.label}
+                <span className="relative">{item.label}</span>
                 <NavigationPending />
               </Link>
             </li>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { NavigationPending } from "./navigation-pending";
+import { NAV, TabPill } from "./page-transition";
 import { usePathname } from "next/navigation";
 import { activeTab, COACH_SECTIONS, visibleTabs } from "@/constants/sections";
 import { cn } from "@/lib/utils";
@@ -31,14 +32,19 @@ export function SectionTabs({
           key={t.href}
           href={t.href}
           aria-current={t === active ? "page" : undefined}
+          transitionTypes={NAV}
           className={cn(
-            "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
-            t === active
-              ? "bg-zinc-100 text-zinc-950 ring-1 ring-zinc-200"
-              : "text-zinc-500 hover:text-zinc-900",
+            "relative shrink-0 rounded-full px-4 py-2 text-sm font-medium",
+            t === active ? "text-zinc-950" : "text-zinc-500 hover:text-zinc-900",
           )}
         >
-          {t.label}
+          {t === active ? (
+            <TabPill
+              name="section-pill"
+              className="absolute inset-0 rounded-full bg-zinc-100 ring-1 ring-zinc-200"
+            />
+          ) : null}
+          <span className="relative">{t.label}</span>
           <NavigationPending />
         </Link>
       ))}

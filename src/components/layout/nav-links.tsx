@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { NavigationPending } from "./navigation-pending";
+import { NAV, TabPill } from "./page-transition";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { isUnder } from "@/constants/sections";
@@ -33,14 +34,19 @@ export function NavLinks({ items }: { items: NavItem[] }) {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
+            transitionTypes={NAV}
             className={cn(
-              "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
-              active
-                ? "bg-zinc-900 text-zinc-50 shadow-sm"
-                : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
+              "relative shrink-0 rounded-full px-4 py-2 text-sm font-medium",
+              active ? "text-zinc-50" : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
             )}
           >
-            {item.label}
+            {active ? (
+              <TabPill
+                name="sidebar-pill"
+                className="absolute inset-0 rounded-full bg-zinc-900 shadow-sm"
+              />
+            ) : null}
+            <span className="relative">{item.label}</span>
             <NavigationPending />
           </Link>
         );

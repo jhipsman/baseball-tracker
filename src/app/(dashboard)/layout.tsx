@@ -3,6 +3,7 @@ import { OrgSwitcher } from "@/components/layout/org-switcher";
 import { SeasonToggle } from "@/components/layout/season-toggle";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { PageTransition } from "@/components/layout/page-transition";
 import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
@@ -26,7 +27,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-full flex-1 flex-col md:flex-row">
       <TimezoneSync current={tz ? decodeURIComponent(tz) : undefined} />
-      <aside className="glass border-b border-zinc-200/70 md:sticky md:top-3 md:m-3 md:mr-0 md:h-[calc(100dvh-1.5rem)] md:w-64 md:shrink-0 md:rounded-3xl md:border-0 md:shadow-xl md:ring-1 md:shadow-black/5 md:ring-zinc-200/80">
+      <aside className="glass md:sticky md:top-3 md:m-3 md:mr-0 md:h-[calc(100dvh-1.5rem)] md:w-64 md:shrink-0 md:rounded-3xl md:border-0">
         <div className="flex h-full flex-col gap-4 p-4 md:overflow-y-auto md:p-5">
           <div className="flex items-center gap-2">
             <span
@@ -83,7 +84,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
         </div>
       </aside>
       <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
-        <div className="mx-auto w-full max-w-7xl [&>*]:mx-auto">{children}</div>
+        <div className="mx-auto w-full max-w-7xl [&>*]:mx-auto">
+          <PageTransition>{children}</PageTransition>
+        </div>
       </main>
     </div>
   );

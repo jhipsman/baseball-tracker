@@ -20,6 +20,9 @@
   --radius-2xl: 1.5rem;
   --radius-3xl: 2rem;
 
+  /* Fast start, long soft landing: how things settle on iOS. */
+  --ease-out-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* Diamond green — primary brand color */
   --color-brand-50: #ecfdf3;
   --color-brand-100: #d1fadf;
@@ -111,19 +114,21 @@ html {
   background: var(--color-backdrop);
 }
 
-/* Stadium-light backdrop: a green glow top-left and a warm one top-right. */
+/* Stadium-light backdrop: color behind the glass so it has something to bend. */
 body {
   color: var(--color-zinc-900);
   background:
-    radial-gradient(70rem 40rem at -10% -15%, rgb(18 183 106 / 0.12), transparent 60%),
-    radial-gradient(60rem 36rem at 110% -10%, rgb(245 158 11 / 0.08), transparent 60%),
+    radial-gradient(60rem 38rem at -10% -15%, rgb(18 183 106 / 0.16), transparent 60%),
+    radial-gradient(52rem 34rem at 110% -10%, rgb(245 158 11 / 0.11), transparent 60%),
+    radial-gradient(56rem 40rem at 60% 115%, rgb(86 182 242 / 0.1), transparent 60%),
     var(--color-backdrop);
   background-attachment: fixed;
 }
 [data-theme="dark"] body {
   background:
-    radial-gradient(70rem 40rem at -10% -15%, rgb(61 220 132 / 0.11), transparent 60%),
-    radial-gradient(60rem 36rem at 110% -10%, rgb(245 184 60 / 0.07), transparent 60%),
+    radial-gradient(60rem 38rem at -10% -15%, rgb(61 220 132 / 0.13), transparent 60%),
+    radial-gradient(52rem 34rem at 110% -10%, rgb(245 184 60 / 0.08), transparent 60%),
+    radial-gradient(56rem 40rem at 60% 115%, rgb(86 182 242 / 0.07), transparent 60%),
     var(--color-backdrop);
   background-attachment: fixed;
 }
@@ -131,18 +136,175 @@ body {
 ::selection {
   background: var(--color-brand-200);
 }
-
-/* Floating chrome (sidebar, headers, tab bars): frosted glass. */
-.glass {
-  background-color: var(--color-surface);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  backdrop-filter: blur(24px) saturate(1.4);
+html {
+  accent-color: var(--color-brand-600);
+  caret-color: var(--color-brand-600);
+  scrollbar-color: var(--color-zinc-300) transparent;
 }
 
-/* Dialogs and popovers never show the page through them. */
+/* Liquid glass: only the floating layer (sidebar, headers, tab bar, sheets).
+   Heavy blur + saturation so color shows through, a specular rim lit from
+   above, and a soft lifted shadow. Owns its box-shadow, so don't add ring-*
+   or shadow-* utilities to a .glass element. */
+.glass {
+  background-color: rgb(255 255 255 / 0.55);
+  -webkit-backdrop-filter: blur(28px) saturate(1.9) brightness(1.04);
+  backdrop-filter: blur(28px) saturate(1.9) brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 0 rgb(255 255 255 / 0.25),
+    inset 0 0 0 1px rgb(255 255 255 / 0.4),
+    0 1px 2px rgb(16 24 20 / 0.06),
+    0 12px 32px -12px rgb(16 24 20 / 0.22);
+}
+[data-theme="dark"] .glass {
+  background-color: rgb(34 37 42 / 0.5);
+  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  backdrop-filter: blur(28px) saturate(1.6);
+  box-shadow:
+    inset 0 1px 0 0 rgb(255 255 255 / 0.16),
+    inset 0 -1px 0 0 rgb(255 255 255 / 0.04),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08),
+    0 16px 40px -12px rgb(0 0 0 / 0.7);
+}
+/* Glass buttons brighten under the pointer. */
+.glass-control:not(:disabled):hover {
+  background-color: rgb(255 255 255 / 0.8);
+}
+[data-theme="dark"] .glass-control:not(:disabled):hover {
+  background-color: rgb(52 56 62 / 0.6);
+}
+
+/* Without blur support, glass falls back to a solid panel (still readable). */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass {
+    background-color: var(--color-surface-solid);
+  }
+}
+
+/* Panels catch a faint top highlight, like light on a glass edge.
+   (Feeds Tailwind's shadow stack, so ring-* still works.) */
+.bg-surface {
+  --tw-inset-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.7);
+}
+[data-theme="dark"] .bg-surface {
+  --tw-inset-shadow: inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+}
+
+/* Dialogs and popovers never show the page through them; they rise like a sheet. */
 dialog.bg-surface,
 [popover].bg-surface {
   background-color: var(--color-surface-solid);
+}
+dialog[open] {
+  animation: sheet-in 420ms var(--ease-out-spring) both;
+}
+dialog[open]::backdrop {
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: fade-in 240ms ease-out both;
+}
+@keyframes sheet-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.97);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* -------------------------------------------------------------- motion */
+
+/* Press feedback: controls sink slightly under a finger and spring back. */
+@layer base {
+  button,
+  a {
+    transition-property: color, background-color, border-color, box-shadow, opacity, scale;
+    transition-duration: 180ms;
+    transition-timing-function: var(--ease-out-spring);
+  }
+}
+button:not(:disabled):active,
+a.rounded-full:active,
+a.bg-surface:active,
+a.hero:active {
+  scale: 0.97;
+  transition-duration: 90ms;
+}
+a.bg-surface:active,
+a.hero:active {
+  scale: 0.985;
+}
+
+/* Page changes from the menus: the old page dissolves quickly, the new one
+   rises into focus. Set by <PageTransition> + transitionTypes={["nav"]}. */
+::view-transition-old(.page) {
+  animation: 140ms ease-in both page-out;
+}
+::view-transition-new(.page) {
+  animation: 380ms var(--ease-out-spring) 60ms both page-in;
+}
+@keyframes page-out {
+  to {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+@keyframes page-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(8px);
+  }
+}
+
+/* The selected-tab pill glides to the new tab instead of jumping. */
+::view-transition-group(.pill) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out-spring);
+}
+::view-transition-old(.pill),
+::view-transition-new(.pill) {
+  height: 100%;
+}
+
+/* Day/Night: the new theme spreads out from the switch like a ripple. */
+html[data-theme-switching]::view-transition-old(root) {
+  animation: none;
+}
+html[data-theme-switching]::view-transition-new(root) {
+  animation: 560ms var(--ease-out-spring) both theme-reveal;
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--reveal-x, 50%) var(--reveal-y, 0));
+  }
+  to {
+    clip-path: circle(var(--reveal-r, 150vmax) at var(--reveal-x, 50%) var(--reveal-y, 0));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the meaning (fades), lose the movement. */
+  ::view-transition-new(.page) {
+    animation: 160ms ease-out both fade-in;
+  }
+  ::view-transition-group(.pill) {
+    animation-duration: 0s;
+  }
+  html[data-theme-switching]::view-transition-new(root) {
+    animation: 200ms ease-out both fade-in;
+  }
+  dialog[open] {
+    animation: fade-in 160ms ease-out both;
+  }
+  button:not(:disabled):active,
+  a:active {
+    scale: none;
+  }
 }
 
 /* Big moments (today's workout, live game): always night-lit, both modes. */

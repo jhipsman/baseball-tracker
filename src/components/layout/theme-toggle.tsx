@@ -37,12 +37,25 @@ function subscribe(onChange: () => void) {
 export function ThemeToggle({ className }: { className?: string }) {
   const theme = useSyncExternalStore(subscribe, current, () => null);
 
-  function toggle() {
+  function toggle(e: React.MouseEvent<HTMLButtonElement>) {
     const next: Theme = current() === "dark" ? "light" : "dark";
-    apply(next);
     try {
       localStorage.setItem(KEY, next);
     } catch {}
+    const root = document.documentElement;
+    if (!document.startViewTransition) return apply(next);
+    // The new theme ripples out from the switch.
+    const box = e.currentTarget.getBoundingClientRect();
+    const x = box.left + box.width / 2;
+    const y = box.top + box.height / 2;
+    const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    root.style.setProperty("--reveal-x", `${x}px`);
+    root.style.setProperty("--reveal-y", `${y}px`);
+    root.style.setProperty("--reveal-r", `${r}px`);
+    root.dataset.themeSwitching = "";
+    document
+      .startViewTransition(() => apply(next))
+      .finished.finally(() => delete root.dataset.themeSwitching);
   }
 
   const dark = theme === "dark";
