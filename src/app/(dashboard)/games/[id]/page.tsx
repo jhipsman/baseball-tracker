@@ -28,6 +28,8 @@ import {
 } from "@/components/games/game-forms";
 import { LiveScoring } from "@/components/games/live-scoring";
 import { LiveFeed } from "@/components/live/live-feed";
+import { LiveGame } from "@/components/live/live-game";
+import { loadLiveSnapshot } from "@/lib/live/data";
 
 export const metadata: Metadata = { title: "Game" };
 
@@ -41,6 +43,8 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
   const { groups, tournaments } = await loadGameFormOptions(supabase, org.id);
   const { data: liveRow } = await supabase.from("games").select("live_state").eq("id", id).single();
   const liveLogged = !!liveRow?.live_state;
+  // Scored at-bat by at-bat: show the animated live view (what parents see).
+  const liveSnapshot = liveLogged ? await loadLiveSnapshot(supabase, id) : null;
   const g = game;
 
   const defaults = {
@@ -137,7 +141,16 @@ export default async function GamePage({ params }: PageProps<"/games/[id]">) {
             />
           )}
           {!liveLogged && g.status === "live" ? atBatLink : null}
-          <LiveFeed gameId={g.id} orgId={org.id} live={g.status === "live"} />
+          {liveSnapshot ? (
+            <LiveGame
+              gameId={g.id}
+              initial={liveSnapshot}
+              teamName={org.name}
+              opponent={g.opponent}
+            />
+          ) : (
+            <LiveFeed gameId={g.id} orgId={org.id} live={g.status === "live"} />
+          )}
           <BoxScore gameId={g.id} />
 
           {g.notes ? (

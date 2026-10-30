@@ -4,6 +4,7 @@ import type { Database, Json } from "@/types/database";
 import type { Half, LiveSetup, Play, Result } from "./engine";
 import { parsePitchHistory } from "./pitch-count";
 import { parsePlayDetails } from "./runners";
+import { buildSnapshot } from "./snapshot";
 
 type Client = SupabaseClient<Database>;
 
@@ -108,4 +109,26 @@ export async function loadPlayerNames(supabase: Client, orgId: string) {
     names.set(m.profile_id, m.profile?.full_name || m.profile?.email || "Player");
   }
   return names;
+}
+
+/** The live game view's data for one game, as the viewer is allowed to see it (RLS). */
+export async function loadLiveSnapshot(supabase: Client, gameId: string) {
+  const { data: game } = await supabase
+    .from("games")
+    .select("id, org_id, status, team_score, opponent_score, live_state")
+    .eq("id", gameId)
+    .maybeSingle();
+  if (!game) return null;
+  const [plays, names] = await Promise.all([
+    loadPlays(supabase, gameId),
+    loadPlayerNames(supabase, game.org_id),
+  ]);
+  return buildSnapshot({
+    status: game.status,
+    teamScore: game.team_score,
+    opponentScore: game.opponent_score,
+    setup: parseLiveState(game.live_state),
+    plays,
+    names,
+  });
 }

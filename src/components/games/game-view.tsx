@@ -19,9 +19,12 @@ import {
   timeLine,
 } from "./game-ui";
 import { LiveRefresh } from "./live-refresh";
+import { LiveGame } from "@/components/live/live-game";
+import { loadLiveSnapshot } from "@/lib/live/data";
+import { createClient } from "@/lib/supabase/server";
 
 /** Read-only game page for players and parents (phone-first). */
-export function GameView({
+export async function GameView({
   game: g,
   teamName,
   backHref,
@@ -34,9 +37,12 @@ export function GameView({
 }) {
   const result = gameResult(g);
   const showScore = g.status === "live" || g.status === "final";
+  const snapshot = showScore ? await loadLiveSnapshot(await createClient(), g.id) : null;
+  // Scored live (or a final game with a play log): the animated live view replaces the plain score and log.
+  const liveView = snapshot?.scored ? snapshot : null;
   return (
     <div className="space-y-4">
-      <LiveRefresh live={g.status === "live"} />
+      <LiveRefresh live={g.status === "live"} seconds={liveView ? 30 : 10} />
       <Link href={backHref} className="text-sm text-zinc-500">
         ← {backLabel}
       </Link>
@@ -68,7 +74,11 @@ export function GameView({
         RSVP & attendance →
       </Link>
 
-      {showScore && g.teamScore != null && g.opponentScore != null ? (
+      {liveView ? (
+        <LiveGame gameId={g.id} initial={liveView} teamName={teamName} opponent={g.opponent} />
+      ) : null}
+
+      {!liveView && showScore && g.teamScore != null && g.opponentScore != null ? (
         <section className="flex items-center justify-between gap-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
           <div className="flex items-center gap-2">
             {result ? <ResultChip result={result} className="size-8 text-base" /> : null}
@@ -118,7 +128,7 @@ export function GameView({
           <CalendarFileLink id={g.id} />
         </div>
       </section>
-      <LiveFeed gameId={g.id} orgId={g.orgId} live={g.status === "live"} />
+      {liveView ? null : <LiveFeed gameId={g.id} orgId={g.orgId} live={g.status === "live"} />}
       <BoxScore gameId={g.id} />
     </div>
   );
