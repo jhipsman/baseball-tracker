@@ -2,6 +2,16 @@ import "server-only";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
+/** Names (never values) of settings online payments still need, for the admin's setup card. */
+export function teamPaymentsMissing() {
+  const missing: string[] = [];
+  if (!process.env.STRIPE_SECRET_KEY) missing.push("STRIPE_SECRET_KEY");
+  if (!process.env.STRIPE_TEAM_WEBHOOK_SECRET) missing.push("STRIPE_TEAM_WEBHOOK_SECRET");
+  if (!(process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY))
+    missing.push("SUPABASE_SECRET_KEY");
+  if (!process.env.NEXT_PUBLIC_SITE_URL) missing.push("NEXT_PUBLIC_SITE_URL");
+  return missing;
+}
 export function teamPaymentsReady() {
   return !!(
     process.env.STRIPE_SECRET_KEY &&
