@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react
 import { createPortal } from "react-dom";
 import { demoSearchUrl, parseDemoVideo, type DemoVideo } from "@/lib/exercise-video";
 import { cn } from "@/lib/utils";
+import { ViewButton } from "@/components/ui/view-button";
 
 // Keep clicks/keys inside the modal from reaching parents (e.g. drag handles in the
 // builder library, whose listeners are React props and see portal events).
@@ -125,26 +126,25 @@ export function ExerciseDemo({
 
   return (
     <>
-      <button
-        type="button"
+      <ViewButton
         onPointerDown={stop}
         onTouchStart={stop}
         onKeyDown={stop}
-        onClick={(e) => {
+        onPress={(e) => {
           e.stopPropagation();
           setOpen(true);
         }}
         aria-label={`Watch ${name} demo`}
         className={cn(
           compact
-            ? "flex size-8 shrink-0 items-center justify-center rounded-md text-xs text-brand-700 hover:bg-brand-50"
-            : "inline-flex h-8 shrink-0 items-center gap-1 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-900 ring-1 ring-brand-500/30 ring-inset hover:bg-brand-100",
+            ? "flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-md text-xs text-brand-700 hover:bg-brand-50"
+            : "inline-flex h-8 shrink-0 cursor-pointer items-center gap-1 rounded-full bg-brand-50 px-3 text-xs font-semibold text-brand-900 ring-1 ring-brand-500/30 ring-inset hover:bg-brand-100",
           className,
         )}
       >
         <span aria-hidden>▶</span>
         {compact ? null : "Demo"}
-      </button>
+      </ViewButton>
       {open ? <DemoDialog name={name} video={video} onClose={() => setOpen(false)} /> : null}
     </>
   );

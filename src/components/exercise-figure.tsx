@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { figureFor, type Figure, type Prop, type Segment } from "@/lib/figures/library";
 import { GROUND, joints, mixPose, place, type Joints, type Point } from "@/lib/figures/skeleton";
 import { cn } from "@/lib/utils";
+import { ViewButton } from "@/components/ui/view-button";
 
 const MOVE = 1100,
   HOLD = 450;
@@ -275,18 +276,17 @@ export function ExerciseFigureToggle({ name, className }: { name: string; classN
   if (!fig) return null;
   return (
     <div className={cn("contents", className)}>
-      <button
-        type="button"
+      <ViewButton
         aria-expanded={open}
         aria-label={open ? `Hide ${name} diagram` : `Show how to do ${name}`}
-        onClick={() => setOpen((o) => !o)}
+        onPress={() => setOpen((o) => !o)}
         className={cn(
-          "size-14 shrink-0 overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200 hover:ring-brand-600",
+          "block size-14 shrink-0 cursor-pointer overflow-hidden rounded-xl bg-surface ring-1 ring-zinc-200 hover:ring-brand-600 focus-visible:outline-2 focus-visible:outline-brand-600",
           open && "ring-2 ring-brand-600",
         )}
       >
         <FigureSvg fig={fig} ms={0} still />
-      </button>
+      </ViewButton>
       {open ? (
         <div className="col-span-full mt-2 w-full basis-full space-y-1">
           <ExerciseFigure name={name} className="mx-auto max-w-xs" />
