@@ -1112,6 +1112,8 @@ export type Database = {
       };
       body_checkins: {
         Row: {
+          session_minutes: number | null;
+          session_rpe: number | null;
           date: string;
           feel: number;
           logged_by: string | null;
@@ -1123,6 +1125,8 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          session_minutes?: number | null;
+          session_rpe?: number | null;
           date: string;
           feel: number;
           logged_by?: string | null;
@@ -1134,6 +1138,8 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          session_minutes?: number | null;
+          session_rpe?: number | null;
           date?: string;
           feel?: number;
           logged_by?: string | null;
@@ -1176,6 +1182,36 @@ export type Database = {
           player_id?: string;
           updated_at?: string;
           updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      growth_measurements: {
+        Row: {
+          created_at: string;
+          height_in: number;
+          id: string;
+          logged_by: string | null;
+          measured_on: string;
+          org_id: string;
+          player_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          height_in: number;
+          id?: string;
+          logged_by?: string | null;
+          measured_on: string;
+          org_id: string;
+          player_id: string;
+        };
+        Update: {
+          created_at?: string;
+          height_in?: number;
+          id?: string;
+          logged_by?: string | null;
+          measured_on?: string;
+          org_id?: string;
+          player_id?: string;
         };
         Relationships: [];
       };

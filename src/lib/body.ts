@@ -13,6 +13,8 @@ export type BodyCheckin = {
   sore: string[];
   sleep: Sleep | null;
   note: string | null;
+  /** Today's team practice or game, if they said: minutes and effort 1–10. */
+  session?: { minutes: number; rpe: number } | null;
 };
 export type Sleep = "under6" | "6to7" | "8plus";
 

@@ -49,6 +49,7 @@ export const COACH_SECTIONS: Section[] = [
     tabs: [
       { href: "/throwing", label: "Today" },
       { href: "/throwing/workload", label: "Workload & logs" },
+      { href: "/throwing/growth", label: "Growth" },
       { href: "/throwing/medical", label: "Medical" },
     ],
   },

@@ -208,6 +208,7 @@ export async function saveBodyCheckin(input: {
   sore?: string[];
   sleep?: Sleep | null;
   note?: string;
+  session?: { minutes: number; rpe: number } | null;
 }): Promise<R> {
   const { supabase, org, user } = await requireActiveOrg();
   const playerId = input.playerId ?? user.id;
@@ -217,6 +218,16 @@ export async function saveBodyCheckin(input: {
     return { error: "Pick how you feel." };
   const sore = [...new Set((input.sore ?? []).filter(isSpot))].slice(0, 16);
   const sleep = SLEEPS.some((s) => s.key === input.sleep) ? input.sleep! : null;
+  const session =
+    input.session &&
+    Number.isInteger(input.session.minutes) &&
+    input.session.minutes > 0 &&
+    input.session.minutes <= 300 &&
+    Number.isInteger(input.session.rpe) &&
+    input.session.rpe >= 1 &&
+    input.session.rpe <= 10
+      ? input.session
+      : null;
   const { error } = await supabase.from("body_checkins").upsert({
     org_id: org.id,
     player_id: playerId,
@@ -224,6 +235,8 @@ export async function saveBodyCheckin(input: {
     feel: input.feel,
     sore,
     sleep,
+    session_minutes: session?.minutes ?? null,
+    session_rpe: session?.rpe ?? null,
     note:
       String(input.note ?? "")
         .trim()
@@ -233,4 +246,35 @@ export async function saveBodyCheckin(input: {
   if (error) return { error: "Check-in not saved. Check your signal and try again." };
   refresh(playerId);
   return {};
+}
+
+/**
+ * Record heights (inches) for one or more players on a day; a blank clears
+ * nothing. Coaches for anyone on the team; a player or parent for themselves.
+ */
+export async function saveHeights(
+  date: string,
+  entries: { playerId: string; inches: number }[],
+): Promise<R & { saved?: number }> {
+  const { supabase, org, user } = await requireActiveOrg();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return { error: "Pick the date measured." };
+  const rows = entries
+    .filter((e) => UUID.test(e.playerId) && Number.isFinite(e.inches))
+    .map((e) => ({ ...e, inches: Math.round(e.inches * 10) / 10 }));
+  if (rows.some((e) => e.inches < 36 || e.inches > 90))
+    return { error: "Heights are in inches (36–90), e.g. 64.5." };
+  if (!rows.length) return { error: "Enter at least one height." };
+  const { error } = await supabase.from("growth_measurements").upsert(
+    rows.map((e) => ({
+      org_id: org.id,
+      player_id: e.playerId,
+      measured_on: date,
+      height_in: e.inches,
+      logged_by: user.id,
+    })),
+    { onConflict: "org_id,player_id,measured_on" },
+  );
+  if (error) return { error: "Couldn't save. Check your signal and try again." };
+  revalidatePath("/throwing", "layout");
+  return { saved: rows.length };
 }

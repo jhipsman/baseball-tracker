@@ -24,6 +24,7 @@ describe("sections", () => {
     expect(visibleTabs(health, null).map((t) => t.label)).toEqual([
       "Today",
       "Workload & logs",
+      "Growth",
       "Medical",
     ]);
   });

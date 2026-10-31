@@ -10,6 +10,7 @@ import { injuryLabel, isBodyPart, isInjuryType, planTitle, type Side } from "@/l
 import { ageOn, dailySeries, pitchSmartBand } from "@/lib/workload";
 import { ARM_FEEL } from "@/constants/throwing";
 import { feelOf, SLEEPS, spotName } from "@/lib/body";
+import { growthRate, trainingLoad } from "@/lib/load";
 import { ThrowsChart } from "@/components/throwing/throws-chart";
 import { ThrowLogForm } from "@/components/throwing/throw-log-form";
 import { BirthDateForm, ThrowingList } from "@/components/throwing/status";
@@ -43,7 +44,7 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
   if (!member || member.role !== "player") notFound();
   const name = member.profile.full_name || member.profile.email;
 
-  const [{ health, rows, births, body }, history] = await Promise.all([
+  const [{ health, rows, births, body, sessionsFor, heights }, history] = await Promise.all([
     loadHealth(supabase, org.id, [{ id, name }], today),
     loadHealthHistory(supabase, org.id, id),
   ]);
@@ -58,6 +59,10 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
     feel: mine.find((r) => r.date === d && r.armFeel)?.armFeel ?? null,
     body: myBody.find((c) => c.date === d) ?? null,
   }));
+  const load = trainingLoad(sessionsFor(id), today);
+  const weekSessions = sessionsFor(id).filter((x) => x.date >= addDays(today, -6));
+  const myHeights = heights.get(id) ?? [];
+  const growth = growthRate(myHeights);
   const lastBody = myBody[0] && myBody[0].date >= addDays(today, -6) ? myBody[0] : null;
 
   return (
@@ -249,6 +254,44 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
           </section>
         )}
       </div>
+
+      <section className="grid gap-3 sm:grid-cols-2" aria-label="Load and growth">
+        <div className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200" data-testid="load-card">
+          <h2 className="text-sm font-semibold text-zinc-600">Training load, last 7 days</h2>
+          <p className="mt-1 text-2xl font-semibold tabular-nums">{Math.round(load.acute)}</p>
+          <p className="text-sm text-zinc-600">
+            {weekSessions.length} session{weekSessions.length === 1 ? "" : "s"} (minutes × effort)
+            {load.ratio != null
+              ? ` · usual ${Math.round(load.chronic)}/week (${load.ratio.toFixed(1)}×)`
+              : " · builds a baseline over 3 weeks"}
+          </p>
+          <p className="mt-1 text-xs text-zinc-500">
+            From logged workouts and practices/games players add in their check-in.
+          </p>
+        </div>
+        <div className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200" data-testid="growth-card">
+          <h2 className="text-sm font-semibold text-zinc-600">Height</h2>
+          {myHeights[0] ? (
+            <>
+              <p className="mt-1 text-2xl font-semibold tabular-nums">{myHeights[0].inches} in</p>
+              <p className="text-sm text-zinc-600">
+                {formatGameDate(myHeights[0].date)}
+                {growth
+                  ? ` · +${growth.gained.toFixed(1)} in over ${growth.months} months (${growth.perYear.toFixed(1)} in/yr)`
+                  : ""}
+              </p>
+            </>
+          ) : (
+            <p className="mt-1 text-sm text-zinc-600">Not measured yet.</p>
+          )}
+          <Link
+            href="/throwing/growth"
+            className="mt-1 inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+          >
+            Measure the team →
+          </Link>
+        </div>
+      </section>
 
       {history.length ? (
         <section className="space-y-2">

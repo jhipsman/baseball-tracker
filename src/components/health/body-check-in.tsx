@@ -6,6 +6,10 @@ import { FEELS, feelOf, SLEEPS, spotName, type BodyCheckin, type Sleep } from "@
 import { cn } from "@/lib/utils";
 import { BodyMap } from "./body-map";
 
+const MINUTES = [30, 60, 90, 120, 150];
+const effortWord = (r: number) =>
+  r <= 2 ? "very easy" : r <= 4 ? "easy" : r <= 6 ? "moderate" : r <= 8 ? "hard" : "max effort";
+
 /**
  * About ten seconds on the player's home page: one tap for how they feel
  * overall, then (optional) tap anything sore and how they slept.
@@ -14,11 +18,22 @@ export function BodyCheckIn({ today, current }: { today: string; current: BodyCh
   const [feel, setFeel] = useState<number | null>(current?.feel ?? null);
   const [sore, setSore] = useState<string[]>(current?.sore ?? []);
   const [sleep, setSleep] = useState<Sleep | null>(current?.sleep ?? null);
+  const [minutes, setMinutes] = useState<number | null>(current?.session?.minutes ?? null);
+  const [rpe, setRpe] = useState<number>(current?.session?.rpe ?? 5);
+  const session = minutes ? { minutes, rpe } : null;
   const [stage, setStage] = useState<"feel" | "details" | "done">(current ? "done" : "feel");
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
 
-  function save(next: { feel: number; sore: string[]; sleep: Sleep | null }, then: typeof stage) {
+  function save(
+    next: {
+      feel: number;
+      sore: string[];
+      sleep: Sleep | null;
+      session: { minutes: number; rpe: number } | null;
+    },
+    then: typeof stage,
+  ) {
     setError("");
     start(async () => {
       const res = await saveBodyCheckin({ date: today, ...next });
@@ -41,6 +56,7 @@ export function BodyCheckIn({ today, current }: { today: string; current: BodyCh
           <span className="font-semibold">Feeling {f.label.toLowerCase()} today.</span>{" "}
           {sore.length ? `Sore: ${sore.map(spotName).join(", ")}.` : "Nothing sore."}
           {sleep ? ` Slept ${SLEEPS.find((s) => s.key === sleep)!.label}.` : ""}
+          {session ? ` Team session: ${session.minutes} min at ${session.rpe}/10.` : ""}
         </p>
         <button
           type="button"
@@ -68,7 +84,7 @@ export function BodyCheckIn({ today, current }: { today: string; current: BodyCh
             aria-pressed={feel === f.value}
             onClick={() => {
               setFeel(f.value);
-              save({ feel: f.value, sore, sleep }, "details");
+              save({ feel: f.value, sore, sleep, session }, "details");
             }}
             className={cn(
               "flex min-h-16 flex-col items-center justify-center gap-1 rounded-xl text-xs font-semibold ring-1 ring-zinc-200 transition-transform active:scale-95 disabled:opacity-60 sm:text-sm",
@@ -126,10 +142,48 @@ export function BodyCheckIn({ today, current }: { today: string; current: BodyCh
               ))}
             </div>
           </fieldset>
+          <fieldset>
+            <legend className="text-sm font-semibold">
+              Team practice or game today?{" "}
+              <span className="font-normal text-zinc-600">Optional. Not workouts you logged.</span>
+            </legend>
+            <div className="mt-2 grid grid-cols-5 gap-2">
+              {MINUTES.map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  aria-pressed={minutes === m}
+                  onClick={() => setMinutes(minutes === m ? null : m)}
+                  className={cn(
+                    "min-h-11 rounded-xl text-sm font-semibold ring-1",
+                    minutes === m
+                      ? "bg-zinc-900 text-zinc-50 ring-zinc-900"
+                      : "bg-surface ring-zinc-200 hover:bg-zinc-50",
+                  )}
+                >
+                  {m === 150 ? "2 h +" : `${m}m`}
+                </button>
+              ))}
+            </div>
+            {minutes ? (
+              <label className="mt-3 block text-sm font-medium">
+                How hard? <span className="font-semibold">{rpe}/10</span>{" "}
+                <span className="font-normal text-zinc-600">({effortWord(rpe)})</span>
+                <input
+                  type="range"
+                  min={1}
+                  max={10}
+                  value={rpe}
+                  onChange={(e) => setRpe(Number(e.target.value))}
+                  className="mt-2 block h-11 w-full accent-brand-700"
+                />
+              </label>
+            ) : null}
+          </fieldset>
           <button
             type="button"
             disabled={pending}
-            onClick={() => save({ feel, sore, sleep }, "done")}
+            onClick={() => save({ feel, sore, sleep, session }, "done")}
             className="h-12 w-full rounded-full bg-brand-700 font-semibold text-on-brand disabled:opacity-50"
           >
             {pending ? "Saving…" : "Done"}
