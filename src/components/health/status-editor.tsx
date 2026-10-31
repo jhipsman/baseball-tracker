@@ -2,7 +2,16 @@
 
 import { useOptimistic, useState, useTransition } from "react";
 import { setHealthStatus, togglePlanStep } from "@/lib/health-actions";
-import { RETURN_TO_THROW, type HealthState, type HealthStatus } from "@/lib/health";
+import {
+  INJURY_TYPES,
+  needsClearance,
+  planFor,
+  type HealthState,
+  type HealthStatus,
+  type InjuryType,
+  type Side,
+} from "@/lib/health";
+import { BodyMap, spotLabel } from "./body-map";
 import { cn } from "@/lib/utils";
 
 const OPTIONS: { key: HealthState; label: string; hint: string; on: string }[] = [
@@ -16,24 +25,42 @@ const OPTIONS: { key: HealthState; label: string; hint: string; on: string }[] =
   { key: "out", label: "⛔ Out", hint: "Not playing", on: "bg-red-50 ring-red-700" },
 ];
 
-/** The coach's call on a player, with the reason, expected return and a return-to-throw plan. */
+/** The coach's call on a player: status, the injury (what and where), expected return and a plan. */
 export function StatusEditor({ playerId, current }: { playerId: string; current: HealthStatus }) {
   const [status, setStatus] = useState<HealthState>(current.status);
   const [reason, setReason] = useState(current.reason ?? "");
   const [returnDate, setReturnDate] = useState(current.returnDate ?? "");
-  const [usePlan, setUsePlan] = useState(current.plan.length > 0 || current.status === "full");
-  const [planText, setPlanText] = useState(
-    (current.plan.length ? current.plan.map((s) => s.label) : RETURN_TO_THROW).join("\n"),
+  const [type, setType] = useState<InjuryType | "">(current.injury.type ?? "");
+  const [spot, setSpot] = useState<string | null>(
+    current.injury.bodyPart
+      ? current.injury.side && current.injury.side !== "both"
+        ? `${current.injury.bodyPart}:${current.injury.side}`
+        : current.injury.bodyPart
+      : null,
   );
+  const [startedOn, setStartedOn] = useState(current.injury.startedOn ?? "");
+  const template = (t: InjuryType | "", sp: string | null) =>
+    planFor(t || null, sp?.split(":")[0] ?? null);
+  const [usePlan, setUsePlan] = useState(
+    current.plan.length > 0 || (current.status === "full" && template(type, spot).length > 0),
+  );
+  const [planText, setPlanText] = useState(
+    (current.plan.length ? current.plan.map((s) => s.label) : template(type, spot)).join("\n"),
+  );
+  const [planTouched, setPlanTouched] = useState(current.plan.length > 0);
   const [pending, start] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const changed =
-    status !== current.status ||
-    (status !== "full" &&
-      (reason !== (current.reason ?? "") ||
-        returnDate !== (current.returnDate ?? "") ||
-        usePlan !== current.plan.length > 0 ||
-        (usePlan && planText !== current.plan.map((s) => s.label).join("\n"))));
+  const locked = needsClearance(current);
+  const concussion = type === "concussion";
+  const [part, side] = (spot ?? "").split(":");
+
+  /** Follow the injury with the matching checklist until the coach edits it. */
+  function retemplate(t: InjuryType | "", sp: string | null) {
+    if (planTouched) return;
+    const steps = template(t, sp);
+    setPlanText(steps.join("\n"));
+    setUsePlan(steps.length > 0);
+  }
 
   function save() {
     setMessage(null);
@@ -46,8 +73,27 @@ export function StatusEditor({ playerId, current }: { playerId: string; current:
           .map((label) => ({ label, done: old.get(label) ?? false }))
       : [];
     start(async () => {
-      const res = await setHealthStatus(playerId, { status, reason, returnDate, plan });
+      const res = await setHealthStatus(playerId, {
+        status,
+        reason,
+        returnDate,
+        plan,
+        injuryType: type || null,
+        bodyPart: concussion ? "head" : part || null,
+        side: (side as Side) || null,
+        startedOn: startedOn || null,
+      });
       setMessage(res.error ? { ok: false, text: res.error } : { ok: true, text: "Saved." });
+      // Back to Full closes the injury: the next one starts from a clean form.
+      if (!res.error && status === "full") {
+        setReason("");
+        setReturnDate("");
+        setType("");
+        setSpot(null);
+        setStartedOn("");
+        setPlanTouched(false);
+        setPlanText(planFor(null, null).join("\n"));
+      }
     });
   }
 
@@ -56,39 +102,129 @@ export function StatusEditor({ playerId, current }: { playerId: string; current:
       <fieldset>
         <legend className="mb-2 text-sm font-semibold">Can they play?</legend>
         <div className="grid grid-cols-3 gap-2">
-          {OPTIONS.map((o) => (
-            <label
-              key={o.key}
-              className={cn(
-                "flex min-h-14 cursor-pointer flex-col justify-center rounded-xl px-3 py-2 ring-1",
-                status === o.key ? cn("ring-2", o.on) : "bg-surface ring-zinc-200 hover:bg-zinc-50",
-              )}
-            >
-              <input
-                type="radio"
-                name="health-status"
-                value={o.key}
-                checked={status === o.key}
-                onChange={() => setStatus(o.key)}
-                className="sr-only"
-              />
-              <span className="text-sm font-semibold">{o.label}</span>
-              <span className="text-xs text-zinc-600">{o.hint}</span>
-            </label>
-          ))}
+          {OPTIONS.map((o) => {
+            const blocked = o.key === "full" && locked;
+            return (
+              <label
+                key={o.key}
+                className={cn(
+                  "flex min-h-14 flex-col justify-center rounded-xl px-3 py-2 ring-1",
+                  blocked ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                  status === o.key
+                    ? cn("ring-2", o.on)
+                    : "bg-surface ring-zinc-200 hover:bg-zinc-50",
+                )}
+              >
+                <input
+                  type="radio"
+                  name="health-status"
+                  value={o.key}
+                  checked={status === o.key}
+                  disabled={blocked}
+                  onChange={() => setStatus(o.key)}
+                  className="sr-only"
+                />
+                <span className="text-sm font-semibold">{o.label}</span>
+                <span className="text-xs text-zinc-600">
+                  {blocked ? "Needs written clearance" : o.hint}
+                </span>
+              </label>
+            );
+          })}
         </div>
       </fieldset>
 
       {status !== "full" ? (
         <>
-          <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+          <label className="block text-sm font-medium">
+            What happened?
+            <select
+              value={type}
+              disabled={locked}
+              onChange={(e) => {
+                const t = e.target.value as InjuryType | "";
+                setType(t);
+                if (t === "concussion") {
+                  setStatus("out");
+                  setSpot("head");
+                } else if (t === "illness") setSpot(null);
+                retemplate(t, t === "concussion" ? "head" : t === "illness" ? null : spot);
+              }}
+              className="mt-1 block h-11 w-full rounded-lg bg-surface px-3 ring-1 ring-zinc-300"
+            >
+              <option value="">Choose…</option>
+              {INJURY_TYPES.map((t) => (
+                <option key={t.key} value={t.key}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {concussion ? (
+            <div
+              role="note"
+              className="rounded-xl bg-red-50 p-3 text-sm text-red-950 ring-1 ring-red-200"
+            >
+              <p className="font-semibold">Concussion protocol</p>
+              <p className="mt-1">
+                When in doubt, sit them out: no practice or games the same day, and not until
+                they&apos;re symptom-free and a doctor&apos;s written clearance is uploaded here.
+                Each step below takes at least 24 hours without symptoms; if symptoms come back,
+                drop back a step. Follow your league and state rules.
+              </p>
+            </div>
+          ) : type !== "illness" ? (
+            <div>
+              <p className="text-sm font-medium">
+                Where?{" "}
+                <span className="font-normal text-zinc-600">
+                  {spot ? spotLabel(spot) : "Tap the area"}
+                </span>
+                {spot ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSpot(null);
+                      retemplate(type, null);
+                    }}
+                    className="ml-2 min-h-11 text-sm font-medium text-brand-700"
+                  >
+                    Clear
+                  </button>
+                ) : null}
+              </p>
+              <BodyMap
+                label="Where is the injury"
+                selected={spot ? [spot] : []}
+                onToggle={(sp) => {
+                  const next = sp === spot ? null : sp;
+                  setSpot(next);
+                  retemplate(type, next);
+                }}
+              />
+            </div>
+          ) : null}
+
+          <label className="block text-sm font-medium">
+            Notes for the staff and family
+            <input
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              maxLength={200}
+              placeholder={
+                concussion ? "e.g. Collision at 2B, headache after" : "e.g. No throwing, can hit"
+              }
+              className="mt-1 block h-11 w-full rounded-lg bg-surface px-3 ring-1 ring-zinc-300"
+            />
+          </label>
+          <div className="grid grid-cols-2 gap-3">
             <label className="text-sm font-medium">
-              What&apos;s going on?
+              Happened
               <input
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                maxLength={200}
-                placeholder="e.g. Sore elbow, no throwing"
+                type="date"
+                value={startedOn}
+                onChange={(e) => setStartedOn(e.target.value)}
                 className="mt-1 block h-11 w-full rounded-lg bg-surface px-3 ring-1 ring-zinc-300"
               />
             </label>
@@ -109,14 +245,17 @@ export function StatusEditor({ playerId, current }: { playerId: string; current:
               onChange={(e) => setUsePlan(e.target.checked)}
               className="size-5 accent-brand-700"
             />
-            Follow a return-to-throw plan
+            Follow a return plan
           </label>
           {usePlan ? (
             <label className="block text-sm font-medium">
               Steps, one per line
               <textarea
                 value={planText}
-                onChange={(e) => setPlanText(e.target.value)}
+                onChange={(e) => {
+                  setPlanText(e.target.value);
+                  setPlanTouched(true);
+                }}
                 rows={Math.min(12, planText.split("\n").length + 1)}
                 className="mt-1 block w-full rounded-lg bg-surface px-3 py-2 text-sm ring-1 ring-zinc-300"
               />
@@ -132,7 +271,7 @@ export function StatusEditor({ playerId, current }: { playerId: string; current:
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          disabled={pending || !changed}
+          disabled={pending}
           onClick={save}
           className="h-11 rounded-full bg-brand-700 px-5 text-sm font-semibold text-on-brand disabled:opacity-50"
         >

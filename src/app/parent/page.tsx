@@ -10,6 +10,8 @@ import { playerToday } from "@/lib/player";
 import { addDays, weekStartOf } from "@/lib/schedule";
 import { complianceOf } from "@/lib/compliance";
 import { loadThrowing } from "@/lib/throwing";
+import { STATUS_COLUMNS, toHealthStatus } from "@/lib/health";
+import { FamilyHealthStatus } from "@/components/health/family-status";
 import { availability, throwingAlerts } from "@/lib/workload";
 import { loadAssessments, seriesByMetric } from "@/lib/assessments";
 import { METRICS } from "@/constants/metrics";
@@ -51,6 +53,7 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
     assessments,
     [nextPractice],
     nextGame,
+    healthStatus,
   ] = await Promise.all([
     loadChildEntries(supabase, org.id, child.id, from28, weekEnd > today ? weekEnd : today, today),
     loadThrowing(supabase, org.id, addDays(today, -60), child.id),
@@ -68,6 +71,15 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
     loadPlayerGroupIds(supabase, child.id).then((groups) =>
       loadNextGame(supabase, org.id, today, groups),
     ),
+    hasModule(org.modules, "health")
+      ? supabase
+          .from("player_health_status")
+          .select(STATUS_COLUMNS)
+          .eq("org_id", org.id)
+          .eq("player_id", child.id)
+          .maybeSingle()
+          .then((r) => (r.data ? toHealthStatus(r.data) : null))
+      : Promise.resolve(null),
   ]);
 
   const has = (key: ModuleKey) => hasModule(org.modules, key);
@@ -97,6 +109,16 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">How {name} is doing</h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent" />
       </div>
+
+      {healthStatus ? (
+        <FamilyHealthStatus
+          status={healthStatus}
+          orgId={org.id}
+          playerId={child.id}
+          firstName={name}
+          self={false}
+        />
+      ) : null}
 
       <FormsCard base="/parent" />
 

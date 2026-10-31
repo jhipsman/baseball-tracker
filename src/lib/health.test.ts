@@ -1,5 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { parsePlan, playerHealth, type HealthStatus } from "./health";
+import {
+  CONCUSSION_PROTOCOL,
+  injuryLabel,
+  NO_INJURY,
+  parsePlan,
+  planFor,
+  playerHealth,
+  RETURN_TO_PLAY,
+  RETURN_TO_THROW,
+  toHealthStatus,
+  type HealthStatus,
+} from "./health";
 import type { Alert, Availability } from "./workload";
 
 const ready: Availability = {
@@ -41,6 +52,7 @@ describe("playerHealth", () => {
       reason: "Elbow",
       returnDate: "2026-11-20",
       plan: [],
+      injury: NO_INJURY,
     };
     const h = playerHealth({ ...base, status: out, alerts: [pain] });
     expect([h.lane, h.detail]).toEqual(["out", "Elbow · back 2026-11-20"]);
@@ -64,5 +76,56 @@ describe("parsePlan", () => {
       { label: "Catch", done: true },
     ]);
     expect(parsePlan("nope")).toEqual([]);
+  });
+});
+
+describe("injuries", () => {
+  it("labels where and what", () => {
+    expect(injuryLabel({ type: "sprain", bodyPart: "ankle", side: "left" })).toBe(
+      "Left ankle sprain",
+    );
+    expect(injuryLabel({ type: "strain", bodyPart: "lower_back", side: null })).toBe(
+      "Lower back strain",
+    );
+    expect(injuryLabel({ type: "other", bodyPart: "elbow", side: "both" })).toBe("Elbow");
+    expect(injuryLabel({ type: "soreness", bodyPart: null, side: null })).toBe("Soreness");
+    expect(injuryLabel({ type: "concussion", bodyPart: "head", side: null })).toBe(
+      "Concussion protocol",
+    );
+    expect(injuryLabel({ type: null, bodyPart: null, side: null })).toBeNull();
+  });
+  it("picks the plan for the injury", () => {
+    expect(planFor("concussion", null)).toBe(CONCUSSION_PROTOCOL);
+    expect(planFor("strain", "shoulder")).toBe(RETURN_TO_THROW);
+    expect(planFor("sprain", "ankle")).toBe(RETURN_TO_PLAY);
+    expect(planFor("illness", null)).toEqual([]);
+  });
+  it("puts the injury in the card line and ignores unknown values", () => {
+    const status = toHealthStatus({
+      status: "limited",
+      reason: "No running",
+      return_date: null,
+      plan: [],
+      injury_type: "strain",
+      body_part: "hamstring",
+      side: "right",
+      started_on: "2026-11-01",
+      clearance_path: null,
+      clearance_at: null,
+    });
+    expect(playerHealth({ ...base, status }).detail).toBe("Right hamstring strain: No running");
+    const odd = toHealthStatus({
+      status: "out",
+      reason: null,
+      return_date: null,
+      plan: null,
+      injury_type: "broken",
+      body_part: "tail",
+      side: "up",
+      started_on: null,
+      clearance_path: null,
+      clearance_at: null,
+    });
+    expect(odd.injury).toEqual(NO_INJURY);
   });
 });

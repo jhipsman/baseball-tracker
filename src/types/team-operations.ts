@@ -320,6 +320,10 @@ export type TeamOperationsFunctions = {
   send_payment_reminders: { Args: Record<string, never>; Returns: number };
   notify_document: { Args: { p_doc: string; p_missing_only: boolean }; Returns: number };
   send_trial_reminders: { Args: Record<string, never>; Returns: number };
+  submit_health_clearance: {
+    Args: { p_org: string; p_player: string; p_path: string };
+    Returns: undefined;
+  };
   apply_team_stripe_payment: {
     Args: {
       p_event: string;

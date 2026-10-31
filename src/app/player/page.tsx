@@ -17,7 +17,8 @@ import { NextGameCard } from "@/components/games/game-ui";
 import { cn } from "@/lib/utils";
 import { ArmCheckIn } from "@/components/health/arm-check-in";
 import { FormsCard } from "@/components/documents/family";
-import { parsePlan } from "@/lib/health";
+import { STATUS_COLUMNS, toHealthStatus } from "@/lib/health";
+import { FamilyHealthStatus } from "@/components/health/family-status";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -54,14 +55,13 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
     health
       ? supabase
           .from("player_health_status")
-          .select("status, reason, return_date, plan")
+          .select(STATUS_COLUMNS)
           .eq("org_id", org.id)
           .eq("player_id", user.id)
           .maybeSingle()
-          .then((r) => r.data)
+          .then((r) => (r.data ? toHealthStatus(r.data) : null))
       : Promise.resolve(null),
   ]);
-  const plan = parsePlan(myStatus?.plan);
 
   const firstName = (user.user_metadata?.full_name as string | undefined)?.split(" ")[0];
   const dateLabel = new Date(`${today}T12:00:00Z`).toLocaleDateString("en-US", {
@@ -89,40 +89,14 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
         </p>
       ) : null}
 
-      {health && myStatus && myStatus.status !== "full" ? (
-        <section
-          aria-label="Your status"
-          className={cn(
-            "rounded-2xl p-4 ring-1",
-            myStatus.status === "out"
-              ? "bg-red-50 text-red-900 ring-red-200"
-              : "bg-orange-50 text-orange-950 ring-orange-300",
-          )}
-        >
-          <p className="font-semibold">
-            {myStatus.status === "out" ? "⛔ Coach has you out" : "◐ Coach has you limited"}
-            {myStatus.reason ? `: ${myStatus.reason}` : ""}
-          </p>
-          {myStatus.return_date ? (
-            <p className="text-sm">
-              Expected back{" "}
-              {new Date(`${myStatus.return_date}T12:00:00Z`).toLocaleDateString("en-US", {
-                weekday: "short",
-                month: "short",
-                day: "numeric",
-                timeZone: "UTC",
-              })}
-            </p>
-          ) : null}
-          {plan.length ? (
-            <div className="mt-2 text-sm">
-              <p className="font-medium">
-                Return to throw: {plan.filter((p) => p.done).length} of {plan.length} steps
-              </p>
-              {plan.find((p) => !p.done) ? <p>Next: {plan.find((p) => !p.done)!.label}</p> : null}
-            </div>
-          ) : null}
-        </section>
+      {health && myStatus ? (
+        <FamilyHealthStatus
+          status={myStatus}
+          orgId={org.id}
+          playerId={user.id}
+          firstName={firstName ?? "You"}
+          self
+        />
       ) : null}
 
       <FormsCard base="/player" />

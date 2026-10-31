@@ -5,7 +5,8 @@ import { requireActiveOrg } from "@/lib/org";
 import { playerToday } from "@/lib/player";
 import { formatGameDate } from "@/lib/games";
 import { addDays } from "@/lib/schedule";
-import { loadHealth } from "@/lib/health-data";
+import { loadHealth, loadHealthHistory } from "@/lib/health-data";
+import { injuryLabel, isBodyPart, isInjuryType, planTitle, type Side } from "@/lib/health";
 import { ageOn, dailySeries, pitchSmartBand } from "@/lib/workload";
 import { ARM_FEEL } from "@/constants/throwing";
 import { ThrowsChart } from "@/components/throwing/throws-chart";
@@ -13,6 +14,7 @@ import { ThrowLogForm } from "@/components/throwing/throw-log-form";
 import { BirthDateForm, ThrowingList } from "@/components/throwing/status";
 import { HandleAlert } from "@/components/health/alert-actions";
 import { PlanChecklist, StatusEditor } from "@/components/health/status-editor";
+import { ClearanceUpload, OpenHealthFile } from "@/components/health/clearance";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Player Health" };
@@ -40,7 +42,10 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
   if (!member || member.role !== "player") notFound();
   const name = member.profile.full_name || member.profile.email;
 
-  const { health, rows, births } = await loadHealth(supabase, org.id, [{ id, name }], today);
+  const [{ health, rows, births }, history] = await Promise.all([
+    loadHealth(supabase, org.id, [{ id, name }], today),
+    loadHealthHistory(supabase, org.id, id),
+  ]);
   const h = health[0];
   const mine = rows.filter((r) => r.playerId === id);
   const birth = births.get(id) ?? null;
@@ -162,11 +167,38 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
           <h2 className="text-lg font-semibold">Status</h2>
           <StatusEditor playerId={id} current={h.status} />
         </section>
-        {h.status.plan.length ? (
-          <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
-            <h2 className="text-lg font-semibold">Return to throw</h2>
-            <PlanChecklist playerId={id} plan={h.status.plan} />
-          </section>
+        {h.status.plan.length || h.status.status !== "full" ? (
+          <div className="space-y-6">
+            {h.status.plan.length ? (
+              <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
+                <h2 className="text-lg font-semibold">{planTitle(h.status.injury)}</h2>
+                <PlanChecklist playerId={id} plan={h.status.plan} />
+              </section>
+            ) : null}
+            {h.status.status !== "full" ? (
+              <section
+                className={cn(
+                  "space-y-2 rounded-2xl p-4 ring-1 sm:p-5",
+                  h.status.injury.type === "concussion" && !h.status.injury.clearancePath
+                    ? "bg-red-50 text-red-950 ring-red-200"
+                    : "bg-surface ring-zinc-200",
+                )}
+              >
+                <h2 className="text-lg font-semibold">Doctor&apos;s note</h2>
+                <ClearanceUpload
+                  orgId={org.id}
+                  playerId={id}
+                  path={h.status.injury.clearancePath}
+                  uploadedAt={h.status.injury.clearanceAt}
+                  concussion={h.status.injury.type === "concussion"}
+                  audience="staff"
+                />
+                <p className="text-xs opacity-80">
+                  The player and their parents can upload it too; you&apos;ll get a notification.
+                </p>
+              </section>
+            ) : null}
+          </div>
         ) : (
           <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
             <h2 className="text-lg font-semibold">Log for {name.split(" ")[0]}</h2>
@@ -174,6 +206,36 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
           </section>
         )}
       </div>
+
+      {history.length ? (
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold">Injury history</h2>
+          <ul className="divide-y divide-zinc-100 rounded-2xl bg-surface ring-1 ring-zinc-200">
+            {history.map((x) => (
+              <li
+                key={x.id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm"
+              >
+                <span className="font-semibold">
+                  {injuryLabel({
+                    type: isInjuryType(x.injury_type) ? x.injury_type : null,
+                    bodyPart: isBodyPart(x.body_part) ? x.body_part : null,
+                    side: (x.side as Side | null) ?? null,
+                  }) ?? (x.status === "out" ? "Out" : "Limited")}
+                </span>
+                {x.reason ? <span className="text-zinc-600">{x.reason}</span> : null}
+                <span className="text-zinc-500">
+                  {x.started_on ? `${formatGameDate(x.started_on)} – ` : ""}
+                  {formatGameDate(x.ended_on)}
+                </span>
+                {x.clearance_path ? (
+                  <OpenHealthFile path={x.clearance_path} label="Doctor's note" />
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Throwing, last 4 weeks</h2>
@@ -184,7 +246,7 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
           />
         </div>
         <ThrowingList rows={mine.slice(0, 10)} canDelete={() => true} />
-        {h.status.plan.length ? (
+        {h.status.plan.length || h.status.status !== "full" ? (
           <details className="rounded-2xl bg-surface p-4 ring-1 ring-zinc-200">
             <summary className="cursor-pointer text-sm font-semibold">
               Log for {name.split(" ")[0]}

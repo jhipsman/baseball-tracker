@@ -3,7 +3,13 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database";
 import { formatGameDate } from "./games";
-import { parsePlan, playerHealth, type HealthStatus, type PlayerHealth } from "./health";
+import {
+  playerHealth,
+  STATUS_COLUMNS,
+  toHealthStatus,
+  type HealthStatus,
+  type PlayerHealth,
+} from "./health";
 import { addDays } from "./schedule";
 import { loadBirthDates, loadThrowing, type ThrowingRow } from "./throwing";
 import { availability, throwingAlerts } from "./workload";
@@ -14,14 +20,9 @@ type Client = SupabaseClient<Database>;
 export async function loadHealthStatuses(supabase: Client, orgId: string) {
   const { data } = await supabase
     .from("player_health_status")
-    .select("player_id, status, reason, return_date, plan")
+    .select(`player_id, ${STATUS_COLUMNS}`)
     .eq("org_id", orgId);
-  return new Map<string, HealthStatus>(
-    (data ?? []).map((r) => [
-      r.player_id,
-      { status: r.status, reason: r.reason, returnDate: r.return_date, plan: parsePlan(r.plan) },
-    ]),
-  );
+  return new Map<string, HealthStatus>((data ?? []).map((r) => [r.player_id, toHealthStatus(r)]));
 }
 
 /** Alert keys a coach has marked handled, per player. */
@@ -69,4 +70,18 @@ export async function loadHealth(
     });
   });
   return { health, rows, births };
+}
+
+/** Past injuries for one player, newest first. */
+export async function loadHealthHistory(supabase: Client, orgId: string, playerId: string) {
+  const { data } = await supabase
+    .from("player_health_history")
+    .select(
+      "id, status, injury_type, body_part, side, reason, started_on, ended_on, clearance_path",
+    )
+    .eq("org_id", orgId)
+    .eq("player_id", playerId)
+    .order("ended_on", { ascending: false })
+    .limit(30);
+  return data ?? [];
 }

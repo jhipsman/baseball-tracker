@@ -1107,8 +1107,63 @@ export type Database = {
           },
         ];
       };
+      player_health_history: {
+        Row: {
+          body_part: string | null;
+          clearance_path: string | null;
+          closed_by: string | null;
+          created_at: string;
+          ended_on: string;
+          id: string;
+          injury_type: string | null;
+          org_id: string;
+          player_id: string;
+          reason: string | null;
+          side: string | null;
+          started_on: string | null;
+          status: Database["public"]["Enums"]["health_status"];
+        };
+        Insert: {
+          body_part?: string | null;
+          clearance_path?: string | null;
+          closed_by?: string | null;
+          created_at?: string;
+          ended_on?: string;
+          id?: string;
+          injury_type?: string | null;
+          org_id: string;
+          player_id: string;
+          reason?: string | null;
+          side?: string | null;
+          started_on?: string | null;
+          status: Database["public"]["Enums"]["health_status"];
+        };
+        Update: {
+          body_part?: string | null;
+          clearance_path?: string | null;
+          closed_by?: string | null;
+          created_at?: string;
+          ended_on?: string;
+          id?: string;
+          injury_type?: string | null;
+          org_id?: string;
+          player_id?: string;
+          reason?: string | null;
+          side?: string | null;
+          started_on?: string | null;
+          status?: Database["public"]["Enums"]["health_status"];
+        };
+        Relationships: [];
+      };
       player_health_status: {
         Row: {
+          body_part: string | null;
+          clearance_at: string | null;
+          clearance_by: string | null;
+          clearance_path: string | null;
+          injury_type: string | null;
+          side: string | null;
+          started_on: string | null;
           org_id: string;
           plan: Json;
           player_id: string;
@@ -1119,6 +1174,13 @@ export type Database = {
           updated_by: string | null;
         };
         Insert: {
+          body_part?: string | null;
+          clearance_at?: string | null;
+          clearance_by?: string | null;
+          clearance_path?: string | null;
+          injury_type?: string | null;
+          side?: string | null;
+          started_on?: string | null;
           org_id: string;
           plan?: Json;
           player_id: string;
@@ -1129,6 +1191,13 @@ export type Database = {
           updated_by?: string | null;
         };
         Update: {
+          body_part?: string | null;
+          clearance_at?: string | null;
+          clearance_by?: string | null;
+          clearance_path?: string | null;
+          injury_type?: string | null;
+          side?: string | null;
+          started_on?: string | null;
           org_id?: string;
           plan?: Json;
           player_id?: string;

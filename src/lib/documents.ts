@@ -69,6 +69,9 @@ export const docPath = {
     `${org}/responses/${subject}/${doc}-${Date.now().toString(36)}.${ext}`,
   credential: (org: string, who: string, ext: string) =>
     `${org}/credentials/${who}/${Date.now().toString(36)}.${ext}`,
+  /** Doctor's notes and clearances (staff, the player and their parents). */
+  health: (org: string, player: string, ext: string) =>
+    `${org}/health/${player}/${Date.now().toString(36)}.${ext}`,
 };
 
 export const UPLOAD_TYPES = [

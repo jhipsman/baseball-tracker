@@ -40,6 +40,15 @@ function PlayerCard({ h }: { h: PlayerHealth }) {
             {h.name}
           </Link>
           <p className="text-sm text-zinc-600">{h.detail}</p>
+          {h.status.injury.type === "concussion" && h.status.status !== "full" ? (
+            <p className="mt-1 text-xs font-semibold">
+              {h.status.injury.clearancePath ? (
+                <span className="text-brand-800">✓ Doctor&apos;s note in: review and clear</span>
+              ) : (
+                <span className="text-red-800">Needs a doctor&apos;s written clearance</span>
+              )}
+            </p>
+          ) : null}
         </div>
         {h.feel ? <ArmFeelChip feel={h.feel.feel} /> : null}
       </div>

@@ -10,6 +10,7 @@ export const NOTIFICATION_KINDS = [
   { key: "practice", label: "Practice plans" },
   { key: "program_assigned", label: "New programs" },
   { key: "game", label: "Game changes & final scores" },
+  { key: "health", label: "Health & injury updates" },
 ] as const;
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number]["key"];
@@ -19,9 +20,17 @@ export const isNotificationKind = (v: unknown): v is NotificationKind =>
   typeof v === "string" && KIND_KEYS.has(v);
 
 const ROLE_KINDS: Record<"staff" | "player" | "parent", readonly NotificationKind[]> = {
-  staff: ["announcement", "message", "video_uploaded", "arm_pain"],
-  player: ["announcement", "message", "video_reviewed", "practice", "program_assigned", "game"],
-  parent: ["announcement", "message", "video_reviewed", "arm_pain", "practice", "game"],
+  staff: ["announcement", "message", "video_uploaded", "arm_pain", "health"],
+  player: [
+    "announcement",
+    "message",
+    "video_reviewed",
+    "practice",
+    "program_assigned",
+    "game",
+    "health",
+  ],
+  parent: ["announcement", "message", "video_reviewed", "arm_pain", "practice", "game", "health"],
 };
 
 /** The kinds a role can actually receive (for the push mute list). */
