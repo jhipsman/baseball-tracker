@@ -278,7 +278,7 @@ export function ExerciseFigure({
         <FigureSvg fig={fig} ms={0} still />
       )}
       <figcaption className="sr-only">
-        3D demonstration of {name}. {fig.cue}
+        Diagram of {name}. {fig.cue}
       </figcaption>
     </figure>
   );
