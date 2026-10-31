@@ -109,6 +109,51 @@ export type TeamOperationsTables = {
   team_payment_plan_requests: Table<{ org_id: string; request_key: string; plan_id: string }>;
   registration_forms: Table<RegistrationFormRow>;
   team_registrations: Table<RegistrationRow>;
+  team_documents: Table<TeamDocumentRow>;
+  document_responses: Table<DocumentResponseRow>;
+  staff_credentials: Table<StaffCredentialRow>;
+};
+export type TeamDocumentRow = {
+  id: string;
+  org_id: string;
+  title: string;
+  description: string | null;
+  kind: "read" | "acknowledge" | "sign" | "upload";
+  audience: "families" | "staff";
+  group_id: string | null;
+  file_path: string | null;
+  file_sha256: string | null;
+  due_date: string | null;
+  archived: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type DocumentResponseRow = {
+  id: string;
+  org_id: string;
+  document_id: string;
+  subject_id: string;
+  completed_by: string | null;
+  kind: "acknowledged" | "signed" | "uploaded";
+  signed_name: string | null;
+  file_path: string | null;
+  doc_sha256: string | null;
+  consent_at: string | null;
+  signer_ip: string | null;
+  signer_agent: string | null;
+  created_at: string;
+};
+export type StaffCredentialRow = {
+  id: string;
+  org_id: string;
+  profile_id: string;
+  kind: "background_check" | "safesport" | "concussion" | "first_aid" | "other";
+  label: string | null;
+  file_path: string;
+  issued_on: string | null;
+  expires_on: string | null;
+  created_at: string;
 };
 export type RegistrationFormRow = {
   id: string;
@@ -272,6 +317,7 @@ export type TeamOperationsFunctions = {
     Returns: undefined;
   };
   send_payment_reminders: { Args: Record<string, never>; Returns: number };
+  notify_document: { Args: { p_doc: string; p_missing_only: boolean }; Returns: number };
   apply_team_stripe_payment: {
     Args: {
       p_event: string;

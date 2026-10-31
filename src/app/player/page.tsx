@@ -16,6 +16,7 @@ import { loadNextGame } from "@/lib/games";
 import { NextGameCard } from "@/components/games/game-ui";
 import { cn } from "@/lib/utils";
 import { ArmCheckIn } from "@/components/health/arm-check-in";
+import { FormsCard } from "@/components/documents/family";
 import { parsePlan } from "@/lib/health";
 
 export const metadata: Metadata = { title: "Today" };
@@ -123,6 +124,8 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
           ) : null}
         </section>
       ) : null}
+
+      <FormsCard base="/player" />
 
       {health ? <ArmCheckIn today={today} current={armToday} /> : null}
 

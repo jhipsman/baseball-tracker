@@ -38,6 +38,7 @@ export const COACH_SECTIONS: Section[] = [
       { href: "/stats", label: "Stats", module: "games" },
       { href: "/imports", label: "Import", adminOnly: true },
       { href: "/registration", label: "Registration", adminOnly: true },
+      { href: "/documents", label: "Documents" },
       { href: "/dues", label: "Payments", adminOnly: true },
     ],
   },

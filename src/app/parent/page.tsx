@@ -1,3 +1,4 @@
+import { FormsCard } from "@/components/documents/family";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { loadChildEntries, loadChildPractices, pickChild, requireParent } from "@/lib/parent";
@@ -96,6 +97,8 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">How {name} is doing</h1>
         <ChildSwitcher kids={kids} selected={child} basePath="/parent" />
       </div>
+
+      <FormsCard base="/parent" />
 
       <div className="flex flex-wrap gap-3">
         <Link
