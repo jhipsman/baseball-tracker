@@ -1,7 +1,7 @@
-/** What the public site says about price. Change it here; the pricing page and FAQs follow. */
+/** What the public site and billing say about price. Change it here; pages and checkout follow. */
 export const PRICING = {
-  /** Free period for teams that join now. */
-  foundingOffer: "Free for founding teams through the 2027 season",
+  /** Every new team: free, no card. */
+  trialDays: 30,
   team: { monthly: 19, yearly: 190 },
   /** Teams at which the club discount starts. */
   clubFrom: 5,

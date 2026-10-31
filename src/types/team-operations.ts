@@ -112,6 +112,7 @@ export type TeamOperationsTables = {
   team_documents: Table<TeamDocumentRow>;
   document_responses: Table<DocumentResponseRow>;
   staff_credentials: Table<StaffCredentialRow>;
+  billing_events: Table<{ event_id: string; created_at: string }>;
 };
 export type TeamDocumentRow = {
   id: string;
@@ -318,6 +319,7 @@ export type TeamOperationsFunctions = {
   };
   send_payment_reminders: { Args: Record<string, never>; Returns: number };
   notify_document: { Args: { p_doc: string; p_missing_only: boolean }; Returns: number };
+  send_trial_reminders: { Args: Record<string, never>; Returns: number };
   apply_team_stripe_payment: {
     Args: {
       p_event: string;

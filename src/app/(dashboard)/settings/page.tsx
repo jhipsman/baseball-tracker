@@ -6,12 +6,20 @@ import { cleanModules } from "@/constants/modules";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { openDemoTeam, removeDemoTeam } from "@/lib/demo-actions";
 import { SettingsForm } from "./settings-form";
+import { BillingCard } from "@/components/billing/billing-card";
 
 export const metadata: Metadata = { title: "Settings" };
 
-export default async function SettingsPage() {
+export default async function SettingsPage({ searchParams }: PageProps<"/settings">) {
   const { supabase, org, membership, memberships } = await requireActiveOrg();
   if (membership.role !== "admin") redirect("/");
+  const { billing } = await searchParams;
+  const { data: plan } = await supabase
+    .from("organizations")
+    .select("plan_renews_at")
+    .eq("id", org.id)
+    .single();
+  const renewsAt = plan?.plan_renews_at ?? null;
 
   const [{ data: members }, { data: links }] = await Promise.all([
     supabase
@@ -42,6 +50,22 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Team settings</h1>
         <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
       </div>
+      {billing === "done" ? (
+        <p
+          role="status"
+          className="rounded-xl bg-brand-50 px-4 py-3 text-sm font-medium text-brand-900 ring-1 ring-brand-200"
+        >
+          ✓ Thanks! Your subscription is being confirmed; this page updates in a few seconds.
+        </p>
+      ) : null}
+      <BillingCard
+        org={{
+          is_demo: org.is_demo,
+          plan_status: org.plan_status,
+          trial_ends_at: org.trial_ends_at,
+        }}
+        renewsAt={renewsAt}
+      />
       <Link
         href="/imports"
         className="block rounded-xl border border-brand-200 bg-brand-50 p-5 text-sm font-medium text-brand-800"

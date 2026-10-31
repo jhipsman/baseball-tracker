@@ -46,7 +46,7 @@ export const getMemberships = cache(async () => {
   const { data, error } = await supabase
     .from("org_memberships")
     .select(
-      "id, role, status, org:organizations (id, name, slug, plan_tier, current_season_phase, modules, team_type, is_demo)",
+      "id, role, status, org:organizations (id, name, slug, plan_tier, current_season_phase, modules, team_type, is_demo, plan_status, trial_ends_at)",
     )
     .eq("profile_id", user.id)
     .order("created_at");

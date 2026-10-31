@@ -952,6 +952,7 @@ export type Database = {
           stripe_customer_id: string | null;
           stripe_subscription_id: string | null;
           team_type: string | null;
+          trial_ends_at: string | null;
         };
         Insert: {
           created_at?: string;
@@ -971,6 +972,7 @@ export type Database = {
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
           team_type?: string | null;
+          trial_ends_at?: string | null;
         };
         Update: {
           created_at?: string;
@@ -990,6 +992,7 @@ export type Database = {
           stripe_customer_id?: string | null;
           stripe_subscription_id?: string | null;
           team_type?: string | null;
+          trial_ends_at?: string | null;
         };
         Relationships: [
           {

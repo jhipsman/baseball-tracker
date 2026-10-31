@@ -104,6 +104,16 @@ Then each team admin opens **Team → Payments → Set up online payments** once
 
 Payment reminders run every day at about 10–11am Eastern (3 days before, on the day, and 3 and 7 days late; at most one a day per family; never for autopay plans).
 
+### Charging teams for 9D (subscriptions)
+
+Every team gets a 30-day free trial (no card). After that, coach pages become view-only until an admin subscribes in **Settings → Billing** ($19/month or $190/year; prices live in `src/constants/pricing.ts`). Players, parents and demo teams are never billed. The money goes to your own Stripe account, not teams' accounts.
+
+1. Stripe → **Developers → Webhooks → Add destination** (a second one): **Your account** events, URL `https://YOUR-SITE/api/billing/webhook`, events `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`. Copy its signing secret into Vercel as **`STRIPE_WEBHOOK_SECRET`** and redeploy.
+2. Stripe → **Settings → Billing → Customer portal** → **Save** (turns on the "Manage billing" page: card, receipts, monthly/yearly, cancel).
+3. Nothing else: the "9D Team" product and its monthly and yearly prices are created automatically the first time someone subscribes.
+
+**Discount codes:** Stripe → **Product catalog → Coupons → New** (e.g. 100% off for 3 months), then add a **promotion code** customers type (e.g. `COACHMIKE`). Checkout has a code box.
+
 ## 4. Point Supabase logins at your site
 
 In Supabase:

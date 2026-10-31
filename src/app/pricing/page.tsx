@@ -14,7 +14,7 @@ import {
 
 export const metadata: Metadata = {
   title: `Pricing · ${BRAND.name}`,
-  description: `${PRICING.foundingOffer}. Players and parents are always free. No ${BRAND.name} fee on team dues.`,
+  description: `${PRICING.trialDays}-day free trial, no card needed. Players and parents are always free. No ${BRAND.name} fee on team dues.`,
 };
 
 export default async function PricingPage() {
@@ -29,7 +29,7 @@ export default async function PricingPage() {
       />
       <section className="mx-auto max-w-6xl px-4 py-14">
         <p className="mx-auto mb-8 w-fit rounded-full bg-brand-100 px-4 py-2 text-center text-sm font-semibold text-brand-900">
-          🎉 {PRICING.foundingOffer}
+          {PRICING.trialDays}-day free trial · no card needed
         </p>
         <div className="grid gap-4 md:grid-cols-3">
           <div className="flex flex-col rounded-3xl bg-surface p-6 ring-1 ring-zinc-200">
@@ -51,7 +51,7 @@ export default async function PricingPage() {
               <span className="text-base font-normal text-zinc-500"> / month</span>
             </p>
             <p className="text-sm text-zinc-500">
-              or ${yearly} a year · after your free founding season
+              or ${yearly} a year (two months free) · after your {PRICING.trialDays}-day trial
             </p>
             <ul className="mt-5 space-y-2 text-sm text-zinc-700">
               {FEATURES.map((f) => (
@@ -90,8 +90,12 @@ export default async function PricingPage() {
       <Faq
         items={[
           [
-            "What happens after the founding season?",
-            `You choose: keep going on the Team plan ($${monthly} a month or $${yearly} a year), or stop. Nothing is charged without you choosing a plan.`,
+            `What happens after the ${PRICING.trialDays}-day trial?`,
+            `Subscribe for $${monthly} a month or $${yearly} a year to keep managing your team. If you don't, nothing is deleted: your team becomes read-only until you subscribe.`,
+          ],
+          [
+            "Do I need a card to start?",
+            "No. Start your team and invite everyone; add a card only when you subscribe.",
           ],
           ["Do players or parents ever pay for the app?", "No. Only the team's plan has a price."],
           [
@@ -106,7 +110,7 @@ export default async function PricingPage() {
       />
       <CtaBand
         signedIn={signedIn}
-        title="Start free this season."
+        title={`Try it free for ${PRICING.trialDays} days.`}
         lead="Set up your team in a few minutes and try it with a demo roster."
       />
     </SiteShell>

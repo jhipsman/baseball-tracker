@@ -231,7 +231,7 @@ export const AUDIENCES: Audience[] = [
     faq: [
       [
         "What does it cost?",
-        `${PRICING.foundingOffer}. After that, the Team plan is $${PRICING.team.monthly} a month per team. Players and parents are always free.`,
+        `Every team starts with a ${PRICING.trialDays}-day free trial, no card needed. After that, the Team plan is $${PRICING.team.monthly} a month (or $${PRICING.team.yearly} a year) per team. Players and parents are always free.`,
       ],
       [
         "Do you take a cut of our dues?",

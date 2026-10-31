@@ -12,12 +12,16 @@ import { ROLE_LABELS, SEASON_PHASE_LABELS } from "@/constants";
 import { COACH_SECTIONS, visibleTabs } from "@/constants/sections";
 import { NotificationBell } from "@/components/notifications/bell";
 import { redirect } from "next/navigation";
+import { billingState } from "@/lib/billing";
+import { TrialBanner } from "@/components/billing/trial-banner";
+import { TrialLock } from "@/components/billing/billing-buttons";
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { user, org, membership, memberships, isStaff, preview } = await requireActiveOrg();
   if (preview) redirect(preview.role === "parent" ? "/parent" : "/player");
   if (membership.role === "parent") redirect("/parent");
   const { tz } = await playerToday();
+  const billing = billingState(org);
   const nav: NavItem[] = COACH_SECTIONS.flatMap((section) => {
     const tabs = visibleTabs(section, org.modules, membership.role === "admin");
     return tabs.length
@@ -94,7 +98,14 @@ export default async function DashboardLayout({ children }: { children: React.Re
       </aside>
       <main className="min-w-0 flex-1 px-4 py-6 md:px-10 md:py-10">
         <div className="mx-auto w-full max-w-7xl [&>*]:mx-auto">
-          <PageTransition>{children}</PageTransition>
+          <TrialBanner
+            kind={billing.kind}
+            daysLeft={billing.daysLeft}
+            admin={membership.role === "admin"}
+          />
+          <TrialLock locked={billing.kind === "ended"}>
+            <PageTransition>{children}</PageTransition>
+          </TrialLock>
         </div>
       </main>
     </div>
