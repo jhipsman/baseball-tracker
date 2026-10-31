@@ -1,3 +1,9 @@
+<!--
+9D (formerly Diamond Program, hosted at 9dbsbl.app) is a Next.js baseball training and tracking platform.
+It features dedicated coach, player, and parent views for workout building and logging, throwing/arm care
+workload monitoring (Pitch Smart), live game scoring, season stats, practice planning, and video review.
+-->
+
 # 9D
 
 A training platform for baseball coaches, strength trainers, and facilities: build programs with a drag-and-drop workout builder, assign them to players, and track the work.
