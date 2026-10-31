@@ -10,6 +10,7 @@ import {
   type ExerciseCategory,
 } from "@/constants";
 import { ExerciseDemo } from "@/components/exercise-demo";
+import { ExerciseFigureToggle } from "@/components/exercise-figure";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Exercise library" };
@@ -154,7 +155,8 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
                   </Link>
                 ) : null}
               </div>
-              <div className="mt-auto flex justify-end pt-3">
+              <div className="mt-auto flex flex-wrap items-end justify-between gap-2 pt-3">
+                <ExerciseFigureToggle name={ex.name} />
                 <ExerciseDemo name={ex.name} url={ex.video_demo_url} />
               </div>
             </li>

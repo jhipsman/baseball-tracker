@@ -11,6 +11,7 @@ import {
 } from "@/constants";
 import type { Enums } from "@/types/database";
 import { ExerciseDemo } from "@/components/exercise-demo";
+import { ExerciseFigureToggle } from "@/components/exercise-figure";
 import {
   bestTime,
   formatSeconds,
@@ -360,8 +361,8 @@ export function LogForm({
                   {it.label}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <h2 className="flex min-w-0 items-center gap-2 font-semibold">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <h2 className="flex min-w-0 flex-1 items-center gap-2 font-semibold">
                       {it.category ? (
                         <span
                           aria-hidden
@@ -371,6 +372,7 @@ export function LogForm({
                       {it.name}
                     </h2>
                     <ExerciseDemo name={it.name} url={it.videoUrl} className="mt-[-2px]" />
+                    <ExerciseFigureToggle name={it.name} />
                   </div>
                   {it.prescription ? (
                     <p className="text-sm text-zinc-600">{it.prescription}</p>
