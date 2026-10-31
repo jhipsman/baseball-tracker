@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { PageSkeleton } from "@/components/layout/page-skeleton";
+import { BrandLoader } from "@/components/layout/brand-loader";
 import { loadDashboard } from "@/lib/dashboard";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -28,7 +28,7 @@ export default async function DashboardPage() {
         {firstName ? `Welcome, ${firstName}` : "Welcome"}
       </h1>
       <p className="mt-1 text-sm text-zinc-600">{org.name}</p>
-      <Suspense fallback={<PageSkeleton compact />}>
+      <Suspense fallback={<BrandLoader compact />}>
         <DashboardContent supabase={supabase} org={org} isAdmin={membership.role === "admin"} />
       </Suspense>
     </div>
