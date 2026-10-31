@@ -17,6 +17,8 @@ describe("figureFor", () => {
     expect(which("DB Goblet Squat")).toBe("goblet squat");
     expect(which("Chin-Up")).toBe("pull-up");
     expect(which("Hip Thrust")).toBe("glute bridge");
+    expect(which("Jaeger Band Throwing Deceleration")).toBe("jaeger band throwing deceleration");
+    expect(which("Jaeger Band Throwing Acceleration")).toBe("jaeger band throwing acceleration");
   });
   it("draws nothing rather than the wrong move", () => {
     for (const n of [
@@ -31,8 +33,8 @@ describe("figureFor", () => {
       "Prone 90/90 External Rotation",
       "Tee Work",
       "Long Toss",
-      "Jaeger Band Throwing Deceleration",
-      "Med Ball Rotational Scoop Toss",
+      "Flat Ground Throwing",
+      "Catch Play Progression",
     ])
       expect(which(n), n).toBeNull();
   });
