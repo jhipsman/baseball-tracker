@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { figureFor, type Figure, type Prop, type Segment } from "@/lib/figures/library";
 import { GROUND, joints, mixPose, place, type Joints, type Point } from "@/lib/figures/skeleton";
 import { cn } from "@/lib/utils";
 import { ViewButton } from "@/components/ui/view-button";
+import { ExerciseFigure3D } from "@/components/exercise-figure-3d";
 
 const MOVE = 1100,
   HOLD = 450;
@@ -64,6 +65,7 @@ function Body({ j, fig, ghost }: { j: Joints; fig: Figure; ghost?: boolean }) {
       strokeLinejoin="round"
       strokeWidth={5.5}
       opacity={ghost ? 0.18 : 1}
+      filter={ghost ? undefined : "url(#figure-depth)"}
     >
       {front ? null : (
         <>
@@ -212,6 +214,28 @@ export function FigureSvg({ fig, ms, still }: { fig: Figure; ms: number; still?:
   const inFront = (fig.props ?? []).filter((p) => !behind.includes(p));
   return (
     <svg viewBox="0 0 120 100" className="h-full w-full" role="presentation">
+      <defs>
+        <radialGradient id="figure-light" cx="50%" cy="36%" r="70%">
+          <stop offset="0%" stopColor="var(--color-brand-100)" stopOpacity=".42" />
+          <stop offset="100%" stopColor="var(--color-surface)" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="equipment-metal" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="var(--color-zinc-400)" />
+          <stop offset="45%" stopColor="var(--color-zinc-700)" />
+          <stop offset="100%" stopColor="var(--color-zinc-500)" />
+        </linearGradient>
+        <filter id="figure-depth" x="-25%" y="-25%" width="150%" height="160%">
+          <feDropShadow
+            dx="1"
+            dy="1.4"
+            stdDeviation=".8"
+            floodColor="var(--color-zinc-900)"
+            floodOpacity=".2"
+          />
+        </filter>
+      </defs>
+      <rect width="120" height="100" rx="12" fill="url(#figure-light)" />
+      <ellipse cx="60" cy={GROUND + 1} rx="28" ry="2.5" fill="var(--color-zinc-900)" opacity=".1" />
       <path
         d={`M6 ${GROUND}H114`}
         className="stroke-zinc-200"
@@ -237,9 +261,7 @@ export function ExerciseFigure({
   animate?: boolean;
 }) {
   const fig = figureFor(name);
-  const [ms, setMs] = useState(0);
   const [reduce, setReduce] = useState(false);
-  const raf = useRef(0);
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setReduce(mq.matches);
@@ -247,20 +269,14 @@ export function ExerciseFigure({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
-  useEffect(() => {
-    if (!fig || !animate || reduce) return;
-    const t0 = performance.now();
-    const tick = (t: number) => {
-      setMs(Math.max(0, t - t0));
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf.current);
-  }, [fig, animate, reduce]);
   if (!fig) return null;
   return (
     <figure className={cn("aspect-[6/5] rounded-2xl bg-surface ring-1 ring-zinc-200", className)}>
-      <FigureSvg fig={fig} ms={ms} still={!animate || reduce} />
+      {animate && !reduce ? (
+        <ExerciseFigure3D fig={fig} name={name} />
+      ) : (
+        <FigureSvg fig={fig} ms={0} still />
+      )}
       <figcaption className="sr-only">
         Diagram of {name}. {fig.cue}
       </figcaption>
