@@ -186,7 +186,9 @@ export async function connectTeamPayments(): Promise<{ error?: string; url?: str
           },
           metadata: { org_id: org.id },
         },
-        { idempotencyKey: `team-account-stripe-risk-${org.id}` },
+        // Guards against a double click; per minute, so a refused attempt
+        // (Stripe keeps idempotent results for 24h) doesn't block a retry.
+        { idempotencyKey: `team-account-${org.id}-${Math.floor(Date.now() / 60_000)}` },
       );
       const { error } = await admin
         .from("org_payment_accounts")
