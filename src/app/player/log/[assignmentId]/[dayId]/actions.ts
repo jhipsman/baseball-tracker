@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/org";
+import { requireActiveOrg, requireUser } from "@/lib/org";
+import { hasModule } from "@/constants/modules";
 import type { Enums, Json } from "@/types/database";
 import { isDistanceUnit, type LoggedSet } from "@/lib/sets-format";
 
@@ -94,5 +95,21 @@ export async function saveWorkoutLog(input: WorkoutLogInput): Promise<{ error?: 
 
   revalidatePath("/player");
   revalidatePath("/player/history");
+
+  // A finished throwing day goes straight to "log your throws" with the
+  // prescription prefilled (only when the team has the Health section on).
+  if (input.status !== "skipped") {
+    const { org } = await requireActiveOrg();
+    if (hasModule(org.modules, "health")) {
+      const { data: day } = await supabase
+        .from("program_days")
+        .select("session_type")
+        .eq("id", input.dayId)
+        .maybeSingle();
+      if (day?.session_type === "throwing") {
+        redirect(`/player/throwing?fromDay=${input.dayId}&assignment=${input.assignmentId}`);
+      }
+    }
+  }
   redirect(`/player?saved=${input.status}`);
 }

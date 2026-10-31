@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { figureFor, type Figure, type Prop, type Segment } from "@/lib/figures/library";
 import { GROUND, joints, mixPose, place, type Joints, type Point } from "@/lib/figures/skeleton";
 import { cn } from "@/lib/utils";
 import { ViewButton } from "@/components/ui/view-button";
+
+const WorkoutModel = lazy(() =>
+  import("@/components/workout-model").then((module) => ({ default: module.WorkoutModel })),
+);
+
+// Only show a captured motion for the exact movement it demonstrates.
+const modelFor = (name: string) =>
+  /^(?:dumbbell|db) squat$/i.test(name.trim()) ? "/models/workouts/dumbbell-squat.glb" : null;
 
 const MOVE = 1100,
   HOLD = 450;
@@ -237,6 +245,7 @@ export function ExerciseFigure({
   animate?: boolean;
 }) {
   const fig = figureFor(name);
+  const model = modelFor(name);
   const [ms, setMs] = useState(0);
   const [reduce, setReduce] = useState(false);
   const raf = useRef(0);
@@ -257,12 +266,26 @@ export function ExerciseFigure({
     raf.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf.current);
   }, [fig, animate, reduce]);
-  if (!fig) return null;
+  if (!fig && !model) return null;
   return (
     <figure className={cn("aspect-[6/5] rounded-2xl bg-surface ring-1 ring-zinc-200", className)}>
-      <FigureSvg fig={fig} ms={ms} still={!animate || reduce} />
+      {model && animate && !reduce ? (
+        <Suspense
+          fallback={
+            <p className="p-4 text-center text-sm text-zinc-600">Loading 3D demonstration…</p>
+          }
+        >
+          <WorkoutModel src={model} name={name} />
+        </Suspense>
+      ) : fig ? (
+        <FigureSvg fig={fig} ms={ms} still={!animate || reduce} />
+      ) : (
+        <p className="flex h-full items-center justify-center p-4 text-center text-sm text-zinc-600">
+          3D motion is paused.
+        </p>
+      )}
       <figcaption className="sr-only">
-        Diagram of {name}. {fig.cue}
+        Diagram of {name}. {fig?.cue}
       </figcaption>
     </figure>
   );
@@ -274,8 +297,9 @@ export function ExerciseFigure({
  */
 export function ExerciseFigureToggle({ name, className }: { name: string; className?: string }) {
   const fig = figureFor(name);
+  const model = modelFor(name);
   const [open, setOpen] = useState(false);
-  if (!fig) return null;
+  if (!fig && !model) return null;
   return (
     <div className={cn("contents", className)}>
       <ViewButton
@@ -287,12 +311,18 @@ export function ExerciseFigureToggle({ name, className }: { name: string; classN
           open && "ring-2 ring-brand-600",
         )}
       >
-        <FigureSvg fig={fig} ms={0} still />
+        {fig ? (
+          <FigureSvg fig={fig} ms={0} still />
+        ) : (
+          <span className="flex h-full items-center justify-center text-xs font-semibold text-zinc-700">
+            3D
+          </span>
+        )}
       </ViewButton>
       {open ? (
         <div className="col-span-full mt-2 w-full basis-full space-y-1">
           <ExerciseFigure name={name} className="mx-auto max-w-xs" />
-          {fig.cue ? <p className="text-center text-sm text-zinc-600">{fig.cue}</p> : null}
+          {fig?.cue ? <p className="text-center text-sm text-zinc-600">{fig.cue}</p> : null}
         </div>
       ) : null}
     </div>

@@ -220,6 +220,119 @@ export function throwingAlerts(logs: ThrowLog[], birthDate: string | null, today
   return alerts.sort((a, b) => order[a.level] - order[b.level]);
 }
 
+// ---------------------------------------------------------------------------
+// Prescription prefill for completed throwing days
+// ---------------------------------------------------------------------------
+
+export type PrescriptionExerciseInput = {
+  name: string;
+  category?: string | null;
+  sets?: number | null;
+  reps?: string | null;
+  intensity?: string | null;
+  notes?: string | null;
+};
+
+export type PrescriptionInput = {
+  programName?: string | null;
+  dayName?: string | null;
+  dayNumber?: number | null;
+  exercises?: PrescriptionExerciseInput[] | null;
+};
+
+export type ThrowingPrescription = {
+  type: ThrowType;
+  pitches?: number;
+  maxDistance?: number;
+  notes: string;
+};
+
+/**
+ * Checks if a string parses as a whole number of reps/throws/pitches.
+ * Accepts "15", " 20 ", "20 throws", "15 pitches".
+ * Returns null for ranges ("8-10"), durations ("10 min"), non-numbers ("AMRAP").
+ */
+export function parseWholeNumberReps(reps: string | null | undefined): number | null {
+  if (!reps) return null;
+  const trimmed = reps.trim();
+  const match = trimmed.match(/^(\d+)(?:\s*(?:throws?|pitches?))?$/i);
+  if (!match) return null;
+  const n = Number.parseInt(match[1], 10);
+  return Number.isSafeInteger(n) && n > 0 ? n : null;
+}
+
+/**
+ * Extracts the largest "<number> ft" found across intensity or notes strings.
+ * Matches "180 ft", "180ft", "200+ ft", "250 FT".
+ */
+export function extractMaxDistance(texts: (string | null | undefined)[]): number | null {
+  let max: number | null = null;
+  const regex = /(\d+)\s*(?:\+\s*)?ft\b/gi;
+  for (const text of texts) {
+    if (!text) continue;
+    let match: RegExpExecArray | null;
+    regex.lastIndex = 0;
+    while ((match = regex.exec(text)) !== null) {
+      const val = Number.parseInt(match[1], 10);
+      if (Number.isFinite(val) && (max === null || val > max)) {
+        max = val;
+      }
+    }
+  }
+  return max;
+}
+
+/**
+ * Detects whether this throwing session is a bullpen or long toss.
+ * If any exercise with category "throwing" contains "bullpen" or "pen" (word boundary),
+ * returns "bullpen", otherwise "long_toss".
+ */
+export function detectThrowingType(
+  exercises: { name: string; category?: string | null }[],
+): ThrowType {
+  const isBullpen = exercises.some((e) => {
+    if (e.category !== "throwing") return false;
+    const name = e.name.toLowerCase();
+    return name.includes("bullpen") || /\bpens?\b/i.test(name);
+  });
+  return isBullpen ? "bullpen" : "long_toss";
+}
+
+/**
+ * Builds prefill prescription values when a player finishes a throwing workout.
+ */
+export function computeThrowingPrescription(input: PrescriptionInput): ThrowingPrescription {
+  const exercises = input.exercises ?? [];
+  const throwingExercises = exercises.filter((e) => e.category === "throwing");
+
+  const type = detectThrowingType(throwingExercises);
+
+  let totalPitches = 0;
+  let hasValidPitches = false;
+  for (const ex of throwingExercises) {
+    const reps = parseWholeNumberReps(ex.reps);
+    if (reps != null) {
+      const sets = typeof ex.sets === "number" && ex.sets > 0 ? ex.sets : 1;
+      totalPitches += sets * reps;
+      hasValidPitches = true;
+    }
+  }
+
+  const distanceTexts = throwingExercises.flatMap((e) => [e.intensity, e.notes]);
+  const maxDistance = extractMaxDistance(distanceTexts);
+
+  const dayLabel = input.dayName?.trim() || (input.dayNumber ? `Day ${input.dayNumber}` : "");
+  const progLabel = input.programName?.trim() || "";
+  const notes = progLabel && dayLabel ? `${progLabel} · ${dayLabel}` : progLabel || dayLabel;
+
+  return {
+    type,
+    pitches: hasValidPitches && totalPitches > 0 ? totalPitches : undefined,
+    maxDistance: maxDistance ?? undefined,
+    notes,
+  };
+}
+
 /** One entry per day from `from` to `to` for the throws chart. */
 export function dailySeries(logs: ThrowLog[], from: string, to: string) {
   const out: { date: string; competitive: number; other: number; armFeel: ArmFeel | null }[] = [];

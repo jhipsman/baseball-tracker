@@ -19,6 +19,14 @@ const chip = (on: boolean) =>
     on ? "bg-zinc-900 text-zinc-50 ring-zinc-900" : "bg-surface text-zinc-700 ring-zinc-300",
   );
 
+export type ThrowLogInitial = {
+  type?: ThrowingType;
+  date?: string;
+  pitches?: number | string;
+  maxDistance?: number | string | null;
+  notes?: string;
+};
+
 function localDate() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -34,21 +42,27 @@ export function ThrowLogForm({
   forPlayerId,
   defaultType = "long_toss",
   compact = false,
+  initial,
 }: {
   players?: { id: string; name: string }[];
   forPlayerId?: string;
   defaultType?: ThrowingType;
   compact?: boolean;
+  initial?: ThrowLogInitial;
 }) {
-  const [type, setType] = useState<ThrowingType>(defaultType);
+  const [type, setType] = useState<ThrowingType>(initial?.type ?? defaultType);
   const [playerId, setPlayerId] = useState(players?.[0]?.id ?? "");
-  const [date, setDate] = useState(localDate);
-  const [pitches, setPitches] = useState("");
-  const [distance, setDistance] = useState("");
+  const [date, setDate] = useState(initial?.date ?? localDate);
+  const [pitches, setPitches] = useState(
+    initial?.pitches != null && initial.pitches !== "" ? String(initial.pitches) : "",
+  );
+  const [distance, setDistance] = useState(
+    initial?.maxDistance != null && initial.maxDistance !== "" ? String(initial.maxDistance) : "",
+  );
   const [intensity, setIntensity] = useState<ThrowingIntensity | null>(null);
   const [armFeel, setArmFeel] = useState<ArmFeelValue | null>(null);
   const [mix, setMix] = useState<Record<string, string>>({});
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(initial?.notes ?? "");
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
