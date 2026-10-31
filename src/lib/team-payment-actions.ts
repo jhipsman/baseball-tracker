@@ -131,6 +131,30 @@ export async function remindInvoice(invoiceId: string): Promise<{ error?: string
   after(() => dispatchPush());
   return {};
 }
+/**
+ * Admin-only setup step, so say what actually went wrong (Stripe's own words,
+ * or which setting to check). Never includes key values.
+ */
+function setupError(e: unknown): string {
+  const err = e as { type?: string; message?: string; code?: string };
+  const msg = String(err?.message ?? "");
+  if (err?.type === "StripeAuthenticationError")
+    return "Stripe didn't accept the secret key. Check STRIPE_SECRET_KEY in Vercel (it starts with sk_test_ or sk_live_), then redeploy.";
+  if (err?.type === "StripeConnectionError")
+    return "Couldn't reach Stripe just now. Try again in a minute.";
+  if (
+    err?.type === "StripePermissionError" ||
+    /signed up for Connect|platform.profile|responsibilit|managing losses/i.test(msg)
+  )
+    return `Stripe Connect isn't ready yet: ${msg} In Stripe, open Connect and finish setting it up (including the platform profile), then try again.`;
+  if (err?.type?.startsWith("Stripe")) return `Stripe says: ${msg}`;
+  if (/HTTPS|Invalid URL/i.test(msg))
+    return "NEXT_PUBLIC_SITE_URL must be your full address, like https://9dbsbl.app (no slash at the end). Fix it in Vercel and redeploy.";
+  if (/API key|JWT|apikey|service_role|secret/i.test(msg))
+    return "The database didn't accept SUPABASE_SECRET_KEY. Copy the Secret key again from Supabase (Project Settings → API keys), update it in Vercel and redeploy.";
+  return `Payment setup could not be opened (${msg.slice(0, 160) || "unknown error"}). Try again shortly.`;
+}
+
 export async function connectTeamPayments(): Promise<{ error?: string; url?: string }> {
   const { org, membership } = await requireActiveOrg();
   if (membership.role !== "admin") return { error: "Only team admins can set up payments." };
@@ -183,8 +207,9 @@ export async function connectTeamPayments(): Promise<{ error?: string; url?: str
       type: "account_onboarding",
     });
     return { url: link.url };
-  } catch {
-    return { error: "Payment setup could not be opened. Try again shortly." };
+  } catch (e) {
+    console.error("connectTeamPayments failed", e);
+    return { error: setupError(e) };
   }
 }
 export async function startTeamCheckout(input: {
