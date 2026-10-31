@@ -10,6 +10,7 @@ const PUBLIC_PATHS = [
   "/auth",
   // Marketing and legal pages.
   "/home",
+  "/marketing",
   "/pricing",
   "/privacy",
   "/terms",
@@ -57,6 +58,15 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isSignedIn = Boolean(data?.claims);
   const { pathname } = request.nextUrl;
+
+  // Signed out, 9dbsbl.app shows the homepage (same address); signed in, the app.
+  if (!isSignedIn && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/home";
+    const rewrite = NextResponse.rewrite(url, { request });
+    response.cookies.getAll().forEach((c) => rewrite.cookies.set(c));
+    return rewrite;
+  }
 
   if (!isSignedIn && !isPublicPath(pathname)) {
     const url = request.nextUrl.clone();
