@@ -1,5 +1,13 @@
 # Roadmap notes
 
+## Ask 9D — source-backed player training assistant
+
+First preview implemented locally: `/player/ask`, linked from Me. Uses editorial summaries of two public sources (Driveline exit-velocity education and MLB Pitch Smart), player-entered context, follow-up questions, validated source IDs, and optional coach-discussion draft plans. Requires `ANTHROPIC_API_KEY`; `ASK_9D_MODEL` optionally overrides the existing AI model.
+
+This preview does not search the live web, retrieve videos, read health records or assigned workouts, save conversations, send plans to coaches, or assign workouts. Draft plans are not approved programs.
+
+Next: expand and review the source library (including recovery and videos), add persistent conversations and coach review, add authorized player context with restrictions/workload, and introduce per-player usage limits before broad rollout. Full runtime verification remains pending while the development disk is full and dependencies cannot finish installing.
+
 Product decisions and ideas captured along the way. They supplement the build phases in the project brief, which remain the source of truth for order.
 
 ## Positioning: why this beats a generic lifting app (Hevy, Boostcamp)
