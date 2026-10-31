@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import webpush, { WebPushError } from "web-push";
 import type { Database } from "@/types/database";
 import { hrefForRole } from "@/lib/notifications";
+import { dispatchEmail } from "@/lib/email";
 
 /** Notifications older than this are never pushed (they were seen in-app or are stale). */
 const WINDOW_MS = 15 * 60 * 1000;
@@ -42,13 +43,19 @@ export function pushEnabled() {
 export type DispatchResult = { sent: number; failed: number; removed: number; skipped?: string };
 
 /**
- * Sends web push for recent notifications that haven't been pushed yet.
+ * Sends web push (and, via dispatchEmail, email) for recent notifications not yet sent.
  * Safe to call often (e.g. `after(() => dispatchPush())` at the end of a server action):
  * it claims rows by setting `pushed_at` before sending, skips kinds the recipient muted,
  * links to the page for the recipient's role, and removes expired subscriptions.
  * A no-op when SUPABASE_SECRET_KEY or the VAPID keys aren't set. Never throws.
  */
 export async function dispatchPush(): Promise<DispatchResult> {
+  // Email rides along: every place that pushes also emails (each on its own claim column).
+  const [push] = await Promise.all([pushOnly(), dispatchEmail()]);
+  return push;
+}
+
+async function pushOnly(): Promise<DispatchResult> {
   const cfg = pushConfig();
   if (!cfg) return { sent: 0, failed: 0, removed: 0, skipped: "not configured" };
 

@@ -104,6 +104,14 @@ Then each team admin opens **Team → Payments → Set up online payments** once
 
 Payment reminders run every day at about 10–11am Eastern (3 days before, on the day, and 3 and 7 days late; at most one a day per family; never for autopay plans).
 
+### Email (invites, reminders and updates)
+
+9D emails invitations, form and payment reminders, trial reminders and team updates (several at once are combined into one email; everyone can turn kinds off under Notifications). It uses [Resend](https://resend.com) (free up to 3,000 emails a month).
+
+1. Sign up at resend.com → **Domains → Add domain** → `9dbsbl.app`. Add the DNS records it shows in Vercel → **Domains → 9dbsbl.app → DNS Records**, then click **Verify** in Resend. (These sit beside your Google Workspace records; they don't conflict.)
+2. Resend → **API Keys → Create** (sending access). Add it in Vercel as **`RESEND_API_KEY`** and redeploy. Emails come from `9D <no-reply@9dbsbl.app>`; set **`EMAIL_FROM`** to change that.
+3. **Login emails too** (sign-up confirmations and password resets come from Supabase): Supabase → **Authentication → Emails → SMTP Settings** → enable, host `smtp.resend.com`, port `465`, username `resend`, password = the same Resend API key, sender `no-reply@9dbsbl.app`, name `9D`. This removes Supabase's few-emails-an-hour limit.
+
 ### Charging teams for 9D (subscriptions)
 
 Every team gets a 30-day free trial (no card). After that, coach pages become view-only until an admin subscribes in **Settings → Billing** ($19/month or $190/year; prices live in `src/constants/pricing.ts`). Players, parents and demo teams are never billed. The money goes to your own Stripe account, not teams' accounts.

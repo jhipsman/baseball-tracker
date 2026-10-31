@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireActiveOrg, setActiveOrgCookie } from "@/lib/org";
 import { createClient } from "@/lib/supabase/server";
 import { dispatchPush } from "@/lib/push";
+import { sendOneEmail } from "@/lib/email";
 import { readCents } from "@/lib/team-payments";
 import type { FormState } from "@/lib/auth/actions";
 import type { Json } from "@/types/database";
@@ -167,6 +168,21 @@ export async function submitRegistration(
     .eq("id", id as string)
     .maybeSingle();
   if (reg) await setActiveOrgCookie(reg.org_id);
+  const email = claims.claims.email as string | undefined;
+  if (email)
+    after(() =>
+      sendOneEmail(email, {
+        subject: "You're registered",
+        heading: `${data.player_name} is registered`,
+        lines: [
+          `Thanks, ${data.parent_name.split(" ")[0]}. Your registration and signed waiver are saved.`,
+          installments > 1
+            ? `You chose ${installments} monthly payments; your balance and due dates are in the app.`
+            : "Your balance is in the app if there's a fee.",
+        ],
+        button: { label: "Open payments", path: "/payments" },
+      }),
+    );
   revalidatePath("/payments");
   revalidatePath("/registration", "layout");
   return { id: id as string };

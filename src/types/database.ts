@@ -725,6 +725,7 @@ export type Database = {
           actor_id: string | null;
           body: string | null;
           created_at: string;
+          emailed_at: string | null;
           href: string | null;
           id: string;
           kind: string;
@@ -738,6 +739,7 @@ export type Database = {
           actor_id?: string | null;
           body?: string | null;
           created_at?: string;
+          emailed_at?: string | null;
           href?: string | null;
           id?: string;
           kind: string;
@@ -751,6 +753,7 @@ export type Database = {
           actor_id?: string | null;
           body?: string | null;
           created_at?: string;
+          emailed_at?: string | null;
           href?: string | null;
           id?: string;
           kind?: string;
@@ -790,6 +793,7 @@ export type Database = {
           accepted_by: string | null;
           created_at: string;
           email: string;
+          emailed_at: string | null;
           expires_at: string;
           id: string;
           invited_by: string | null;
@@ -803,6 +807,7 @@ export type Database = {
           accepted_by?: string | null;
           created_at?: string;
           email: string;
+          emailed_at?: string | null;
           expires_at?: string;
           id?: string;
           invited_by?: string | null;
@@ -816,6 +821,7 @@ export type Database = {
           accepted_by?: string | null;
           created_at?: string;
           email?: string;
+          emailed_at?: string | null;
           expires_at?: string;
           id?: string;
           invited_by?: string | null;
@@ -1323,6 +1329,7 @@ export type Database = {
           birth_date: string | null;
           created_at: string;
           email: string;
+          email_muted: string[];
           full_name: string | null;
           id: string;
           push_muted: string[];
@@ -1332,6 +1339,7 @@ export type Database = {
           birth_date?: string | null;
           created_at?: string;
           email: string;
+          email_muted?: string[];
           full_name?: string | null;
           id: string;
           push_muted?: string[];
@@ -1341,6 +1349,7 @@ export type Database = {
           birth_date?: string | null;
           created_at?: string;
           email?: string;
+          email_muted?: string[];
           full_name?: string | null;
           id?: string;
           push_muted?: string[];

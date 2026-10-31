@@ -1,6 +1,9 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { dispatchPush } from "@/lib/push";
+import { emailEnabled } from "@/lib/email";
 import type { FormState } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
 import { INVITABLE_ROLES, ORG_ROLES, PLAYER_POSITIONS, type OrgRole } from "@/constants";
@@ -68,8 +71,11 @@ export async function inviteMember(_prev: FormState, formData: FormData): Promis
 
   revalidatePath("/roster", "layout");
   revalidatePath("/player/profile");
+  after(() => dispatchPush());
   return {
-    message: `Invitation created for ${email}${playerName ? ` (parent of ${playerName})` : ""}. Copy the link below and send it to them.`,
+    message: emailEnabled()
+      ? `Invitation emailed to ${email}${playerName ? ` (parent of ${playerName})` : ""}. You can also copy the link below.`
+      : `Invitation created for ${email}${playerName ? ` (parent of ${playerName})` : ""}. Copy the link below and send it to them.`,
   };
 }
 

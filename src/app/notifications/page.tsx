@@ -1,3 +1,5 @@
+import { emailEnabled } from "@/lib/email";
+import { EmailSettings } from "@/components/notifications/email-settings";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { requireActiveOrg } from "@/lib/org";
@@ -23,7 +25,7 @@ export default async function NotificationsPage() {
       .eq("profile_id", user.id)
       .order("created_at", { ascending: false })
       .limit(100),
-    supabase.from("profiles").select("push_muted").eq("id", user.id).single(),
+    supabase.from("profiles").select("push_muted, email_muted, email").eq("id", user.id).single(),
   ]);
   const list = items ?? [];
   const unread = list.filter((n) => !n.read_at).length;
@@ -111,6 +113,17 @@ export default async function NotificationsPage() {
             here.
           </p>
         )}
+
+        {emailEnabled() && profile?.email ? (
+          <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
+            <h2 className="font-semibold">Email</h2>
+            <EmailSettings
+              email={profile.email}
+              kinds={kindsForRole(membership.role).map((k) => ({ key: k.key, label: k.label }))}
+              muted={profile.email_muted ?? []}
+            />
+          </section>
+        ) : null}
 
         <section className="space-y-3 rounded-xl bg-surface p-4 ring-1 ring-zinc-200">
           <h2 className="font-semibold">Phone notifications</h2>

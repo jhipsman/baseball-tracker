@@ -1,6 +1,9 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { dispatchPush } from "@/lib/push";
+import { emailEnabled } from "@/lib/email";
 import type { FormState } from "@/lib/auth/actions";
 import { requireActiveOrg, requireUser } from "@/lib/org";
 
@@ -51,7 +54,12 @@ export async function inviteMyParent(_prev: FormState, formData: FormData): Prom
 
   revalidatePath("/player/profile");
   revalidatePath("/roster", "layout");
-  return { message: `Invite created. Copy the link below and send it to ${email}.` };
+  after(() => dispatchPush());
+  return {
+    message: emailEnabled()
+      ? `Invite emailed to ${email}. You can also copy the link below.`
+      : `Invite created. Copy the link below and send it to ${email}.`,
+  };
 }
 
 /** Revoke a parent invitation for yourself (RLS: only ones you sent). */

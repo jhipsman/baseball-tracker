@@ -88,3 +88,27 @@ export async function savePushPreferences(
   revalidatePath("/notifications");
   return { message: "Saved." };
 }
+
+/** Saves which kinds are muted for email. The form sends the kinds that stay ON. */
+export async function saveEmailPreferences(
+  _prev: { error?: string; message?: string },
+  formData: FormData,
+): Promise<{ error?: string; message?: string }> {
+  const { supabase, user } = await requireUser();
+  const shown = formData.getAll("shown").map(String).filter(isNotificationKind);
+  const on = new Set(formData.getAll("on").map(String));
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("email_muted")
+    .eq("id", user.id)
+    .single();
+  const muted = new Set((profile?.email_muted ?? []).filter((k) => !shown.includes(k as never)));
+  for (const k of shown) if (!on.has(k)) muted.add(k);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ email_muted: [...muted].sort() })
+    .eq("id", user.id);
+  if (error) return { error: error.message };
+  revalidatePath("/notifications");
+  return { message: "Saved." };
+}
