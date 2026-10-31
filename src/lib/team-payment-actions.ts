@@ -4,15 +4,7 @@ import { revalidatePath } from "next/cache";
 import { playerToday } from "@/lib/player";
 import { requireActiveOrg } from "@/lib/org";
 import { readCents, readPaymentPlan, invoiceBalance } from "@/lib/team-payments";
-import {
-  createTeamAccount,
-  paymentAdmin,
-  paymentSite,
-  teamAccountReady,
-  teamOnboardingLink,
-  teamPaymentsReady,
-  teamStripe,
-} from "@/lib/stripe-team";
+import { paymentAdmin, paymentSite, teamPaymentsReady, teamStripe } from "@/lib/stripe-team";
 import { dispatchPush } from "@/lib/push";
 import type { FormState } from "@/lib/auth/actions";
 function refresh() {
@@ -164,7 +156,7 @@ function setupError(e: unknown): string {
 }
 
 export async function connectTeamPayments(): Promise<{ error?: string; url?: string }> {
-  const { org, membership, user } = await requireActiveOrg();
+  const { org, membership } = await requireActiveOrg();
   if (membership.role !== "admin") return { error: "Only team admins can set up payments." };
   if (!teamPaymentsReady())
     return {
@@ -180,12 +172,23 @@ export async function connectTeamPayments(): Promise<{ error?: string; url?: str
       .eq("org_id", org.id)
       .maybeSingle();
     if (!account) {
-      // Guards against a double click; per minute, so a refused attempt
-      // (Stripe keeps idempotent results for 24h) doesn't block a retry.
-      const created = await createTeamAccount(
-        stripe,
-        { orgId: org.id, name: org.name, email: user.email },
-        `team-account-v2-${org.id}-${Math.floor(Date.now() / 60_000)}`,
+      // Stripe covers losses (disputes, fraud) and collects the team's details;
+      // the team pays its own processing fees and gets its own Stripe dashboard.
+      // (Stripe no longer allows the legacy `type` field with platform-held losses.)
+      const created = await stripe.accounts.create(
+        {
+          country: "US",
+          controller: {
+            losses: { payments: "stripe" },
+            fees: { payer: "account" },
+            requirement_collection: "stripe",
+            stripe_dashboard: { type: "full" },
+          },
+          metadata: { org_id: org.id },
+        },
+        // Guards against a double click; per minute, so a refused attempt
+        // (Stripe keeps idempotent results for 24h) doesn't block a retry.
+        { idempotencyKey: `team-account-${org.id}-${Math.floor(Date.now() / 60_000)}` },
       );
       const { error } = await admin
         .from("org_payment_accounts")
@@ -199,21 +202,25 @@ export async function connectTeamPayments(): Promise<{ error?: string; url?: str
         created_at: new Date().toISOString(),
       };
     }
-    const ready = await teamAccountReady(stripe, account.stripe_account_id);
+    const current = await stripe.accounts.retrieve(account.stripe_account_id);
     await admin
       .from("org_payment_accounts")
-      .update({ charges_enabled: ready, payouts_enabled: ready })
+      .update({
+        charges_enabled: current.charges_enabled ?? false,
+        payouts_enabled: current.payouts_enabled ?? false,
+      })
       .eq("org_id", org.id);
-    if (ready) {
+    if (current.charges_enabled) {
       refresh();
-      return { url: `${paymentSite()}/dues` };
+      return { url: `${paymentSite()}/payments` };
     }
-    return {
-      url: await teamOnboardingLink(stripe, account.stripe_account_id, {
-        refresh: `${paymentSite()}/dues?setup=retry`,
-        back: `${paymentSite()}/dues?setup=returned`,
-      }),
-    };
+    const link = await stripe.accountLinks.create({
+      account: account.stripe_account_id,
+      refresh_url: `${paymentSite()}/payments?setup=retry`,
+      return_url: `${paymentSite()}/payments?setup=returned`,
+      type: "account_onboarding",
+    });
+    return { url: link.url };
   } catch (e) {
     console.error("connectTeamPayments failed", e);
     return { error: setupError(e) };
@@ -235,7 +242,8 @@ export async function startTeamCheckout(input: {
       .eq("org_id", org.id)
       .maybeSingle();
     if (!account) return { error: "Your team has not completed payment setup yet." };
-    if (!(await teamAccountReady(stripe, account.stripe_account_id)))
+    const current = await stripe.accounts.retrieve(account.stripe_account_id);
+    if (!current.charges_enabled)
       return { error: "Your team’s payment setup is still being verified." };
     const options = { stripeAccount: account.stripe_account_id };
     if (input.autopay) {
