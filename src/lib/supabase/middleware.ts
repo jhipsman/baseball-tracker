@@ -13,9 +13,13 @@ const PUBLIC_PATHS = [
   "/pricing",
   "/privacy",
   "/terms",
+  // Season registration links: the offer is public, the form needs an account.
+  "/join",
   // Stripe calls this with its own signature, not a user session.
   "/api/billing/webhook",
   "/api/payments/webhook",
+  // Vercel Cron, authorized by CRON_SECRET.
+  "/api/cron",
 ];
 
 function isPublicPath(pathname: string) {

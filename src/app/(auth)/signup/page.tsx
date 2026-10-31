@@ -14,7 +14,9 @@ export default async function SignupPage({ searchParams }: PageProps<"/signup">)
       <p className="mt-1 mb-6 text-sm text-zinc-600">
         {nextPath?.startsWith("/invite/")
           ? "Use the email address your invitation was sent to. You'll accept it on the next screen."
-          : "Coaches, players, and parents all start here."}
+          : nextPath?.startsWith("/join/")
+            ? "Make your parent account. You'll fill in the registration on the next screen."
+            : "Coaches, players, and parents all start here."}
       </p>
       <SignupForm next={nextPath} />
       <p className="mt-6 text-center text-sm text-zinc-600">
@@ -25,6 +27,17 @@ export default async function SignupPage({ searchParams }: PageProps<"/signup">)
         >
           Sign in
         </Link>
+      </p>
+      <p className="mt-4 text-center text-xs text-zinc-500">
+        By creating an account you agree to the{" "}
+        <Link href="/terms" className="underline">
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="underline">
+          Privacy Policy
+        </Link>
+        .
       </p>
     </>
   );

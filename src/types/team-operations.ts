@@ -107,6 +107,50 @@ export type TeamOperationsTables = {
   }>;
   team_payment_webhooks: Table<{ event_id: string; org_id: string; created_at: string }>;
   team_payment_plan_requests: Table<{ org_id: string; request_key: string; plan_id: string }>;
+  registration_forms: Table<RegistrationFormRow>;
+  team_registrations: Table<RegistrationRow>;
+};
+export type RegistrationFormRow = {
+  id: string;
+  org_id: string;
+  token: string;
+  title: string;
+  season: string;
+  fee_cents: number;
+  installments_max: number;
+  first_due: string | null;
+  waiver_text: string;
+  capacity: number | null;
+  open: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+export type RegistrationRow = {
+  id: string;
+  org_id: string;
+  form_id: string;
+  submitted_by: string | null;
+  parent_name: string;
+  parent_email: string;
+  parent_phone: string;
+  player_name: string;
+  player_birth_date: string;
+  player_email: string | null;
+  player_position: string | null;
+  emergency_name: string;
+  emergency_phone: string;
+  emergency_relation: string | null;
+  medical_notes: string | null;
+  waiver_text: string;
+  waiver_signed_name: string;
+  waiver_signed_at: string;
+  installments: number;
+  plan_id: string | null;
+  player_invite_id: string | null;
+  player_id: string | null;
+  status: string;
+  created_at: string;
 };
 export type TeamOperationsViews = {
   schedule_activities: {
@@ -204,6 +248,30 @@ export type TeamOperationsFunctions = {
     Returns: undefined;
   };
   remind_team_invoice: { Args: { p_org: string; p_invoice: string }; Returns: undefined };
+  get_registration_form: {
+    Args: { p_token: string };
+    Returns: {
+      form_id: string;
+      team_name: string;
+      title: string;
+      season: string;
+      fee_cents: number;
+      installments_max: number;
+      first_due: string | null;
+      waiver_text: string;
+      open: boolean;
+      spots_left: number | null;
+    }[];
+  };
+  submit_registration: {
+    Args: { p_token: string; p_data: Json; p_installments: number };
+    Returns: string;
+  };
+  link_registration_player: {
+    Args: { p_org: string; p_reg: string; p_player: string };
+    Returns: undefined;
+  };
+  send_payment_reminders: { Args: Record<string, never>; Returns: number };
   apply_team_stripe_payment: {
     Args: {
       p_event: string;

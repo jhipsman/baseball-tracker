@@ -83,6 +83,27 @@ In-app notifications (the bell) always work. To also buzz phones, add these in V
 
 Without them, the Notifications page shows a short note instead of the "Turn on phone notifications" switch. Each person turns it on per device from the bell → Notifications, and can choose which kinds buzz their phone. On iPhone they first need **Share → Add to Home Screen** and to open the app from there.
 
+### Online payments and registration (Stripe)
+
+Registration links and payment plans work without Stripe; families just can't pay online until it's on. To turn it on:
+
+1. Make a free account at [stripe.com](https://stripe.com). Leave it in **Test mode** (top right) until you've tried a whole registration with Stripe's test card `4242 4242 4242 4242`.
+2. Stripe → **Connect** → get started (each team gets its own Stripe account, and the money goes straight to the team). In **Settings → Connect → Payment methods**, turn on **ACH Direct Debit** so families can pay from a bank account (much lower fees than cards).
+3. Stripe → **Developers → Webhooks → Add endpoint**: URL `https://YOUR-SITE/api/payments/webhook`, choose **Events on connected accounts**, and add `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`, `charge.refunded`, `account.updated`. Copy its **Signing secret**.
+4. Add to Vercel → **Settings → Environment Variables**, then redeploy:
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Stripe → Developers → API keys → **Secret key** (`sk_test_…` while testing). Server-only. |
+| `STRIPE_TEAM_WEBHOOK_SECRET` | The webhook's signing secret (`whsec_…`). |
+| `NEXT_PUBLIC_SITE_URL` | Your site's address, e.g. `https://9d.vercel.app` |
+| `SUPABASE_SECRET_KEY` | Same as for push notifications above. |
+| `CRON_SECRET` | Any long random string. Vercel's daily job uses it to send payment reminders. |
+
+Then each team admin opens **Team → Payments → Set up online payments** once to connect their bank. When you're ready for real money, switch Stripe to live mode and replace the two Stripe values with the live ones.
+
+Payment reminders run every day at about 10–11am Eastern (3 days before, on the day, and 3 and 7 days late; at most one a day per family; never for autopay plans).
+
 ## 4. Point Supabase logins at your site
 
 In Supabase:
