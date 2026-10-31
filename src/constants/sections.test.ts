@@ -21,6 +21,10 @@ describe("sections", () => {
     expect(visibleTabs(schedule, ["health"]).map((t) => t.label)).toEqual(["Calendar"]);
     expect(visibleTabs(team, ["games"]).map((t) => t.label)).toContain("Stats");
     expect(visibleTabs(health, ["games"])).toEqual([]);
-    expect(visibleTabs(health, null).map((t) => t.label)).toEqual(["Today", "Workload & logs"]);
+    expect(visibleTabs(health, null).map((t) => t.label)).toEqual([
+      "Today",
+      "Workload & logs",
+      "Medical",
+    ]);
   });
 });

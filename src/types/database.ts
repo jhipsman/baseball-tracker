@@ -941,6 +941,7 @@ export type Database = {
       };
       organizations: {
         Row: {
+          emergency_plan: string | null;
           created_at: string;
           current_season_phase: Database["public"]["Enums"]["season_phase"];
           id: string;
@@ -961,6 +962,7 @@ export type Database = {
           trial_ends_at: string | null;
         };
         Insert: {
+          emergency_plan?: string | null;
           created_at?: string;
           current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
@@ -981,6 +983,7 @@ export type Database = {
           trial_ends_at?: string | null;
         };
         Update: {
+          emergency_plan?: string | null;
           created_at?: string;
           current_season_phase?: Database["public"]["Enums"]["season_phase"];
           id?: string;
@@ -1106,6 +1109,75 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      body_checkins: {
+        Row: {
+          date: string;
+          feel: number;
+          logged_by: string | null;
+          note: string | null;
+          org_id: string;
+          player_id: string;
+          sleep: string | null;
+          sore: string[];
+          updated_at: string;
+        };
+        Insert: {
+          date: string;
+          feel: number;
+          logged_by?: string | null;
+          note?: string | null;
+          org_id: string;
+          player_id: string;
+          sleep?: string | null;
+          sore?: string[];
+          updated_at?: string;
+        };
+        Update: {
+          date?: string;
+          feel?: number;
+          logged_by?: string | null;
+          note?: string | null;
+          org_id?: string;
+          player_id?: string;
+          sleep?: string | null;
+          sore?: string[];
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      player_medical: {
+        Row: {
+          allergies: string | null;
+          conditions: string | null;
+          contacts: Json;
+          medications: string | null;
+          org_id: string;
+          player_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          allergies?: string | null;
+          conditions?: string | null;
+          contacts?: Json;
+          medications?: string | null;
+          org_id: string;
+          player_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          allergies?: string | null;
+          conditions?: string | null;
+          contacts?: Json;
+          medications?: string | null;
+          org_id?: string;
+          player_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
       };
       player_health_history: {
         Row: {

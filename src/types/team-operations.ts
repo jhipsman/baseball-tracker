@@ -320,6 +320,21 @@ export type TeamOperationsFunctions = {
   send_payment_reminders: { Args: Record<string, never>; Returns: number };
   notify_document: { Args: { p_doc: string; p_missing_only: boolean }; Returns: number };
   send_trial_reminders: { Args: Record<string, never>; Returns: number };
+  medical_cards: {
+    Args: { p_org: string };
+    Returns: {
+      player_id: string;
+      full_name: string;
+      jersey_number: number | null;
+      birth_date: string | null;
+      allergies: string | null;
+      medications: string | null;
+      conditions: string | null;
+      registration_notes: string | null;
+      contacts: Json;
+      updated_at: string | null;
+    }[];
+  };
   submit_health_clearance: {
     Args: { p_org: string; p_player: string; p_path: string };
     Returns: undefined;

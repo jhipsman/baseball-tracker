@@ -135,6 +135,14 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         >
           Team payments →
         </Link>
+        {has("health") ? (
+          <Link
+            href={href("/parent/medical")}
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+          >
+            Medical card →
+          </Link>
+        ) : null}
       </div>
 
       {has("games") && nextGame ? (

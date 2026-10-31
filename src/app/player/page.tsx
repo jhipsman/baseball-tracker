@@ -19,6 +19,8 @@ import { ArmCheckIn } from "@/components/health/arm-check-in";
 import { FormsCard } from "@/components/documents/family";
 import { STATUS_COLUMNS, toHealthStatus } from "@/lib/health";
 import { FamilyHealthStatus } from "@/components/health/family-status";
+import { BodyCheckIn } from "@/components/health/body-check-in";
+import { loadBodyCheckins } from "@/lib/health-data";
 
 export const metadata: Metadata = { title: "Today" };
 
@@ -33,7 +35,7 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
   const { today } = await playerToday();
   const { saved } = await searchParams;
   const health = hasModule(org.modules, "health");
-  const [assignments, nextPractice, nextGame, armToday, myStatus] = await Promise.all([
+  const [assignments, nextPractice, nextGame, armToday, myStatus, bodyToday] = await Promise.all([
     loadPlayerAssignments(supabase, user.id, org.id, today),
     hasModule(org.modules, "practices")
       ? loadNextPractice(supabase, org.id, today)
@@ -60,6 +62,11 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
           .eq("player_id", user.id)
           .maybeSingle()
           .then((r) => (r.data ? toHealthStatus(r.data) : null))
+      : Promise.resolve(null),
+    health
+      ? loadBodyCheckins(supabase, org.id, today, today, user.id).then(
+          (m) => m.get(user.id)?.[0] ?? null,
+        )
       : Promise.resolve(null),
   ]);
 
@@ -102,6 +109,7 @@ export default async function PlayerTodayPage({ searchParams }: PageProps<"/play
       <FormsCard base="/player" />
 
       {health ? <ArmCheckIn today={today} current={armToday} /> : null}
+      {health ? <BodyCheckIn today={today} current={bodyToday} /> : null}
 
       {hasModule(org.modules, "games") && nextGame ? (
         <NextGameCard game={nextGame} today={today} href={`/player/games/${nextGame.id}`} />

@@ -4,6 +4,7 @@
  * Pure, so the Today board, the player page and the pitcher picker agree.
  */
 import type { Alert, ArmFeel, Availability } from "./workload";
+import type { BodyCheckin } from "./body";
 
 export type HealthState = "full" | "limited" | "out";
 export type PlanStep = { label: string; done: boolean };
@@ -226,6 +227,8 @@ export type PlayerHealth = {
   /** Most recent arm feel, if any in the last week. */
   feel: { feel: ArmFeel; date: string } | null;
   checkedInToday: boolean;
+  /** Latest body check-in this week, if any. */
+  body: BodyCheckin | null;
   /** Short line for the card: the coach's reason, "Rest until Tue", "Up to 85 pitches"… */
   detail: string;
 };
@@ -239,6 +242,7 @@ export function playerHealth(input: {
   avail: Availability;
   feel: { feel: ArmFeel; date: string } | null;
   checkedInToday: boolean;
+  body?: BodyCheckin | null;
   /** "Tue, Nov 3" style label for a date. */
   dateLabel: (date: string) => string;
 }): PlayerHealth {
@@ -276,6 +280,7 @@ export function playerHealth(input: {
     avail: input.avail,
     feel: input.feel,
     checkedInToday: input.checkedInToday,
+    body: input.body ?? null,
     detail,
   };
 }

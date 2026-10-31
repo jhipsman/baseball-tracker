@@ -9,6 +9,7 @@ import { loadHealth, loadHealthHistory } from "@/lib/health-data";
 import { injuryLabel, isBodyPart, isInjuryType, planTitle, type Side } from "@/lib/health";
 import { ageOn, dailySeries, pitchSmartBand } from "@/lib/workload";
 import { ARM_FEEL } from "@/constants/throwing";
+import { feelOf, SLEEPS, spotName } from "@/lib/body";
 import { ThrowsChart } from "@/components/throwing/throws-chart";
 import { ThrowLogForm } from "@/components/throwing/throw-log-form";
 import { BirthDateForm, ThrowingList } from "@/components/throwing/status";
@@ -42,7 +43,7 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
   if (!member || member.role !== "player") notFound();
   const name = member.profile.full_name || member.profile.email;
 
-  const [{ health, rows, births }, history] = await Promise.all([
+  const [{ health, rows, births, body }, history] = await Promise.all([
     loadHealth(supabase, org.id, [{ id, name }], today),
     loadHealthHistory(supabase, org.id, id),
   ]);
@@ -51,10 +52,13 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
   const birth = births.get(id) ?? null;
   const age = birth ? ageOn(birth, today) : null;
   const head = HEADLINE[h.lane];
+  const myBody = body.get(id) ?? [];
   const week = Array.from({ length: 7 }, (_, i) => addDays(today, i - 6)).map((d) => ({
     date: d,
     feel: mine.find((r) => r.date === d && r.armFeel)?.armFeel ?? null,
+    body: myBody.find((c) => c.date === d) ?? null,
   }));
+  const lastBody = myBody[0] && myBody[0].date >= addDays(today, -6) ? myBody[0] : null;
 
   return (
     <div className="max-w-5xl space-y-6">
@@ -117,6 +121,45 @@ export default async function PlayerHealthPage({ params }: PageProps<"/throwing/
             ))}
           </ol>
         </div>
+        {myBody.length ? (
+          <div className="mt-4" data-testid="body-week">
+            <p className="text-xs font-semibold tracking-wide uppercase opacity-80">
+              Body, last 7 days
+            </p>
+            <ol className="mt-2 grid grid-cols-7 gap-1">
+              {week.map((d) => (
+                <li key={d.date} className="text-center">
+                  <span
+                    className={cn(
+                      "block truncate rounded-md px-0.5 py-1 text-[11px] font-semibold",
+                      d.body ? feelOf(d.body.feel).className : "bg-surface text-zinc-400",
+                    )}
+                    title={
+                      d.body
+                        ? `${feelOf(d.body.feel).label}${d.body.sore.length ? ` · sore: ${d.body.sore.map(spotName).join(", ")}` : ""}`
+                        : "No check-in"
+                    }
+                  >
+                    {d.body ? feelOf(d.body.feel).label : "—"}
+                    {d.body?.sore.length ? " •" : ""}
+                  </span>
+                </li>
+              ))}
+            </ol>
+            {lastBody ? (
+              <p className="mt-2 text-sm">
+                Latest ({formatGameDate(lastBody.date)}):{" "}
+                {lastBody.sore.length
+                  ? `sore ${lastBody.sore.map(spotName).join(", ")}`
+                  : "nothing sore"}
+                {lastBody.sleep
+                  ? ` · slept ${SLEEPS.find((x) => x.key === lastBody.sleep)!.label}`
+                  : ""}
+                {lastBody.note ? ` · “${lastBody.note}”` : ""}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </section>
 
       {h.open.length || h.handled.length ? (

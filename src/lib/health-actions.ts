@@ -13,6 +13,7 @@ import {
   type Side,
 } from "@/lib/health";
 import type { Json } from "@/types/database";
+import { isSpot, SLEEPS, type Sleep } from "@/lib/body";
 
 type R = { error?: string };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -194,4 +195,42 @@ export async function openHealthFile(path: string): Promise<{ url?: string; erro
     return { error: "File not found." };
   const { data } = await supabase.storage.from("team-docs").createSignedUrl(path, 300);
   return data ? { url: data.signedUrl } : { error: "You can't open that file." };
+}
+
+/**
+ * The player's (or a parent's) daily body check-in: overall feel, sore spots
+ * and sleep. One per day; checking in again replaces it.
+ */
+export async function saveBodyCheckin(input: {
+  playerId?: string;
+  date: string;
+  feel: number;
+  sore?: string[];
+  sleep?: Sleep | null;
+  note?: string;
+}): Promise<R> {
+  const { supabase, org, user } = await requireActiveOrg();
+  const playerId = input.playerId ?? user.id;
+  if (!UUID.test(playerId) || !/^\d{4}-\d{2}-\d{2}$/.test(input.date))
+    return { error: "Check-in not saved. Try again." };
+  if (!Number.isInteger(input.feel) || input.feel < 1 || input.feel > 5)
+    return { error: "Pick how you feel." };
+  const sore = [...new Set((input.sore ?? []).filter(isSpot))].slice(0, 16);
+  const sleep = SLEEPS.some((s) => s.key === input.sleep) ? input.sleep! : null;
+  const { error } = await supabase.from("body_checkins").upsert({
+    org_id: org.id,
+    player_id: playerId,
+    date: input.date,
+    feel: input.feel,
+    sore,
+    sleep,
+    note:
+      String(input.note ?? "")
+        .trim()
+        .slice(0, 200) || null,
+    logged_by: user.id,
+  });
+  if (error) return { error: "Check-in not saved. Check your signal and try again." };
+  refresh(playerId);
+  return {};
 }

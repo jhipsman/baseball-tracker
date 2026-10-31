@@ -71,6 +71,11 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
         <MeLink href="/payments" hint="Your installments, invoices, and receipts">
           Team payments →
         </MeLink>
+        {membership.role === "player" && hasModule(org.modules, "health") ? (
+          <MeLink href="/player/medical" hint="Allergies, medications and emergency contacts">
+            Medical card →
+          </MeLink>
+        ) : null}
         <MeLink href="/player/history" hint="Every workout you've logged">
           Workout history →
         </MeLink>
