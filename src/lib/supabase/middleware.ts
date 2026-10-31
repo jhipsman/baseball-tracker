@@ -11,6 +11,8 @@ const PUBLIC_PATHS = [
   // Marketing and legal pages.
   "/home",
   "/marketing",
+  "/for",
+  "/features",
   "/pricing",
   "/privacy",
   "/terms",

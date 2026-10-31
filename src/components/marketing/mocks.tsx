@@ -204,3 +204,123 @@ export function PaymentsMock() {
     </Frame>
   );
 }
+
+export function VideoMock() {
+  return (
+    <Frame className="space-y-3">
+      <div className="hero relative aspect-video overflow-hidden rounded-2xl">
+        <svg viewBox="0 0 160 90" className="absolute inset-0 h-full w-full">
+          <path
+            d="M20 80 Q70 20 140 30"
+            fill="none"
+            className="stroke-amber-300"
+            strokeWidth="1.5"
+            strokeDasharray="3 3"
+          />
+          <path
+            d="M62 62 L80 40 L98 58"
+            fill="none"
+            className="stroke-brand-300"
+            strokeWidth="1.5"
+          />
+          <text x="84" y="38" className="fill-brand-300" fontSize="7">
+            92°
+          </text>
+          <circle cx="80" cy="40" r="10" fill="none" className="stroke-white/50" strokeWidth="1" />
+        </svg>
+        <span className="absolute bottom-2 left-2 rounded bg-black/50 px-1.5 text-[10px] text-white">
+          0:04 / 0:07 · ½×
+        </span>
+      </div>
+      <div className="flex gap-2 rounded-xl bg-zinc-50 p-3 text-sm">
+        <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-900">
+          CR
+        </span>
+        <p>
+          <b>0:04</b> Front side opens early. Stay closed through foot strike.
+        </p>
+      </div>
+    </Frame>
+  );
+}
+
+export function StatsMock() {
+  const dots: [number, number, boolean][] = [
+    [30, 34, true],
+    [42, 22, true],
+    [58, 18, false],
+    [70, 30, true],
+    [48, 40, false],
+    [36, 28, true],
+    [64, 44, false],
+  ];
+  return (
+    <Frame className="space-y-3">
+      <div className="grid grid-cols-4 gap-2 text-center">
+        {[
+          [".342", "AVG"],
+          [".455", "OBP"],
+          ["14", "RBI"],
+          ["6", "SB"],
+        ].map(([v, l]) => (
+          <div key={l} className="rounded-xl p-2 ring-1 ring-zinc-200">
+            <b className="block text-lg tabular-nums">{v}</b>
+            <span className="text-[11px] text-zinc-500">{l}</span>
+          </div>
+        ))}
+      </div>
+      <svg viewBox="0 0 100 60" className="w-full rounded-xl bg-brand-50">
+        <path d="M50 58 L10 18 A56 56 0 0 1 90 18 Z" className="fill-brand-100" />
+        <path d="M50 58 L36 44 L50 30 L64 44 Z" className="fill-amber-100" />
+        {dots.map(([x, y, hit], i) => (
+          <circle
+            key={i}
+            cx={x}
+            cy={y}
+            r="2.2"
+            className={hit ? "fill-brand-600" : "fill-zinc-400"}
+          />
+        ))}
+      </svg>
+      <p className="px-1 text-xs text-zinc-500">Spray chart · last 10 games</p>
+    </Frame>
+  );
+}
+
+export function ClubMock() {
+  return (
+    <Frame className="space-y-2">
+      <div className="flex items-baseline justify-between px-1">
+        <p className="font-semibold">Riverside Baseball Club</p>
+        <p className="text-xs text-zinc-500">4 teams</p>
+      </div>
+      {[
+        ["14U", "18 players", "$5,400 of $5,400", true],
+        ["13U", "16 players", "$4,200 of $4,800", false],
+        ["12U", "15 players", "$4,500 of $4,500", true],
+        ["10U", "12 players", "Registration open", false],
+      ].map(([t, n, money, done]) => (
+        <div
+          key={t as string}
+          className="flex items-center gap-3 rounded-2xl p-2.5 ring-1 ring-zinc-200"
+        >
+          <span className="grid size-9 place-items-center rounded-xl bg-zinc-900 text-xs font-bold text-zinc-50">
+            {t}
+          </span>
+          <span className="min-w-0 flex-1">
+            <b className="block text-sm">{n}</b>
+            <span className="block text-xs text-zinc-600">{money}</span>
+          </span>
+          <span
+            className={cn(
+              "rounded-full px-2 py-0.5 text-xs font-semibold",
+              done ? "bg-brand-100 text-brand-900" : "bg-amber-100 text-amber-900",
+            )}
+          >
+            {done ? "✓ Paid" : "Open"}
+          </span>
+        </div>
+      ))}
+    </Frame>
+  );
+}
