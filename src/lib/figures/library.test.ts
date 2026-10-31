@@ -17,7 +17,6 @@ describe("figureFor", () => {
     expect(which("DB Goblet Squat")).toBe("goblet squat");
     expect(which("Chin-Up")).toBe("pull-up");
     expect(which("Hip Thrust")).toBe("glute bridge");
-    expect(which("Catch Play Progression")).toBe("long toss");
   });
   it("draws nothing rather than the wrong move", () => {
     for (const n of [
@@ -31,6 +30,9 @@ describe("figureFor", () => {
       "Side-Lying External Rotation",
       "Prone 90/90 External Rotation",
       "Tee Work",
+      "Long Toss",
+      "Jaeger Band Throwing Deceleration",
+      "Med Ball Rotational Scoop Toss",
     ])
       expect(which(n), n).toBeNull();
   });
@@ -45,5 +47,18 @@ describe("skeleton", () => {
         expect(d(j.knee[0], j.ankle[0])).toBeCloseTo(20, 5);
         expect(d(j.hip, j.neck)).toBeCloseTo(26, 5);
       }
+  });
+});
+
+describe("animation timing", () => {
+  it("never asks for a pose before the start or past the end", async () => {
+    const { FigureSvg } = await import("@/components/exercise-figure");
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    const { createElement } = await import("react");
+    for (const n of FIGURE_NAMES)
+      for (const ms of [-16, -0.4, 0, 1549.9, 1e7])
+        expect(() =>
+          renderToStaticMarkup(createElement(FigureSvg, { fig: figureFor(n)!, ms })),
+        ).not.toThrow();
   });
 });

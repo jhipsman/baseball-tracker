@@ -305,74 +305,6 @@ const FIGURES: Record<string, Figure> = {
     focus: ["upper", "torso"],
     cue: "Facing the anchor, open straight arms out to a T and squeeze.",
   },
-  "jaeger band throwing deceleration": {
-    view: "side",
-    anchor: { on: "feet", x: 66 },
-    frames: [
-      stand({
-        torso: 175,
-        arm: [
-          [150, 175],
-          [-20, -10],
-        ],
-        leg: [
-          [25, 0],
-          [-15, -5],
-        ],
-      }),
-      stand({
-        torso: 140,
-        arm: [
-          [30, 15],
-          [-40, -30],
-        ],
-        leg: [
-          [40, -10],
-          [-25, -20],
-        ],
-      }),
-    ],
-    props: [
-      { kind: "post", x: 14, top: 30 },
-      { kind: "band", from: "nearHand", to: [14, 32] },
-    ],
-    focus: ["upper", "fore"],
-    cue: "Band behind you; finish your throw and control the band back.",
-  },
-  "jaeger band throwing acceleration": {
-    view: "side",
-    anchor: { on: "feet", x: 62 },
-    frames: [
-      stand({
-        torso: 185,
-        arm: [
-          [-110, 175],
-          [70, 80],
-        ],
-        leg: [
-          [25, 0],
-          [-15, -5],
-        ],
-      }),
-      stand({
-        torso: 160,
-        arm: [
-          [115, 105],
-          [-30, -20],
-        ],
-        leg: [
-          [30, -5],
-          [-20, -10],
-        ],
-      }),
-    ],
-    props: [
-      { kind: "post", x: 12, top: 30 },
-      { kind: "band", from: "nearHand", to: [12, 32] },
-    ],
-    focus: ["upper", "fore"],
-    cue: "Band behind you; from a high cocked arm, drive it through to release.",
-  },
   "prone y raise": {
     view: "side",
     anchor: { on: "hip", at: [36, 52] },
@@ -405,70 +337,6 @@ const FIGURES: Record<string, Figure> = {
     props: [{ kind: "bench", x: 4, y: 55, w: 50, h: 6 }],
     focus: ["upper", "torso"],
     cue: "Lying face down, thumbs up; lift your arms into a Y.",
-  },
-  "med ball rotational scoop toss": {
-    view: "side",
-    anchor: { on: "feet", x: 56 },
-    frames: [
-      stand({
-        torso: 160,
-        arm: [
-          [-35, -20],
-          [-30, -15],
-        ],
-        leg: [
-          [30, -15],
-          [-15, -20],
-        ],
-      }),
-      stand({
-        torso: 178,
-        arm: [
-          [115, 115],
-          [110, 110],
-        ],
-        leg: [
-          [15, -5],
-          [-25, -25],
-        ],
-        foot: [90, 160],
-      }),
-    ],
-    props: [{ kind: "medball", at: "hands" }],
-    focus: ["torso", "thigh"],
-    cue: "Load the back hip, then turn hard and throw through the wall.",
-  },
-  "long toss": {
-    view: "side",
-    anchor: { on: "feet", x: 56 },
-    frames: [
-      stand({
-        torso: 190,
-        arm: [
-          [-115, 160],
-          [80, 90],
-        ],
-        leg: [
-          [30, 0],
-          [-20, -5],
-        ],
-      }),
-      stand({
-        torso: 150,
-        arm: [
-          [80, 60],
-          [-40, -30],
-        ],
-        leg: [
-          [45, -10],
-          [-30, -40],
-        ],
-        foot: [90, 160],
-      }),
-    ],
-    props: [{ kind: "ball", at: "nearHand" }],
-    focus: ["upper", "fore", "torso"],
-    cue: "Stay on line, get behind the ball and let it carry.",
   },
   "glute bridge": {
     view: "side",
@@ -522,11 +390,7 @@ const KEYWORDS: [RegExp, string][] = [
   ],
   [/forward fly/, "jaeger band forward fly"],
   [/reverse fly/, "jaeger band reverse fly"],
-  [/(throwing )?decel/, "jaeger band throwing deceleration"],
-  [/(throwing )?accel/, "jaeger band throwing acceleration"],
   [/\by raise\b/, "prone y raise"],
-  [/scoop toss/, "med ball rotational scoop toss"],
-  [/(long toss|catch play|flat ground)/, "long toss"],
   [/(glute bridge|hip thrust)/, "glute bridge"],
 ];
 

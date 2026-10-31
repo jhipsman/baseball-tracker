@@ -15,7 +15,9 @@ function frameAt(fig: Figure, ms: number) {
   const n = fig.frames.length;
   const path = [...fig.frames.keys(), ...[...fig.frames.keys()].reverse().slice(1, -1)];
   const leg = MOVE + HOLD;
-  const t = ms % (leg * path.length);
+  // The first animation frame can be stamped a hair before the start; never index below zero.
+  const total = leg * path.length;
+  const t = ((Math.max(0, ms) % total) + total) % total;
   const i = Math.floor(t / leg),
     local = t % leg;
   const a = fig.frames[path[i]],
@@ -249,7 +251,7 @@ export function ExerciseFigure({
     if (!fig || !animate || reduce) return;
     const t0 = performance.now();
     const tick = (t: number) => {
-      setMs(t - t0);
+      setMs(Math.max(0, t - t0));
       raf.current = requestAnimationFrame(tick);
     };
     raf.current = requestAnimationFrame(tick);
