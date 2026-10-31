@@ -505,3 +505,12 @@ html[data-theme-switching]::view-transition-new(root) {
     animation: none;
   }
 }
+
+/* Public site bands: a soft 9D-green wash on the page's own colors, so they
+   read light in Day and dark in Night (the app's .hero stays night-lit). */
+.site-hero {
+  background:
+    radial-gradient(30rem 20rem at 0% 0%, rgb(61 220 132 / 0.16), transparent 65%),
+    radial-gradient(26rem 16rem at 100% 100%, rgb(245 184 60 / 0.08), transparent 65%),
+    linear-gradient(170deg, var(--color-brand-50), var(--color-zinc-50));
+}

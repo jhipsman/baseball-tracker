@@ -79,7 +79,7 @@ export function FeatureTabs() {
   const [pick, setPick] = useState(0);
   const f = FEATURES[pick];
   return (
-    <section aria-labelledby="inside" className="bg-zinc-100/60 py-14">
+    <section aria-labelledby="inside" className="py-14">
       <div className="mx-auto max-w-6xl px-4">
         <h2 id="inside" className="text-center text-3xl font-semibold tracking-tight">
           What&apos;s inside

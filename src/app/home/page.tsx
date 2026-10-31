@@ -29,14 +29,14 @@ export default async function HomePage() {
           <StartButton signedIn={signedIn} />
           <a
             href="#watch"
-            className="inline-flex h-12 items-center justify-center rounded-full px-7 font-semibold text-white ring-1 ring-white/30 hover:bg-white/10"
+            className="inline-flex h-12 items-center justify-center rounded-full bg-surface px-7 font-semibold text-zinc-900 ring-1 ring-zinc-300 hover:bg-zinc-50"
           >
             ▶ Watch the 1-minute tour
           </a>
         </div>
         <div
           id="watch"
-          className="mx-auto mt-12 max-w-4xl scroll-mt-24 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-white/15"
+          className="mx-auto mt-12 max-w-4xl scroll-mt-24 overflow-hidden rounded-3xl shadow-2xl ring-1 ring-zinc-900/10"
         >
           <video
             className="aspect-video w-full bg-black"

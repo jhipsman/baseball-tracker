@@ -109,13 +109,13 @@ export function PageHero({
   children?: React.ReactNode;
 }) {
   return (
-    <section className="hero">
+    <section className="site-hero">
       <div className="mx-auto max-w-6xl px-4 pt-14 pb-14 text-center sm:pt-20">
-        <p className="text-sm font-semibold tracking-wide text-white/60 uppercase">{kicker}</p>
+        <p className="text-sm font-semibold tracking-wide text-brand-700 uppercase">{kicker}</p>
         <h1 className="mx-auto mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
           {title}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl text-lg text-pretty text-white/75">{lead}</p>
+        <p className="mx-auto mt-4 max-w-2xl text-lg text-pretty text-zinc-600">{lead}</p>
         {children}
       </div>
     </section>
@@ -252,14 +252,14 @@ export function CtaBand({
 }) {
   return (
     <section className="mx-auto max-w-6xl px-4 py-14">
-      <div className="hero rounded-3xl px-6 py-12 text-center sm:px-12">
+      <div className="site-hero rounded-3xl px-6 py-12 text-center ring-1 ring-zinc-200 sm:px-12">
         <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-white/75">{lead}</p>
+        <p className="mx-auto mt-3 max-w-xl text-zinc-600">{lead}</p>
         <StartButton signedIn={signedIn} className="mt-7" />
         {!signedIn ? (
-          <p className="mt-4 text-sm text-white/70">
+          <p className="mt-4 text-sm text-zinc-600">
             Already on a team?{" "}
-            <Link href="/login" className="font-semibold text-white underline">
+            <Link href="/login" className="font-semibold text-zinc-900 underline">
               Log in
             </Link>
           </p>
