@@ -172,9 +172,21 @@ export async function connectTeamPayments(): Promise<{ error?: string; url?: str
       .eq("org_id", org.id)
       .maybeSingle();
     if (!account) {
+      // Stripe covers losses (disputes, fraud) and collects the team's details;
+      // the team pays its own processing fees and gets its own Stripe dashboard.
+      // (Stripe no longer allows the legacy `type` field with platform-held losses.)
       const created = await stripe.accounts.create(
-        { type: "express", country: "US", metadata: { org_id: org.id } },
-        { idempotencyKey: `team-account-${org.id}` },
+        {
+          country: "US",
+          controller: {
+            losses: { payments: "stripe" },
+            fees: { payer: "account" },
+            requirement_collection: "stripe",
+            stripe_dashboard: { type: "full" },
+          },
+          metadata: { org_id: org.id },
+        },
+        { idempotencyKey: `team-account-stripe-risk-${org.id}` },
       );
       const { error } = await admin
         .from("org_payment_accounts")

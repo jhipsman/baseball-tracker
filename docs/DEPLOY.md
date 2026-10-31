@@ -88,7 +88,7 @@ Without them, the Notifications page shows a short note instead of the "Turn on 
 Registration links and payment plans work without Stripe; families just can't pay online until it's on. To turn it on:
 
 1. Make a free account at [stripe.com](https://stripe.com). Leave it in **Test mode** (top right) until you've tried a whole registration with Stripe's test card `4242 4242 4242 4242`.
-2. Stripe → **Connect** → get started (each team gets its own Stripe account, and the money goes straight to the team). In **Settings → Connect → Payment methods**, turn on **ACH Direct Debit** so families can pay from a bank account (much lower fees than cards).
+2. Stripe → **Connect** → get started (each team gets its own Stripe account, and the money goes straight to the team). 9D creates each team's account with **Stripe handling risk and losses**, the team paying its own processing fees, and its own full Stripe dashboard; in the Connect platform profile, choose the matching options (Stripe manages risk). In **Settings → Connect → Payment methods**, turn on **ACH Direct Debit** so families can pay from a bank account (much lower fees than cards).
 3. Stripe → **Developers → Webhooks → Add endpoint**: URL `https://YOUR-SITE/api/payments/webhook`, choose **Events on connected accounts**, and add `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `invoice.paid`, `invoice.payment_failed`, `customer.subscription.deleted`, `charge.refunded`, `account.updated`. Copy its **Signing secret**.
 4. Add to Vercel → **Settings → Environment Variables**, then redeploy:
 
