@@ -8,7 +8,7 @@ import {
   WhyStrip,
 } from "@/components/marketing/blocks";
 import { AudienceSwitch, FeatureTabs } from "@/components/marketing/switchers";
-import { HeroMotion } from "@/components/marketing/hero-motion";
+import { HeroPreview } from "@/components/marketing/hero-preview";
 
 export const metadata: Metadata = {
   title: `${BRAND.name} · Built for baseball`,
@@ -20,30 +20,32 @@ export default async function HomePage() {
   const signedIn = await isSignedIn();
   return (
     <SiteShell>
-      <section className="relative isolate overflow-hidden bg-neutral-950 text-neutral-50">
-        <HeroMotion />
-        <div className="relative mx-auto max-w-6xl px-6 pt-20 pb-28 sm:pt-28 sm:pb-32">
-          <p className="text-sm font-semibold tracking-widest text-neutral-300 uppercase">
-            {BRAND.tagline}
-          </p>
-          <h1 className="mt-4 max-w-2xl text-5xl font-semibold tracking-tight text-balance sm:text-7xl">
-            Your whole season.
-            <br />
-            One app.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-neutral-200">
-            Schedule, training, arm care, live scoring, registration and payments, for coaches,
-            players and parents.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <StartButton signedIn={signedIn} />
-            <a
-              href="#watch"
-              className="inline-flex h-12 items-center justify-center rounded-full bg-surface px-7 font-semibold text-zinc-900 ring-1 ring-zinc-300 hover:bg-zinc-50"
-            >
-              ▶ See 9D in action
-            </a>
+      <section className="site-hero">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 lg:grid-cols-2 lg:gap-14 lg:py-20">
+          <div>
+            <p className="text-sm font-semibold tracking-widest text-brand-700 uppercase">
+              {BRAND.tagline}
+            </p>
+            <h1 className="mt-4 max-w-2xl text-5xl font-semibold tracking-tight text-balance sm:text-7xl">
+              Your whole season.
+              <br />
+              One app.
+            </h1>
+            <p className="mt-6 max-w-xl text-lg text-zinc-600">
+              Schedule, training, arm care, live scoring, registration and payments, for coaches,
+              players and parents.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <StartButton signedIn={signedIn} />
+              <a
+                href="#watch"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-surface px-7 font-semibold text-zinc-900 ring-1 ring-zinc-300 hover:bg-zinc-50"
+              >
+                ▶ See 9D in action
+              </a>
+            </div>
           </div>
+          <HeroPreview />
         </div>
       </section>
       <AudienceSwitch />

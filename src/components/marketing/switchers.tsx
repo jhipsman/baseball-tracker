@@ -4,6 +4,32 @@ import { useState } from "react";
 import Link from "next/link";
 import { AUDIENCES, FEATURES } from "./content";
 import { cn } from "@/lib/utils";
+import styles from "./motion.module.css";
+import type { KeyboardEvent } from "react";
+
+function navigateTabs(
+  event: KeyboardEvent<HTMLButtonElement>,
+  index: number,
+  count: number,
+  select: (index: number) => void,
+) {
+  const next =
+    event.key === "ArrowRight"
+      ? (index + 1) % count
+      : event.key === "ArrowLeft"
+        ? (index + count - 1) % count
+        : event.key === "Home"
+          ? 0
+          : event.key === "End"
+            ? count - 1
+            : null;
+  if (next === null) return;
+  event.preventDefault();
+  select(next);
+  event.currentTarget.parentElement
+    ?.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+    [next]?.focus();
+}
 
 /** "Who's it for?" — pick coach, player or parent and see just that. */
 export function AudienceSwitch() {
@@ -26,9 +52,12 @@ export function AudienceSwitch() {
             role="tab"
             id={`aud-${x.slug}`}
             aria-selected={pick === i}
+            tabIndex={pick === i ? 0 : -1}
+            onKeyDown={(event) => navigateTabs(event, i, AUDIENCES.length, setPick)}
             aria-controls="aud-panel"
             onClick={() => setPick(i)}
             className={cn(
+              styles.tab,
               "h-11 shrink-0 rounded-full px-4 text-sm font-semibold sm:px-5",
               pick === i ? "bg-zinc-900 text-zinc-50" : "text-zinc-700 hover:bg-zinc-100",
             )}
@@ -39,9 +68,11 @@ export function AudienceSwitch() {
       </div>
       <div
         id="aud-panel"
+        key={a.slug}
+        tabIndex={0}
         role="tabpanel"
         aria-labelledby={`aud-${a.slug}`}
-        className="mt-10 grid items-center gap-8 md:grid-cols-2 md:gap-14"
+        className={cn(styles.panel, "mt-10 grid items-center gap-8 md:grid-cols-2 md:gap-14")}
       >
         <div>
           <h3 className="text-3xl font-semibold tracking-tight text-balance">{a.title}</h3>
@@ -66,7 +97,7 @@ export function AudienceSwitch() {
             Everything for {a.label.toLowerCase()} →
           </Link>
         </div>
-        <div className="mx-auto w-full max-w-md">
+        <div className={cn(styles.preview, "mx-auto w-full max-w-md")}>
           <Mock />
         </div>
       </div>
@@ -95,9 +126,12 @@ export function FeatureTabs() {
               role="tab"
               id={`ft-${x.slug}`}
               aria-selected={pick === i}
+              tabIndex={pick === i ? 0 : -1}
+              onKeyDown={(event) => navigateTabs(event, i, FEATURES.length, setPick)}
               aria-controls="ft-panel"
               onClick={() => setPick(i)}
               className={cn(
+                styles.tab,
                 "inline-flex h-11 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold ring-1",
                 pick === i
                   ? "bg-brand-700 text-on-brand ring-brand-700"
@@ -111,9 +145,11 @@ export function FeatureTabs() {
         </div>
         <div
           id="ft-panel"
+          key={f.slug}
+          tabIndex={0}
           role="tabpanel"
           aria-labelledby={`ft-${f.slug}`}
-          className="mt-8 grid items-center gap-8 md:grid-cols-2 md:gap-14"
+          className={cn(styles.panel, "mt-8 grid items-center gap-8 md:grid-cols-2 md:gap-14")}
         >
           <div>
             <h3 className="text-3xl font-semibold tracking-tight text-balance">{f.title}</h3>
@@ -135,7 +171,7 @@ export function FeatureTabs() {
               More about {f.name.toLowerCase()} →
             </Link>
           </div>
-          <div className="mx-auto w-full max-w-md">
+          <div className={cn(styles.preview, "mx-auto w-full max-w-md")}>
             <f.Mock />
           </div>
         </div>
