@@ -237,6 +237,26 @@ dialog[open]::backdrop {
 
 /* Press feedback: controls sink slightly under a finger and spring back. */
 @layer base {
+  /* Day is light even when the phone or computer is in dark mode (Night sets dark). */
+  :root {
+    color-scheme: light;
+  }
+  /* Dropdowns: the open list is drawn by the browser, which keeps its own white
+     background while the text follows the site (light in Night). Give the list
+     the site's colors so it reads in both modes. Classes on a select still win. */
+  select {
+    background-color: var(--color-surface-solid);
+    color: var(--color-zinc-900);
+    accent-color: var(--color-brand-600);
+  }
+  option,
+  optgroup {
+    background-color: var(--color-surface-solid);
+    color: var(--color-zinc-900);
+  }
+  option:disabled {
+    color: var(--color-zinc-500);
+  }
   button,
   a {
     transition-property: color, background-color, border-color, box-shadow, opacity, scale;

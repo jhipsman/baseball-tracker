@@ -894,7 +894,7 @@
   min-height: 44px;
   padding: 8px 10px;
   color: var(--zinc-900);
-  background-color: #fff;
+  background-color: var(--color-surface-solid, #fff);
   min-width: 0;
   max-width: 100%;
   font-size: 16px;
