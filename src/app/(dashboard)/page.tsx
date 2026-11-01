@@ -64,17 +64,7 @@ async function DashboardContent({
       supabase.from("team_events").select("id", count).eq("org_id", org.id),
     ],
   );
-  const {
-    team,
-    recent,
-    throwRows,
-    births,
-    exercises,
-    members,
-    programs,
-    videosToReview,
-    nextPractice,
-  } = dashboard;
+  const { team, recent, throwRows, births, programs, videosToReview, nextPractice } = dashboard;
   const armAlerts = team.players.flatMap((p) =>
     throwingAlerts(
       throwRows.filter((r) => r.playerId === p.id),
@@ -94,7 +84,7 @@ async function DashboardContent({
     {
       done: (parents.count ?? 0) + (parentInvites.count ?? 0) > 0,
       label: "Invite parents",
-      href: "/roster/manage",
+      href: "/roster/manage#parents",
     },
     {
       done: hasSchedule,
@@ -109,6 +99,10 @@ async function DashboardContent({
   ];
   // A brand-new team sees the checklist, not a wall of zeros.
   const brandNew = team.players.length === 0;
+  // Workout tracking cards only once the team trains through 9D.
+  const training = (programs.count ?? 0) > 0;
+  // The checklist stays until the required steps are done; training is optional.
+  const setUp = steps.slice(0, 3).every((st) => st.done);
   const remaining = steps.filter((st) => !st.done).length;
   const nextStep = steps.find((st) => !st.done);
 
@@ -116,9 +110,9 @@ async function DashboardContent({
     ...(hasModule(org.modules, "videos")
       ? [{ label: "Videos to review", value: videosToReview, href: "/videos" }]
       : []),
-    { label: "Members", value: members.count ?? 0, href: "/roster" },
-    { label: "Programs", value: programs.count ?? 0, href: "/programs" },
-    { label: "Exercises in library", value: exercises.count ?? 0, href: "/exercises" },
+    { label: "Players", value: team.players.length, href: "/roster" },
+    { label: "Parents joined", value: parents.count ?? 0, href: "/roster/manage" },
+    ...(training ? [{ label: "Programs", value: programs.count ?? 0, href: "/programs" }] : []),
   ];
 
   return (
@@ -163,7 +157,15 @@ async function DashboardContent({
         </div>
       ) : null}
 
-      {remaining > 0 ? (
+      {setUp && !training && !org.is_demo ? (
+        <p className="mt-6 text-sm text-zinc-600">
+          Your team is set up. Want to run training through 9D too?{" "}
+          <Link href="/programs/new" className="font-semibold text-brand-700 hover:underline">
+            Build a program →
+          </Link>
+        </p>
+      ) : null}
+      {!setUp ? (
         <section className="mt-6 rounded-xl bg-surface p-5 ring-1 ring-brand-500">
           <h2 className="font-semibold">Getting started</h2>
           <p className="mt-0.5 text-sm text-zinc-600">
@@ -229,110 +231,112 @@ async function DashboardContent({
 
       {brandNew ? null : (
         <>
-          <div className="mt-6 grid gap-4 lg:grid-cols-3 [&>*]:min-w-0">
-            <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
-              <h2 className="text-sm text-zinc-600">Team compliance, last 7 days</h2>
-              <p className="mt-1 text-5xl font-semibold">
-                {teamCompliance.rate == null ? "—" : `${Math.round(teamCompliance.rate * 100)}%`}
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">
-                {teamCompliance.due === 0
-                  ? "Shows up once players have a program assigned."
-                  : `${teamCompliance.logged} of ${teamCompliance.due} due workouts logged · ${teamCompliance.missed} missed`}
-              </p>
-              <Link
-                href="/calendar"
-                className="mt-3 inline-block text-sm font-semibold text-brand-700"
-              >
-                Open calendar →
-              </Link>
-            </section>
-
-            <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
-              <h2 className="font-semibold">Needs attention</h2>
-              {attention.length === 0 ? (
-                <p className="mt-2 text-sm text-zinc-500">
-                  {team.players.length === 0
-                    ? "Players who fall behind on workouts will show up here."
-                    : teamCompliance.due === 0
-                      ? "Nothing due yet. Assign a program to start tracking."
-                      : "Everyone is keeping up this week."}
+          {training ? (
+            <div className="mt-6 grid gap-4 lg:grid-cols-3 [&>*]:min-w-0">
+              <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
+                <h2 className="text-sm text-zinc-600">Team compliance, last 7 days</h2>
+                <p className="mt-1 text-5xl font-semibold">
+                  {teamCompliance.rate == null ? "—" : `${Math.round(teamCompliance.rate * 100)}%`}
                 </p>
-              ) : (
-                <ul className="mt-2 divide-y divide-zinc-100">
-                  {attention.slice(0, 6).map((p) => {
-                    const c = perPlayer.get(p.id)!;
-                    return (
-                      <li
-                        key={p.id}
-                        className="flex items-center justify-between gap-2 py-2 text-sm"
-                      >
-                        <Link
-                          href={`/roster/${p.id}`}
-                          className="truncate font-medium hover:underline"
+                <p className="mt-1 text-xs text-zinc-500">
+                  {teamCompliance.due === 0
+                    ? "Shows up once players have a program assigned."
+                    : `${teamCompliance.logged} of ${teamCompliance.due} due workouts logged · ${teamCompliance.missed} missed`}
+                </p>
+                <Link
+                  href="/calendar"
+                  className="mt-3 inline-block text-sm font-semibold text-brand-700"
+                >
+                  Open calendar →
+                </Link>
+              </section>
+
+              <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
+                <h2 className="font-semibold">Needs attention</h2>
+                {attention.length === 0 ? (
+                  <p className="mt-2 text-sm text-zinc-500">
+                    {team.players.length === 0
+                      ? "Players who fall behind on workouts will show up here."
+                      : teamCompliance.due === 0
+                        ? "Nothing due yet. Assign a program to start tracking."
+                        : "Everyone is keeping up this week."}
+                  </p>
+                ) : (
+                  <ul className="mt-2 divide-y divide-zinc-100">
+                    {attention.slice(0, 6).map((p) => {
+                      const c = perPlayer.get(p.id)!;
+                      return (
+                        <li
+                          key={p.id}
+                          className="flex items-center justify-between gap-2 py-2 text-sm"
                         >
-                          {p.name}
-                        </Link>
-                        <span className="shrink-0 text-xs text-zinc-500 tabular-nums">
-                          {c.logged}/{c.due} logged · {c.missed} missed
-                        </span>
+                          <Link
+                            href={`/roster/${p.id}`}
+                            className="truncate font-medium hover:underline"
+                          >
+                            {p.name}
+                          </Link>
+                          <span className="shrink-0 text-xs text-zinc-500 tabular-nums">
+                            {c.logged}/{c.due} logged · {c.missed} missed
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+                <Link
+                  href="/roster"
+                  className="mt-3 inline-block text-sm font-semibold text-brand-700"
+                >
+                  Roster overview →
+                </Link>
+              </section>
+
+              <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
+                <h2 className="font-semibold">Recent workouts</h2>
+                {!recent || recent.length === 0 ? (
+                  <p className="mt-2 text-sm text-zinc-500">
+                    No workouts logged yet. They appear here as players finish them.
+                  </p>
+                ) : (
+                  <ul className="mt-2 divide-y divide-zinc-100">
+                    {recent.map((l) => (
+                      <li key={l.id} className="py-2 text-sm">
+                        <div className="flex items-center justify-between gap-2">
+                          <Link
+                            href={`/roster/${l.player_id}`}
+                            className="truncate font-medium hover:underline"
+                          >
+                            {l.player.full_name || l.player.email}
+                          </Link>
+                          <span
+                            className={cn(
+                              "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium",
+                              l.status === "completed"
+                                ? "bg-brand-50 text-brand-900"
+                                : l.status === "partial"
+                                  ? "bg-amber-50 text-amber-800"
+                                  : "bg-zinc-100 text-zinc-600",
+                            )}
+                          >
+                            {l.status}
+                          </span>
+                        </div>
+                        <p className="truncate text-xs text-zinc-500">
+                          {l.day_name || "Workout"} · {l.assignment.program.name} ·{" "}
+                          {formatPracticeDate(l.date_completed)}
+                          {l.overall_rpe != null ? ` · RPE ${l.overall_rpe}` : ""}
+                        </p>
+                        {l.notes ? (
+                          <p className="truncate text-xs text-zinc-600 italic">“{l.notes}”</p>
+                        ) : null}
                       </li>
-                    );
-                  })}
-                </ul>
-              )}
-              <Link
-                href="/roster"
-                className="mt-3 inline-block text-sm font-semibold text-brand-700"
-              >
-                Roster overview →
-              </Link>
-            </section>
-
-            <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
-              <h2 className="font-semibold">Recent workouts</h2>
-              {!recent || recent.length === 0 ? (
-                <p className="mt-2 text-sm text-zinc-500">
-                  No workouts logged yet. They appear here as players finish them.
-                </p>
-              ) : (
-                <ul className="mt-2 divide-y divide-zinc-100">
-                  {recent.map((l) => (
-                    <li key={l.id} className="py-2 text-sm">
-                      <div className="flex items-center justify-between gap-2">
-                        <Link
-                          href={`/roster/${l.player_id}`}
-                          className="truncate font-medium hover:underline"
-                        >
-                          {l.player.full_name || l.player.email}
-                        </Link>
-                        <span
-                          className={cn(
-                            "shrink-0 rounded px-1.5 py-0.5 text-[11px] font-medium",
-                            l.status === "completed"
-                              ? "bg-brand-50 text-brand-900"
-                              : l.status === "partial"
-                                ? "bg-amber-50 text-amber-800"
-                                : "bg-zinc-100 text-zinc-600",
-                          )}
-                        >
-                          {l.status}
-                        </span>
-                      </div>
-                      <p className="truncate text-xs text-zinc-500">
-                        {l.day_name || "Workout"} · {l.assignment.program.name} ·{" "}
-                        {formatPracticeDate(l.date_completed)}
-                        {l.overall_rpe != null ? ` · RPE ${l.overall_rpe}` : ""}
-                      </p>
-                      {l.notes ? (
-                        <p className="truncate text-xs text-zinc-600 italic">“{l.notes}”</p>
-                      ) : null}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          </div>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            </div>
+          ) : null}
 
           <dl className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
             {stats.map((s) => {

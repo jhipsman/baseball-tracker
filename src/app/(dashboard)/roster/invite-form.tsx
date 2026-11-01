@@ -73,8 +73,8 @@ export function InviteForm({
       ) : null}
       {isParent ? (
         <p className="text-xs text-zinc-500">
-          Parents get a read-only view of their own player only: workouts, throwing, testing
-          numbers, and reviewed videos.
+          Parents see the schedule, messages, payments and forms, plus their own player&apos;s
+          workouts, health and stats.
         </p>
       ) : null}
       <SubmitButton pendingLabel="Inviting…">Invite</SubmitButton>

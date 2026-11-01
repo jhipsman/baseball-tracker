@@ -7,6 +7,7 @@ import { INVITABLE_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { InviteForm } from "../invite-form";
 import { AddPlayersForm } from "@/components/roster/roster-only";
+import { ParentInvites } from "@/components/roster/parent-invites";
 import { isPlaceholderEmail } from "@/lib/accounts";
 import { CreateGroupForm } from "../group-form";
 import {
@@ -35,7 +36,7 @@ export default async function RosterPage() {
     isStaff
       ? supabase
           .from("org_invitations")
-          .select("id, email, role, token, expires_at, player_id")
+          .select("id, email, role, token, expires_at, player_id, extra_player_ids")
           .eq("org_id", org.id)
           .is("accepted_at", null)
           .order("created_at", { ascending: false })
@@ -72,6 +73,14 @@ export default async function RosterPage() {
       .map((id) => nameOf.get(id))
       .filter(Boolean)
       .join(", ") || "no player linked";
+  // Players with no parent yet: not linked, and no parent invite waiting for them.
+  const covered = new Set<string>((links ?? []).map((l) => l.player_id));
+  for (const inv of pending)
+    if (inv.role === "parent")
+      for (const id of [inv.player_id, ...(inv.extra_player_ids ?? [])]) if (id) covered.add(id);
+  const needParents = players
+    .filter((p) => !covered.has(p.profile_id))
+    .map((p) => ({ id: p.profile_id, name: nameOf.get(p.profile_id) ?? "Player" }));
   const inviteRoles = isAdmin ? INVITABLE_ROLES : (["parent"] as const);
   const memberRoles = INVITABLE_ROLES.filter((r) => r !== "parent");
 
@@ -97,6 +106,22 @@ export default async function RosterPage() {
             .
           </p>
           <AddPlayersForm />
+        </section>
+      ) : null}
+
+      {isStaff && needParents.length > 0 ? (
+        <section
+          id="parents"
+          className="scroll-mt-24 rounded-xl bg-surface p-5 ring-1 ring-zinc-200"
+        >
+          <h2 className="font-semibold">Invite parents</h2>
+          <p className="mt-1 mb-2 text-sm text-zinc-600">
+            {needParents.length === 1
+              ? "1 player doesn't have a parent on 9D yet."
+              : `${needParents.length} players don't have a parent on 9D yet.`}{" "}
+            Type the emails you have and send them all at once. Leave the rest blank for now.
+          </p>
+          <ParentInvites players={needParents} />
         </section>
       ) : null}
 
@@ -126,7 +151,9 @@ export default async function RosterPage() {
                       <span className="min-w-0 flex-1 truncate">{inv.email}</span>
                       <span className="text-zinc-500">
                         {inv.role === "parent" && inv.player_id
-                          ? `Parent of ${nameOf.get(inv.player_id) ?? "a player"}`
+                          ? `Parent of ${[inv.player_id, ...(inv.extra_player_ids ?? [])]
+                              .map((id) => nameOf.get(id)?.split(" ")[0] ?? "a player")
+                              .join(" & ")}`
                           : ROLE_LABELS[inv.role]}
                       </span>
                       {expired ? (

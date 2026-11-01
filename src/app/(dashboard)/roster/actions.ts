@@ -192,3 +192,71 @@ export async function setGroupMembers(formData: FormData) {
   }
   revalidatePath("/roster", "layout");
 }
+
+/**
+ * Invite parents for many players at once (one email per row). The same email
+ * on several players becomes one invite that links all of their kids.
+ */
+export async function inviteParents(
+  rows: { playerId: string; email: string }[],
+): Promise<{ error?: string; sent?: number; notes?: string[] }> {
+  const { supabase, user, org, isStaff } = await requireActiveOrg();
+  if (!isStaff) return { error: "Only coaches can invite parents." };
+  const clean = (rows ?? [])
+    .map((r) => ({
+      playerId: String(r?.playerId ?? ""),
+      email: String(r?.email ?? "")
+        .trim()
+        .toLowerCase(),
+    }))
+    .filter((r) => r.email);
+  if (!clean.length) return { error: "Type at least one parent email." };
+  if (clean.length > 200) return { error: "Invite up to 200 parents at a time." };
+  const bad = clean.filter((r) => !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email));
+  if (bad.length) return { error: `Check this email: ${bad[0].email}` };
+
+  const { data: players } = await supabase
+    .from("org_memberships")
+    .select("profile_id, profile:profiles (full_name, email)")
+    .eq("org_id", org.id)
+    .eq("role", "player");
+  const nameOf = new Map(
+    (players ?? []).map((p) => [p.profile_id, p.profile.full_name || p.profile.email]),
+  );
+  const kids = new Map<string, string[]>();
+  for (const r of clean) {
+    if (!nameOf.has(r.playerId)) continue;
+    kids.set(r.email, [...new Set([...(kids.get(r.email) ?? []), r.playerId])]);
+  }
+  const { data: staff } = await supabase
+    .from("org_memberships")
+    .select("role, profile:profiles!inner (email)")
+    .eq("org_id", org.id)
+    .neq("role", "parent")
+    .in("profile.email", [...kids.keys()]);
+  const taken = new Map((staff ?? []).map((m) => [m.profile.email.toLowerCase(), m.role]));
+
+  let sent = 0;
+  const notes: string[] = [];
+  for (const [email, ids] of kids) {
+    if (taken.has(email)) {
+      notes.push(`${email} is already on the team as a ${taken.get(email)}.`);
+      continue;
+    }
+    const { error } = await supabase.from("org_invitations").insert({
+      org_id: org.id,
+      email,
+      role: "parent",
+      invited_by: user.id,
+      player_id: ids[0],
+      extra_player_ids: ids.slice(1),
+    });
+    if (!error) sent += 1;
+    else if (error.code === "23505") notes.push(`${email} already has a pending invitation.`);
+    else notes.push(`Couldn't invite ${email}. Try again.`);
+  }
+  revalidatePath("/roster", "layout");
+  revalidatePath("/");
+  if (sent) after(() => dispatchPush());
+  return { sent, notes };
+}
