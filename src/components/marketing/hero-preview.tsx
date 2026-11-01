@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ScheduleMock, TrainingMock, LiveMock } from "./mocks";
 import styles from "./motion.module.css";
 
@@ -12,12 +12,67 @@ const scenes = [
 
 export function HeroPreview() {
   const [selected, setSelected] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const scene = scenes[selected];
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncMotion = () => {
+      if (reducedMotion.matches) {
+        video.pause();
+      } else {
+        void video.play().catch(() => {});
+      }
+    };
+    syncMotion();
+    reducedMotion.addEventListener("change", syncMotion);
+    return () => {
+      reducedMotion.removeEventListener("change", syncMotion);
+      video.pause();
+    };
+  }, []);
+
   return (
-    <div className="rounded-3xl bg-zinc-100 p-4 ring-1 ring-zinc-200 sm:p-6">
+    <div className="rounded-3xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-6">
       <div className="mb-5 flex items-center justify-between text-xs font-semibold text-zinc-600">
         <span>ONE TEAM. CONNECTED.</span>
         <span>Sample team</span>
+      </div>
+      <div className="relative mb-5 h-28 overflow-hidden rounded-2xl bg-neutral-950 sm:h-36">
+        <video
+          ref={videoRef}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          poster="/marketing/9d-hero-poster.jpg"
+          aria-hidden="true"
+          className="absolute inset-0 size-full object-cover opacity-75"
+          onPlay={() => setPlaying(true)}
+          onPause={() => setPlaying(false)}
+        >
+          <source src="/marketing/9d-hero-loop.mp4" type="video/mp4" />
+        </video>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-neutral-950/70 via-transparent to-neutral-950/20" />
+        <span className="absolute bottom-3 left-4 text-xs font-semibold tracking-wide text-white">
+          A LOOK INSIDE 9D
+        </span>
+        <button
+          type="button"
+          aria-label={playing ? "Pause product video" : "Play product video"}
+          onClick={() => {
+            const video = videoRef.current;
+            if (!video) return;
+            if (video.paused) void video.play().catch(() => {});
+            else video.pause();
+          }}
+          className="absolute right-3 bottom-2 z-10 grid size-11 place-items-center rounded-full bg-neutral-950/80 text-sm text-white ring-1 ring-white/40 focus-visible:outline-2 focus-visible:outline-offset-2"
+        >
+          {playing ? "Ⅱ" : "▶"}
+        </button>
       </div>
       <div
         role="tablist"
@@ -60,7 +115,7 @@ export function HeroPreview() {
         role="tabpanel"
         aria-labelledby={`hero-tab-${selected}`}
         tabIndex={0}
-        className="min-h-[420px]"
+        className="min-h-[320px]"
       >
         <div key={selected} className={styles.preview}>
           <scene.Mock />

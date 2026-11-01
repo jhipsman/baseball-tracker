@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { BRAND } from "@/constants/brand";
 import { Barlow_Condensed, Manrope } from "next/font/google";
 import { THEME_SCRIPT } from "@/lib/theme";
+import { PageTransition } from "@/components/layout/page-transition";
 import "./globals.css";
 
 const display = Manrope({ subsets: ["latin"], variable: "--font-display", display: "swap" });
@@ -41,7 +42,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
-      <body className="flex min-h-full flex-col font-sans">{children}</body>
+      <body className="flex min-h-full flex-col font-sans">
+        <PageTransition>{children}</PageTransition>
+      </body>
     </html>
   );
 }
