@@ -48,7 +48,7 @@ function fmt(date: string, opts: Intl.DateTimeFormatOptions) {
 }
 
 export default async function CalendarPage({ searchParams }: PageProps<"/calendar">) {
-  const { supabase, org, isStaff } = await requireActiveOrg();
+  const { supabase, org, isStaff, membership } = await requireActiveOrg();
   if (!isStaff) redirect("/player");
   const params = await searchParams;
   const { today } = await playerToday();
@@ -103,6 +103,12 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
       ? `${fmt(from, { month: "short", day: "numeric" })} – ${fmt(to, { month: "short", day: "numeric", year: "numeric" })}`
       : fmt(monthStart, { month: "long", year: "numeric" });
 
+  const nothing =
+    entries.length === 0 &&
+    practices.length === 0 &&
+    games.length === 0 &&
+    tournaments.length === 0 &&
+    events.teamEvents.length === 0;
   const done = entries.filter((e) => e.status === "completed" || e.status === "partial").length;
   const due = entries.filter((e) => e.status !== "upcoming" && e.status !== "today").length;
 
@@ -112,10 +118,12 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
         <div>
           <h1 className="text-2xl font-medium tracking-tight sm:text-3xl">Calendar</h1>
           <p className="mt-1 text-sm text-zinc-600">
-            {SEASON_PHASE_LABELS[org.current_season_phase]} ·{" "}
+            {SEASON_PHASE_LABELS[org.current_season_phase]}
             {due > 0
-              ? `${done} of ${due} due workouts logged`
-              : `${entries.length} workouts scheduled`}
+              ? ` · ${done} of ${due} due workouts logged`
+              : entries.length > 0
+                ? ` · ${entries.length} workouts scheduled`
+                : ""}
             {practices.length > 0
               ? ` · ${practices.length} practice${practices.length === 1 ? "" : "s"}`
               : ""}
@@ -192,22 +200,44 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Link href="/calendar/manage" className={buttonClass("secondary")}>
+        {hasModule(org.modules, "games") ? (
+          <Link href="/games/new" className={buttonClass("primary")}>
+            Add game
+          </Link>
+        ) : null}
+        {hasModule(org.modules, "practices") ? (
+          <Link href="/practices/new" className={buttonClass("secondary")}>
+            Add practice
+          </Link>
+        ) : null}
+        <Link href="/calendar/new" className={buttonClass("secondary")}>
+          Add team event
+        </Link>
+        <Link href="/calendar/manage" className={buttonClass("ghost")}>
           Manage events & attendance
         </Link>
-        <Link href="/calendar/new" className={buttonClass("ghost")}>
-          Create team event
-        </Link>
       </div>
-      <Legend />
+      {nothing ? null : <Legend />}
 
-      {roster.length === 0 &&
-      practices.length === 0 &&
-      games.length === 0 &&
-      events.teamEvents.length === 0 ? (
-        <p className="rounded-xl bg-surface p-8 text-center text-sm text-zinc-500 ring-1 ring-zinc-200">
-          {group ? `No players in ${group.name} yet.` : "No players on the roster yet."}
-        </p>
+      {nothing ? (
+        <div className="rounded-xl bg-surface p-8 text-center ring-1 ring-zinc-200">
+          <p className="font-semibold">
+            Nothing on the calendar {view === "week" ? "this week" : "this month"}
+          </p>
+          <p className="mt-1 text-sm text-zinc-500">
+            {group && roster.length === 0
+              ? `No players in ${group.name} yet.`
+              : "Add a game, practice or team event above. Training workouts show up here once players have a program."}
+          </p>
+          {membership.role === "admin" ? (
+            <p className="mt-3 text-sm text-zinc-600">
+              Have your schedule somewhere else?{" "}
+              <Link href="/imports" className="font-semibold text-brand-700 hover:underline">
+                Import it →
+              </Link>
+            </p>
+          ) : null}
+        </div>
       ) : view === "week" ? (
         <WeekGrid
           from={from}
@@ -385,7 +415,9 @@ function WeekGrid({
       <table className="w-full min-w-[56rem] table-fixed border-collapse text-sm">
         <thead>
           <tr className="border-b border-zinc-200 text-left">
-            <th className="sticky left-0 z-10 w-48 bg-surface-solid px-3 py-2 font-semibold">Player</th>
+            <th className="sticky left-0 z-10 w-48 bg-surface-solid px-3 py-2 font-semibold">
+              Player
+            </th>
             {days.map((d) => (
               <th
                 key={d}

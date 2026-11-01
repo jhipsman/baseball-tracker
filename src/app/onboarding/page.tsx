@@ -7,7 +7,7 @@ import { SubmitButton } from "@/components/ui/submit-button";
 import { acceptInvitation } from "@/app/invite/[token]/actions";
 import { CreateOrgForm } from "./create-org-form";
 
-export const metadata: Metadata = { title: "Create your organization" };
+export const metadata: Metadata = { title: "Set up your team" };
 
 export default async function OnboardingPage() {
   const { supabase, user } = await requireUser();
@@ -20,8 +20,8 @@ export default async function OnboardingPage() {
   const createOrg = (
     <>
       <p className="mt-1 mb-6 text-sm text-zinc-600">
-        Your team, school, or facility. Everything you build lives inside it, and you&apos;ll be its
-        admin.
+        A team, a club with several teams, a school or a training facility. You&apos;ll be its admin
+        and can invite other coaches.
       </p>
       <CreateOrgForm />
     </>
@@ -59,13 +59,13 @@ export default async function OnboardingPage() {
               Starting a new team instead?
             </summary>
             <div className="mt-4">
-              <h2 className="text-lg font-semibold">Set up your organization</h2>
+              <h2 className="text-lg font-semibold">Set up a new team</h2>
               {createOrg}
             </div>
           </details>
         ) : (
           <>
-            <h1 className="text-xl font-semibold">Set up your organization</h1>
+            <h1 className="text-xl font-semibold">Set up your team</h1>
             {createOrg}
           </>
         )}

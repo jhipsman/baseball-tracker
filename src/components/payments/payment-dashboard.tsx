@@ -67,6 +67,9 @@ export async function PaymentDashboard({ admin }: { admin: boolean }) {
         Team payments are temporarily unavailable. Please try again shortly.
       </p>
     );
+  // Which settings are missing goes to the server log for the owner, never to customers.
+  if (admin && !ready)
+    console.error("Team payments not configured; missing:", teamPaymentsMissing().join(", "));
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -90,20 +93,6 @@ export async function PaymentDashboard({ admin }: { admin: boolean }) {
             : "Online checkout and autopay are not available until your team completes payment setup. Installment schedules and offline payment records still work."}
         </p>
         {admin && <ConnectPaymentsButton ready={ready} />}
-        {admin && !ready ? (
-          <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-950 ring-1 ring-amber-200">
-            <p className="font-semibold">The site is missing these settings:</p>
-            <ul className="mt-1 list-disc pl-5 font-mono text-xs">
-              {teamPaymentsMissing().map((m) => (
-                <li key={m}>{m}</li>
-              ))}
-            </ul>
-            <p className="mt-1">
-              Add them in Vercel → Settings → Environment Variables (Production), then Deployments →
-              ⋯ → Redeploy.
-            </p>
-          </div>
-        ) : null}
         <p className="text-xs text-zinc-500">
           Monthly installments are team dues, separate from any subscription for using this app.
           Payment confirmations come from the processor; a return from checkout alone does not mark

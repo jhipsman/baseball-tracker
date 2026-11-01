@@ -322,8 +322,8 @@ function AiPanel({
 
       {!enabled ? (
         <p className="rounded-lg bg-zinc-50 p-3 text-sm text-zinc-700 ring-1 ring-zinc-200">
-          AI analysis is off. To turn it on, add an <code>ANTHROPIC_API_KEY</code> environment
-          variable in Vercel (see docs/DEPLOY.md).
+          AI analysis isn&apos;t available right now. You can still draw, measure and record
+          feedback by hand.
         </p>
       ) : (
         <div className="space-y-3">

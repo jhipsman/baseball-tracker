@@ -9,21 +9,24 @@ import { TEAM_TYPES } from "@/constants/modules";
 
 export async function createOrganization(_prev: FormState, formData: FormData): Promise<FormState> {
   const name = String(formData.get("name") ?? "").trim();
-  const slug = slugify(String(formData.get("slug") ?? "") || name);
+  if (!name) return { error: "Enter your team's name." };
 
-  if (!name) return { error: "Organization name is required." };
-  if (slug.length < 2) return { error: "URL must be at least 2 characters." };
-
+  // The address is internal: make one from the name, numbered if it's taken.
+  const base = slugify(name).slice(0, 40) || "team";
+  const slug = base.length < 2 ? `${base}-team` : base;
   const supabase = await createClient();
-  const { data: org, error } = await supabase.rpc("create_organization", {
-    p_name: name,
-    p_slug: slug,
-  });
-
-  if (error) {
-    if (error.code === "23505") return { error: `The URL "${slug}" is already taken.` };
-    return { error: error.message };
+  let org: { id: string } | null = null;
+  for (let attempt = 0; attempt < 6 && !org; attempt++) {
+    const suffix =
+      attempt === 0 ? "" : attempt < 4 ? `-${attempt + 1}` : `-${crypto.randomUUID().slice(0, 6)}`;
+    const { data, error } = await supabase.rpc("create_organization", {
+      p_name: name,
+      p_slug: `${slug}${suffix}`,
+    });
+    if (!error) org = data;
+    else if (error.code !== "23505") return { error: error.message };
   }
+  if (!org) return { error: "Couldn't create the team. Please try again." };
 
   // Start with the features that fit this kind of team (changeable in Settings).
   const type = TEAM_TYPES.find((t) => t.key === formData.get("team_type"));
