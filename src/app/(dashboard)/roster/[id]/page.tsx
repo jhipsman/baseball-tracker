@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
+import { isPlaceholderEmail } from "@/lib/accounts";
+import { GiveLoginForm } from "@/components/roster/roster-only";
 import { playerToday } from "@/lib/player";
 import { addDays } from "@/lib/schedule";
 import { loadTeam } from "@/lib/team";
@@ -153,13 +155,29 @@ export default async function PlayerProfilePage({
           ))}
         </div>
         <p className="mt-1 text-sm text-zinc-500">
-          {member.profile.email} · joined{" "}
+          {isPlaceholderEmail(member.profile.email) ? "No login yet" : member.profile.email} ·
+          joined{" "}
           {formatPracticeDate(member.created_at.slice(0, 10), {
             year: "numeric",
             weekday: undefined,
           })}
         </p>
       </div>
+
+      {member.profile.email.endsWith("@roster.invalid") ? (
+        <section
+          className="rounded-xl bg-surface p-4 ring-1 ring-zinc-200"
+          data-testid="give-login"
+        >
+          <h2 className="font-semibold">No login yet</h2>
+          <p className="mt-1 mb-3 text-sm text-zinc-600">
+            {name.split(" ")[0]} is on the roster without an account; parents can follow along for
+            them. Old enough for their own? Send a link to set a password. Everything on this
+            profile stays.
+          </p>
+          <GiveLoginForm playerId={member.profile_id} firstName={name.split(" ")[0]} />
+        </section>
+      ) : null}
 
       {critical.length > 0 ? (
         <a

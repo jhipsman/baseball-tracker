@@ -6,6 +6,8 @@ import { selectClass } from "@/components/ui/select";
 import { INVITABLE_ROLES, PLAYER_POSITIONS, ROLE_LABELS } from "@/constants";
 import { cn } from "@/lib/utils";
 import { InviteForm } from "../invite-form";
+import { AddPlayersForm } from "@/components/roster/roster-only";
+import { isPlaceholderEmail } from "@/lib/accounts";
 import { CreateGroupForm } from "../group-form";
 import {
   deleteGroup,
@@ -81,6 +83,22 @@ export default async function RosterPage() {
           {members.length} member{members.length === 1 ? "" : "s"} in {org.name}
         </p>
       </div>
+
+      {isStaff && membership.role !== "trainer" ? (
+        <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
+          <h2 className="font-semibold">Add players without an email</h2>
+          <p className="mt-1 mb-4 text-sm text-zinc-600">
+            Younger players don&apos;t need their own login. They&apos;re full roster members
+            (lineups, stats, health); invite their parents below, and give them a login later from
+            their profile. Moving a whole team?{" "}
+            <a href="/imports" className="font-semibold text-brand-700">
+              Import it instead
+            </a>
+            .
+          </p>
+          <AddPlayersForm />
+        </section>
+      ) : null}
 
       {isStaff ? (
         <section className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
@@ -241,7 +259,9 @@ export default async function RosterPage() {
                     ) : null}
                     {isSelf ? <span className="ml-2 text-xs text-zinc-400">(you)</span> : null}
                   </p>
-                  <p className="truncate text-sm text-zinc-500">{m.profile.email}</p>
+                  <p className="truncate text-sm text-zinc-500">
+                    {isPlaceholderEmail(m.profile.email) ? "No login yet" : m.profile.email}
+                  </p>
                 </div>
 
                 {m.role === "parent" ? (

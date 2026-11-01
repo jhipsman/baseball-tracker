@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ org: vi.fn(), rpc: vi.fn() }));
 vi.mock("@/lib/org", () => ({ requireActiveOrg: mocks.org }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/push", () => ({ dispatchPush: vi.fn() }));
 import { saveImport } from "@/app/(dashboard)/imports/actions";
 beforeEach(() => {
   vi.clearAllMocks();

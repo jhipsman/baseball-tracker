@@ -185,10 +185,21 @@ async function inviteEmails(admin: Admin, cfg: EmailConfig) {
     .is("emailed_at", null)
     .is("accepted_at", null)
     .gte("created_at", since)
-    .select("id, org_id, email, role, token, invited_by, player_id");
+    .select(
+      "id, org_id, email, role, token, invited_by, player_id, claim_profile_id, extra_player_ids",
+    );
   if (!claimed?.length) return { sent: 0, failed: 0 };
   const ids = [
-    ...new Set(claimed.flatMap((c) => [c.invited_by, c.player_id]).filter(Boolean)),
+    ...new Set(
+      claimed
+        .flatMap((c) => [
+          c.invited_by,
+          c.player_id,
+          c.claim_profile_id,
+          ...(c.extra_player_ids ?? []),
+        ])
+        .filter(Boolean),
+    ),
   ] as string[];
   const [{ data: teams }, { data: people }] = await Promise.all([
     admin
@@ -212,22 +223,31 @@ async function inviteEmails(admin: Admin, cfg: EmailConfig) {
     const t = (teams ?? []).find((x) => x.id === c.org_id);
     if (!t || t.is_demo) continue;
     const by = name(c.invited_by);
-    const child = c.role === "parent" ? name(c.player_id) : null;
-    const href = `${cfg.site}/invite/${c.token}`;
+    const kids = (c.role === "parent" ? [c.player_id, ...(c.extra_player_ids ?? [])] : [])
+      .map(name)
+      .filter(Boolean) as string[];
+    const child = kids.length ? kids.join(" and ") : null;
+    const claim = !!c.claim_profile_id;
+    const href = `${cfg.site}/${claim ? "claim" : "invite"}/${c.token}`;
     const role = ROLE_LABELS[c.role].toLowerCase();
-    const heading = `Join ${t.name} on ${BRAND.name}`;
-    const lines = [
-      `${by ?? "Your coach"} invited you to join ${t.name} as a ${role}${child ? ` (for ${child})` : ""}.`,
-      `${BRAND.name} has the team schedule, messages, training and live game updates. It's free for players and parents.`,
-      `Use this email address (${c.email}) when you sign up. The link works for 14 days.`,
-    ];
+    const heading = claim ? `Set up your ${BRAND.name} login` : `Join ${t.name} on ${BRAND.name}`;
+    const lines = claim
+      ? [
+          `${by ?? "Your coach"} added you to ${t.name} on ${BRAND.name}. Choose a password to see your schedule, workouts and stats.`,
+          `You'll sign in with this email address (${c.email}). The link works for 14 days.`,
+        ]
+      : [
+          `${by ?? "Your coach"} invited you to join ${t.name} as a ${role}${child ? ` (for ${child})` : ""}.`,
+          `${BRAND.name} has the team schedule, messages, training and live game updates. It's free for players and parents.`,
+          `Use this email address (${c.email}) when you sign up. The link works for 14 days.`,
+        ];
     const ok = await sendEmail(cfg, {
       to: c.email,
       subject: heading,
       html: emailHtml({
         heading,
         lines,
-        button: { label: "Accept invitation", href },
+        button: { label: claim ? "Set up my account" : "Accept invitation", href },
         footer: `${BRAND.legalName} · You got this because ${by ?? "a coach"} invited ${c.email}. Not expecting it? Ignore this email.`,
       }),
       text: `${heading}\n\n${lines.join("\n")}\n\n${href}`,

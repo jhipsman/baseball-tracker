@@ -789,6 +789,8 @@ export type Database = {
       };
       org_invitations: {
         Row: {
+          claim_profile_id: string | null;
+          extra_player_ids: string[];
           accepted_at: string | null;
           accepted_by: string | null;
           created_at: string;
@@ -803,6 +805,8 @@ export type Database = {
           token: string;
         };
         Insert: {
+          claim_profile_id?: string | null;
+          extra_player_ids?: string[];
           accepted_at?: string | null;
           accepted_by?: string | null;
           created_at?: string;
@@ -817,6 +821,8 @@ export type Database = {
           token?: string;
         };
         Update: {
+          claim_profile_id?: string | null;
+          extra_player_ids?: string[];
           accepted_at?: string | null;
           accepted_by?: string | null;
           created_at?: string;
@@ -831,6 +837,13 @@ export type Database = {
           token?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "org_invitations_claim_profile_id_fkey";
+            columns: ["claim_profile_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "org_invitations_accepted_by_fkey";
             columns: ["accepted_by"];
@@ -1212,6 +1225,57 @@ export type Database = {
           measured_on?: string;
           org_id?: string;
           player_id?: string;
+        };
+        Relationships: [];
+      };
+      import_batches: {
+        Row: {
+          created_at: string;
+          created_by: string | null;
+          games: string[];
+          id: string;
+          import_rows: string[];
+          invitations: string[];
+          kind: string;
+          label: string | null;
+          org_id: string;
+          players: string[];
+          practices: string[];
+          source: string;
+          summary: Json;
+          undone_at: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          created_by?: string | null;
+          games?: string[];
+          id?: string;
+          import_rows?: string[];
+          invitations?: string[];
+          kind: string;
+          label?: string | null;
+          org_id: string;
+          players?: string[];
+          practices?: string[];
+          source: string;
+          summary?: Json;
+          undone_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          created_by?: string | null;
+          games?: string[];
+          id?: string;
+          import_rows?: string[];
+          invitations?: string[];
+          kind?: string;
+          label?: string | null;
+          org_id?: string;
+          players?: string[];
+          practices?: string[];
+          source?: string;
+          summary?: Json;
+          undone_at?: string | null;
         };
         Relationships: [];
       };

@@ -320,6 +320,27 @@ export type TeamOperationsFunctions = {
   send_payment_reminders: { Args: Record<string, never>; Returns: number };
   notify_document: { Args: { p_doc: string; p_missing_only: boolean }; Returns: number };
   send_trial_reminders: { Args: Record<string, never>; Returns: number };
+  add_roster_players: {
+    Args: { p_org: string; p_people: Json };
+    Returns: Json;
+  };
+  create_claim_invite: {
+    Args: { p_org: string; p_player: string; p_email: string };
+    Returns: string;
+  };
+  import_roster: {
+    Args: { p_org: string; p_source: string; p_label: string; p_people: Json; p_invite: boolean };
+    Returns: Json;
+  };
+  import_schedule: {
+    Args: { p_org: string; p_source: string; p_label: string; p_events: Json };
+    Returns: Json;
+  };
+  import_stats: {
+    Args: { p_org: string; p_source: string; p_season: string; p_label: string; p_rows: Json };
+    Returns: Json;
+  };
+  undo_import: { Args: { p_batch: string }; Returns: Json };
   medical_cards: {
     Args: { p_org: string };
     Returns: {

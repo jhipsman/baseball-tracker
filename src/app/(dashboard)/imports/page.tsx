@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireActiveOrg } from "@/lib/org";
 import { ImportedPlayerLink } from "./player-link";
-import { ImportWizard } from "./wizard";
+import { SwitchWizard } from "./switch-wizard";
+import { UndoImportButton } from "./undo-button";
 export const metadata = { title: "Bring your team over" };
 export default async function ImportsPage() {
   const { supabase, org, membership } = await requireActiveOrg();
@@ -22,6 +23,12 @@ export default async function ImportsPage() {
     .from("player_groups")
     .select("id,name")
     .eq("org_id", org.id);
+  const { data: batches } = await supabase
+    .from("import_batches")
+    .select("id, kind, source, label, summary, created_at, undone_at")
+    .eq("org_id", org.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
   const players = (roster ?? []).map((r) => ({
     id: r.profile_id,
     name: r.profile.full_name || r.profile.email,
@@ -32,25 +39,64 @@ export default async function ImportsPage() {
         <p className="text-xs font-semibold tracking-widest text-brand-700 uppercase">Team setup</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-tight">Bring your team over.</h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-zinc-600">
-          Your roster, schedule, and history belong with your team. Start with a spreadsheet or an
-          export from the app you use today.
+          Moving from GameChanger, TeamSnap, LeagueApps, SportsEngine or a spreadsheet? Upload their
+          export as it is. Players don&apos;t need an email to be on the roster, parents get invited
+          for their kids, and any import can be undone.
         </p>
       </header>
-      <ImportWizard groups={groups ?? []} />
+      <SwitchWizard teamName={org.name} groups={(groups ?? []).map((g) => g.name)} />
+      {batches?.length ? (
+        <section id="history" className="rounded-2xl bg-surface p-5 ring-1 ring-zinc-200">
+          <h2 className="font-semibold">Your imports</h2>
+          <ul className="mt-2 divide-y divide-zinc-100">
+            {batches.map((b) => {
+              const s = b.summary as Record<string, number>;
+              const what =
+                b.kind === "roster"
+                  ? `${s.created ?? 0} players added, ${s.matched ?? 0} updated`
+                  : b.kind === "schedule"
+                    ? `${s.games ?? 0} games, ${s.practices ?? 0} practices`
+                    : `${s.saved ?? 0} stat lines`;
+              return (
+                <li
+                  key={b.id}
+                  className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
+                >
+                  <span>
+                    <span className="font-medium">{b.label || b.kind}</span>{" "}
+                    <span className="text-zinc-500">
+                      · {what} ·{" "}
+                      {new Date(b.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </span>
+                  </span>
+                  {b.undone_at ? (
+                    <span className="text-xs text-zinc-500">Undone</span>
+                  ) : (
+                    <UndoImportButton batchId={b.id} />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
       <section className="rounded-xl border border-zinc-200 bg-surface p-5">
-        <h2 className="font-semibold">Imported data</h2>
+        <h2 className="font-semibold">Imported stats and records</h2>
         <p className="mt-2 text-sm text-zinc-600">
-          Schedules appear in{" "}
-          <Link className="text-brand-700 underline" href="/games">
-            Games
+          Past season lines from other apps, kept exactly as they were (separate from 9D&apos;s own
+          season totals). Lines are matched to roster players by name and number; &ldquo;—&rdquo;
+          means no match yet. Games and practices you import go straight onto the{" "}
+          <Link className="text-brand-700 underline" href="/calendar">
+            calendar
           </Link>
-          . Imported players can be linked to roster accounts below; linking also attaches matching
-          historical snapshots. It does not create an account or send an invitation. Historical
-          stats remain source snapshots, separate from live season totals. Use{" "}
+          , and players onto the{" "}
           <Link className="text-brand-700 underline" href="/roster">
-            Roster
-          </Link>{" "}
-          to invite players when you’re ready.
+            roster
+          </Link>
+          .
         </p>
         {error ? (
           <p className="mt-4 text-sm text-amber-800">

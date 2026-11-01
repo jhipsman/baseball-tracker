@@ -85,6 +85,15 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
   - upload-back requests
   - staff certifications with expiry
 
+**Switching to 9D** (`/imports`)
+- Upload a GameChanger, TeamSnap, LeagueApps or SportsEngine export as it is (CSV, Excel, or a calendar `.ics` file or link), or paste spreadsheet cells. Step-by-step export guides per platform.
+- Finds the header row under titles, reads GameChanger's Batting/Pitching sections, matches headers loosely (parent emails, team/division, birthdays), many date/time formats, Excel date cells, positions ("Shortstop" → SS), "Last, First" names.
+- Roster: players are created with no login needed ("roster-only"), groups from the team column, cancelled/withdrawn/staff rows skipped, duplicate rows per parent merged; parents invited (siblings share one invite), players with an email get a "set up your login" link (`/claim/[token]`).
+- Schedule: games and practices; Home team / Away team files ask which team is yours; duplicates skipped.
+- Stats: batting and pitching lines matched to roster players.
+- Every import can be undone. Roster → Manage also adds players by name, and a player's page has "Give them a login".
+- Formats were built from typical exports; real files from each platform are the best test. Send any file that doesn't import cleanly.
+
 **9D business**
 - Marketing site: home, For coaches / players / parents, six feature pages, pricing
 - Privacy and Terms pages; demo team; branded loading animation

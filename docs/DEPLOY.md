@@ -152,6 +152,8 @@ Leave **Confirm email** turned on. Invitations only work for a verified email ad
 
 ## 5. Try it
 
+**Test sign-ups without new email accounts.** Gmail ignores anything after a `+`, so `you+coach1@gmail.com`, `you+player1@gmail.com` and `you+mom1@gmail.com` are three separate 9D accounts whose emails all land in your own inbox. Use a new `+word` each time you want to walk through onboarding as a brand-new coach, player or parent (Google Workspace addresses on 9dbsbl.app work the same way).
+
 1. Open your Vercel URL, sign up, confirm the email, and create your organization.
 2. **Roster → Invite** a second email you own as a player, open the invite link on your phone, and accept it.
 3. Build a short program, assign it to that player, and log a workout from the phone.

@@ -8,6 +8,8 @@ const PUBLIC_PATHS = [
   "/signup",
   "/forgot-password",
   "/auth",
+  // Setting up a login for a player a coach added without an email.
+  "/claim",
   // Marketing and legal pages.
   "/home",
   "/marketing",
