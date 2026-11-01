@@ -5,7 +5,6 @@ import { hasModule } from "@/constants/modules";
 import { PlayerNav } from "@/components/layout/player-nav";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PageTransition } from "@/components/layout/page-transition";
 import { requireActiveOrg } from "@/lib/org";
 import { PreviewBar, ReadOnly } from "@/components/layout/preview-bar";
 import { playerToday } from "@/lib/player";
@@ -45,9 +44,7 @@ export default async function PlayerLayout({ children }: { children: React.React
         </div>
       </header>
       <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-24">
-        <PageTransition>
-          <ReadOnly on={!!preview}>{children}</ReadOnly>
-        </PageTransition>
+        <ReadOnly on={!!preview}>{children}</ReadOnly>
       </main>
       <Suspense>
         <PlayerNav modules={org.modules} />

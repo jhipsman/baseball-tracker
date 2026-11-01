@@ -4,7 +4,6 @@ import { OrgSwitcher } from "@/components/layout/org-switcher";
 import { SeasonToggle } from "@/components/layout/season-toggle";
 import { TimezoneSync } from "@/components/layout/timezone-sync";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { PageTransition } from "@/components/layout/page-transition";
 import { playerToday } from "@/lib/player";
 import { signOut } from "@/lib/auth/actions";
 import { requireActiveOrg } from "@/lib/org";
@@ -103,9 +102,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             daysLeft={billing.daysLeft}
             admin={membership.role === "admin"}
           />
-          <TrialLock locked={billing.kind === "ended"}>
-            <PageTransition>{children}</PageTransition>
-          </TrialLock>
+          <TrialLock locked={billing.kind === "ended"}>{children}</TrialLock>
         </div>
       </main>
     </div>

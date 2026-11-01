@@ -122,6 +122,22 @@ The goal: run a tryout and turn the players you want into registered, paid team 
 ### 4.2 "Ask the trainer": a recovery and performance assistant
 
 An assistant for players (and parents) that answers **only from a curated library of approved sources** and cites a source with every answer.
+
+**Status: a first preview ("Ask 9D") is built** at `/player/ask` (linked from Me), added by Codex.
+- **What it does:**
+  - answers from editorial summaries of two public sources (Driveline exit-velocity education, MLB Pitch Smart)
+  - uses context the player types in and asks follow-up questions
+  - checks that cited source IDs are real
+  - can draft a plan for the player to discuss with their coach
+- **Setup:** needs `ANTHROPIC_API_KEY`; `ASK_9D_MODEL` optionally overrides the model.
+- **What it doesn't do yet:**
+  - search the web, read health records or assigned workouts
+  - save conversations or send plans to coaches
+- **Still to build:**
+  - a reviewed source library, including recovery sources
+  - saved conversations with coach review
+  - the player's real injury, plan and workload as context (with the guardrails below)
+  - per-player usage limits before a broad rollout
 - **Approach:** retrieval over approved documents with the Claude API (the app already uses it for video analysis). We do not train a model.
 - **Recovery mode:**
   - It knows the player's current injury, return-plan step and recent check-ins.

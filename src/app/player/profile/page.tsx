@@ -79,6 +79,11 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
         <MeLink href="/player/history" hint="Every workout you've logged">
           Workout history →
         </MeLink>
+        {membership.role === "player" ? (
+          <MeLink href="/player/ask" hint="Source-backed baseball training questions">
+            Ask 9D →
+          </MeLink>
+        ) : null}
         {membership.role === "player" && hasModule(org.modules, "games") ? (
           <MeLink href="/player/stats" hint="Your season line and game log">
             My stats →

@@ -1,13 +1,12 @@
 import { ViewTransition } from "react";
 
 /**
- * Animates the page area when the user moves between pages from a menu
- * (links tagged `transitionTypes={["nav"]}`). Saves, refreshes and the live
- * scorer's updates don't animate. The motion itself lives in globals.css (.page).
+ * Provides a consistent page transition for route changes throughout the app.
+ * The motion itself lives in globals.css (.page).
  */
 export function PageTransition({ children }: { children: React.ReactNode }) {
   return (
-    <ViewTransition update={{ nav: "page", default: "none" }} default="none">
+    <ViewTransition update={{ default: "page" }} default="none">
       {children}
     </ViewTransition>
   );
