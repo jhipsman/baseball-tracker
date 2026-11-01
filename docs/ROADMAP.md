@@ -1,76 +1,179 @@
-# Roadmap notes
+# 9D roadmap
 
-Product decisions and ideas captured along the way. They supplement the build phases in the project brief, which remain the source of truth for order.
+The working plan for 9D (legal name 9D Systems): what's built, what's next, and the rules any contributor (human, Claude or ChatGPT/Codex) should follow. Keep this file current: move items to **Built** when they ship.
 
-## Positioning: why this beats a generic lifting app (Hevy, Boostcamp)
+Last updated: October 31, 2026.
 
-Generic apps log lifts. 9D should know about **the throwing arm and the baseball calendar**:
+---
 
-- Throwing workload: pitch counts, long-toss distances, bullpen plans, arm-feel check-ins (Phase 5)
-- Safety alerts: MLB Pitch Smart limits by age, acute:chronic workload spikes, multi-sport load (Phase 5)
-- Season-aware programming: off-season → pre-season → in-season periodization (Phase 3 toggle, AI later)
-- Swing and pitching video feedback from a coach or AI, with drawings, angles, and voice-over (Phase 6)
-- Coach-run teams: one coach, many players, compliance at a glance (Phases 3–4)
+## 1. What 9D is
 
-Phase 5 is the strongest differentiator. Consider pulling it ahead of Phase 4 if needed.
+A baseball team app for **coaches and clubs, players, and parents**, live at **https://9dbsbl.app**. Its edge over generic lifting apps (Hevy, Boostcamp) and game apps (GameChanger) is that it knows **the throwing arm, the whole athlete, and the baseball season**, all in one place: schedule, training, health, live scoring, registration, payments and documents.
 
-## Video analysis (Phase 6, built)
+**Pricing:** every team gets a 30-day free trial with no card. After that it's $19/month or $190/year per team, and coach pages go view-only until someone subscribes. Discount codes are Stripe promotion codes. Players and parents never pay. Prices live in `src/constants/pricing.ts`.
 
-Built: upload, coach queue, frame stepping and slow motion, line/arrow/angle/circle/freehand drawings and timestamped notes, voice-over breakdown recording, written feedback, and optional Claude analysis that the coach edits before sharing.
+---
 
-Still to do:
+## 2. How to work in this repo (read before changing anything)
 
-- Side-by-side or overlay comparison with an earlier rep or a model video.
-- Notify the player when a review is sent (needs push notifications).
-- Player replies on a review (a short thread per video).
-- Larger uploads: compress in the browser or use resumable uploads (TUS) on a paid Supabase plan.
-- Clean up storage files when a whole org or player is deleted (today files are removed when a video is deleted).
-- Pose estimation (joint tracking) to measure angles automatically and give the AI real measurements, not just frames.
+- **Stack:**
+  - Next.js 16 (App Router, server actions), React, Tailwind v4, Supabase (Postgres, Auth, Storage, RLS), Stripe, Resend for email
+  - Deployed on Vercel
+  - This Next.js has breaking changes compared with older versions: read `node_modules/next/dist/docs/` before using an API (see `AGENTS.md`).
+- **Branch:** work on `claude/laughing-knuth-4iwh0e` (the default branch; pushes deploy). Several agents push here, so **always fetch and merge before pushing**.
+- **Database:**
+  - Add a new file in `supabase/migrations/` (timestamped, after the latest one). The "Deploy database migrations" GitHub Action applies it to production on push.
+  - Never edit a migration that has already shipped.
+  - Every table needs RLS. Use the `private.*` helpers: `is_org_staff`, `is_org_member`, `is_parent_of`, `is_player_in_org`, `has_org_role`.
+  - Types are hand-maintained: update `src/types/database.ts` (tables) and `src/types/team-operations.ts` (RPCs and team-operations tables).
+- **New routes:** run `npx next typegen` so `PageProps<"/path">` exists.
+- **Day / Night theme (required):** every screen must work in both modes.
+  - Use `bg-surface` for panels and `text-on-brand` on brand fills.
+  - Use `bg-zinc-900 text-zinc-50` for inverted chips.
+  - Add no new hex colors in components, and use only color shades that already have a Night version (`src/app/theme-coverage.test.ts` checks this).
+  - Full rules: `.claude/agents/design.md`.
+- **Phones first:**
+  - Tap targets are at least 44px and nothing scrolls sideways at 375px.
+  - "View as player/parent" preview disables every `<button>`. Anything that only opens or shows something should use `ViewButton` (`src/components/ui/view-button.tsx`).
+- **Privacy:**
+  - Health data about minors is visible only to the team's staff, the player and that player's parents.
+  - Notification and email text stays vague ("Coach update"); details stay in the app.
+- **Secrets:** never put a secret in a `NEXT_PUBLIC_` variable, never commit keys, and never ask for keys to be pasted into a chat.
+- **Licensing:**
+  - Don't copy code or assets from GameChanger, Hevy or any AGPL project. PDFCraft was only a reference; Documents uses pdf-lib (MIT) and PDF.js (Apache-2.0).
+  - Anything an AI feature reads must be public domain, openly licensed, or the team's own document.
+- **Checks before pushing:** `npx tsc --noEmit`, `npx eslint src`, `npx vitest run`, and Prettier on changed files.
+- **Writing style for UI copy:** short and plain. No dashes inside sentences, no jargon, and "talk to your coach or athletic trainer" rather than anything diagnostic.
 
-## Workout logging improvements (built in Phase 7)
+---
 
-- **Tracking types per exercise** (built): weight × reps, reps only, time (e.g. 60-yard sprint, 7.1 s), distance, and distance + time. The player's workout screen shows only the inputs that apply, and the built-in library has sensible defaults.
-- **Demo videos on exercises** (built): coaches add a YouTube or Vimeo link to a custom exercise. Players watch it in a pop-up during the workout; it also shows in the library, the builder, and program pages. Exercises without a video get a "Find a demo" YouTube search.
-- Still open: curated demo links for the built-in library (needs someone to pick and vet real videos), and letting coaches set a tracking type or video on a global exercise for their org only.
+## 3. Built
 
-## Health section (grows out of Arm care)
+**Training**
+- Programs, assignments, workout logging with tracking types (weight × reps, time, distance)
+- Demo videos, plus our own animated exercise diagrams (SVG figures in `src/lib/figures/`). Long toss and flat ground have none on purpose; Blender versions are planned later.
 
-"Arm care" becomes a **Health** section: throwing workload and arm check-ins are its first parts. Other parts aren't decided yet. Ideas to choose from:
+**Team**
+- Roster and invites by link and email; parents linked to players
+- Messages, schedule and RSVPs, practices, notifications (in-app, push and email)
 
-- **Daily readiness check-in** (10 seconds): sleep, energy, soreness, stress → a readiness score the coach sees before practice.
-- **Soreness body map:** tap where it hurts (shoulder, elbow, back, hamstring…); repeated spots raise an alert.
-- **Injury log and return-to-play:** who's injured, what, since when, cleared by whom; a step-by-step return-to-throw plan (e.g. long-toss distances by week) with the player's status shown on the roster and Throwing board.
-- **Arm health testing:** shoulder internal/external rotation range, grip strength, and other screens tracked over the season (fits the existing testing/assessments feature).
-- **Multi-sport and outside load:** other sports' practices and games so total workload is honest.
-- **Concussion protocol tracking.**
-- **Athletic trainer notes** with tighter privacy (medical info visible only to staff the player or parent allows; check FERPA/HIPAA implications before storing medical detail).
-- **Sleep, hydration, nutrition** habits (light-touch, optional).
+**Games**
+- Box scores and stats
+- **Live scoring:**
+  - start flow: pitcher cards with health status, batting order, who bats first
+  - five-button pitch pad and a guided "in play" flow
+  - fielders' names on the field; opponent lineup by batting spot
+  - undo; phone focus mode
+  - parent live feed
 
-Keep the tone "talk to your coach or athletic trainer," never diagnostic.
+**Player Health**
+- **Today board** (`/throwing`): needs a look / out / limited / resting / ready, plus alerts you can mark handled
+- **Pitch Smart** limits and rest days; arm check-in; throwing volume spikes
+- **Injuries:** where (body map) and what; return plans by injury; injury history
+- **Concussion protocol:** a 7-step plan; can't return to Full without a doctor's written clearance (the database enforces this); families upload the note
+- **Daily body check-in:** feel, sore spots, sleep, and team-session minutes × effort. Alerts for feeling rough, new soreness and lingering soreness.
+- **Training load** (minutes × effort) spikes
+- **Growth tab:** monthly heights and growth-spurt flags
+- **Pitched and caught on the same day** alert (from the box score)
+- **Medical tab:** allergies, medications, emergency contacts with tap-to-call, the team's field emergency plan, print
 
-## Live game scoring (built)
+**Team operations**
+- **Registration links:** waiver signing, installment plans, automatic payment reminders (daily Vercel cron)
+- **Team dues via Stripe Connect:** each team's own Stripe account; ACH supported
+- **Documents:**
+  - families sign PDFs on their phone; the server stamps a signature page with an audit trail
+  - upload-back requests
+  - staff certifications with expiry
 
-- **Live pitch counter** for our pitcher (ball / strike / in play), feeding Pitch Smart in real time with dugout warnings before limits.
-- **At-bat-by-at-bat scoring** (result per plate appearance, outs, auto-advancing lineup) that fills in the box score automatically; parents follow live with a last-play feed.
-- Built: live pitch counter with Pitch Smart, at-bat scoring that fills the box score, parent live feed, recent at-bats on profiles.
-- Later, if asked: full runner-by-runner scoring (base state, earned-run logic), spray charts, importing GameChanger stats, tournament-weekend pitcher availability planner.
+**9D business**
+- Marketing site: home, For coaches / players / parents, six feature pages, pricing
+- Privacy and Terms pages; demo team; branded loading animation
+- Subscriptions (trial, Checkout, customer portal, webhook)
+- **Email (Resend):** invites, reminders and notifications, with per-kind opt-out
 
-## From the Phase 5 product review
+**Deploy notes:** `docs/DEPLOY.md`.
 
-See [PRODUCT_REVIEW.md](PRODUCT_REVIEW.md) for the full list. Highlights:
+---
 
-- Link throwing program days to throwing logs (prompt "log your throws" when a throwing day is finished)
-- Workload across teams: a player's throwing history should follow them between orgs
-- Pitch Smart annual limits (innings per year, months off from overhead throwing)
-- Privacy policy, terms, and parental consent for under-13 players
+## 4. Next up (in this order)
 
-## Notifications
+### 4.1 Tryouts and one-click offers
 
-- Push workout reminders (Phase 2 leftover). Needs VAPID keys, a push-subscription table, and a scheduled job (Vercel Cron) now that the site is live on HTTPS.
+The goal: run a tryout and turn the players you want into registered, paid team members without spreadsheets.
 
-## Native app (Phase 9)
+1. **Tryout events:**
+   - a public sign-up link (like registration links) collecting player, age, positions and parent contact, plus an optional fee and waiver
+   - check-in at the field with tryout numbers
+2. **Grading clipboard (phone-first):**
+   - coaches grade each player on the 20–80 scouting scale by category: arm, hit, power, run, field, pitching velo, catcher pop time; plus notes
+   - several evaluators can grade at once; their scores are averaged
+   - works offline-tolerant (save as you go)
+3. **Rankings:** sort by overall or by category; filter by position or age; compare two players side by side.
+4. **Send offer:**
+   - one click sends an email and an in-app offer that leads into the existing **registration** flow
+   - the flow includes the waiver and required forms from **Documents** and a **Stripe deposit** (team payments)
+   - the offer has an expiry date
+5. **Offer tracker:**
+   - statuses: sent / viewed / accepted / declined / expired
+   - automatic reminders through the existing cron and email
+   - a waitlist that moves up when someone declines
+6. Families who accept become roster players with parents linked (reuse `link_registration_player`).
 
-- Capacitor wrapper for the App Store and Google Play.
-- To pass Apple review: native push, camera capture for video, offline logging.
-- In-app account deletion and a privacy policy (minors and COPPA).
-- Bill organizations outside the app (Stripe) to avoid in-app purchase fees.
+### 4.2 "Ask the trainer": a recovery and performance assistant
+
+An assistant for players (and parents) that answers **only from a curated library of approved sources** and cites a source with every answer.
+- **Approach:** retrieval over approved documents with the Claude API (the app already uses it for video analysis). We do not train a model.
+- **Recovery mode:**
+  - It knows the player's current injury, return-plan step and recent check-ins.
+  - It explains the plan and suggests safe things to work on meanwhile (e.g. legs and core during an elbow injury).
+  - Example questions: "Why can't I throw yet?", "What does step 4 mean?"
+- **Performance mode:** strength, speed and explosiveness, answered with exercises from 9D's own exercise library (with diagrams). It can draft a program for the coach to approve.
+- **Guardrails:**
+  - It never changes the coach's status, plan or the concussion lock.
+  - It never diagnoses.
+  - Warning signs (numbness, pain getting worse, headache after a hit, any concussion symptom) get "stop and tell your coach or parent", and the coach is alerted.
+  - If the library has no source for a question, it says so instead of guessing.
+  - Coaches can see their players' questions.
+- **Library sources:**
+  - public, citable material: MLB/USA Baseball Pitch Smart, CDC HEADS UP, open-access research on PubMed Central, and freely published position statements after a license check
+  - the team's own uploaded protocols, used for that team only
+  - every source is approved before use, and each is stored with its title, publisher, link and license
+
+### 4.3 Small scorer additions
+
+- Dropped third strike, catcher's interference, runner's interference.
+- A recorded "override rest" confirmation when a coach picks a pitcher who should be resting under Pitch Smart.
+
+### 4.4 Health leftovers
+
+- **Catching outside games:** log bullpen and practice catching (innings or pitches received) so "pitched and caught" and catcher load include them. This needs a new throwing type and an innings field in the throw log form.
+- **Heat and lightning:** needs a weather API. Heat index guidance and lightning-distance warnings on practice and game days.
+- Parents can do the body check-in for younger players. The database already allows it; it needs a UI on the parent home.
+- Arm health testing (shoulder internal/external rotation range, grip strength) in Testing.
+- Pitch Smart annual limits (innings per year, months off from overhead throwing).
+
+---
+
+## 5. Later / ideas
+
+- **Video:** side-by-side compare with an earlier rep or a model video; player replies on reviews; bigger uploads (resumable); pose estimation for automatic angles.
+- **Exercise library:** curated demo videos for built-in exercises; Blender-rendered diagrams; per-team overrides of global exercises.
+- **Workload:** a player's throwing history follows them between teams; link throwing program days to throw logs.
+- **Live scoring:** full runner-by-runner scoring with earned runs, spray charts, GameChanger stat import, a tournament-weekend pitcher planner.
+- **Clubs:** multi-team club accounts with club pricing (discount from 5 teams).
+- **Native app:**
+  - Capacitor wrapper for the App Store and Google Play: native push, camera capture, offline logging, in-app account deletion
+  - Bill outside the app to avoid in-app purchase fees.
+- **Compliance:** parental consent for under-13 players (COPPA); review FERPA/HIPAA questions before storing more medical detail.
+
+---
+
+## 6. Owner to-dos (setup outside the code)
+
+Steps for each are in `docs/DEPLOY.md`.
+
+- [ ] **Resend:** verify the 9dbsbl.app domain, then add `RESEND_API_KEY` in Vercel and redeploy.
+- [ ] **Supabase:** turn on custom SMTP through Resend, so login and password-reset emails come from 9dbsbl.app.
+- [ ] **Stripe billing:** add the second webhook (`/api/billing/webhook`) and `STRIPE_WEBHOOK_SECRET`, then save the Customer portal settings.
+- [ ] **Stripe live mode:** enable Accounts v1 support there too, then swap the test keys for live ones.
+- [ ] Match the Vercel and Supabase regions, and consider paid plans before teams rely on it (Supabase free projects pause after a week idle; the keep-awake Action covers this for now).
