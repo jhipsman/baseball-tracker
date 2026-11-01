@@ -110,6 +110,42 @@ describe("buildSnapshot", () => {
     ]);
     expect(s.lastSeq).toBe(2);
   });
+  it("knows who just scored and where they ran from, so the viewer can run them home", () => {
+    expect(s.crossed).toEqual([{ id: "a", initials: "CH", name: "Carter", ours: true, from: 2 }]);
+  });
+  it("shows who's on deck and the batter's line today", () => {
+    expect(s.onDeck).toBe("Carter Hayes");
+    expect(s.batterToday).toBe("First at-bat today");
+    const later = buildSnapshot({
+      status: "live",
+      teamScore: 1,
+      opponentScore: 0,
+      setup,
+      plays: [...plays, play({ seq: 3, batterId: "c", result: "GO", outs: 1 })],
+      names,
+    });
+    expect(later.batter).toBe("Carter Hayes");
+    expect(later.batterToday).toBe("1 for 1 today");
+    expect(later.crossed).toEqual([]);
+  });
+  it("puts our fielders' initials on the field only when we're in the field", () => {
+    expect(s.fielders.every((f) => f.initials === null && !f.ours)).toBe(true);
+    const fielding = buildSnapshot({
+      status: "live",
+      teamScore: 0,
+      opponentScore: 0,
+      setup: { ...setup, weBatFirst: false, defense: { SS: "b" } },
+      plays: [],
+      names,
+    });
+    expect(fielding.fielders.find((f) => f.pos === "SS")).toEqual({
+      pos: "SS",
+      initials: "JR",
+      ours: true,
+    });
+    expect(fielding.fielders.find((f) => f.pos === "P")?.initials).toBe("OW");
+    expect(fielding.onDeck).toBeNull();
+  });
   it("hides opponent identities", () => {
     const opp = buildSnapshot({
       status: "live",

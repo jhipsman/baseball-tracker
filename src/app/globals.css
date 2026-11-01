@@ -398,13 +398,22 @@ html[data-theme-switching]::view-transition-new(root) {
 }
 .live-celebrate {
   background: radial-gradient(circle at 50% 55%, rgb(61 220 132 / 0.28), transparent 60%);
-  animation: live-celebrate 1.9s ease-out both;
+  animation: live-celebrate 1.9s ease-out 0.6s both;
 }
 .live-celebrate-quiet {
   background: radial-gradient(circle at 50% 55%, rgb(245 184 60 / 0.2), transparent 60%);
 }
 .live-celebrate > span {
-  animation: live-pop 1.9s var(--ease-out-spring) both;
+  animation: live-pop 1.9s var(--ease-out-spring) 0.6s both;
+}
+.live-field-in {
+  animation: live-field-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes live-field-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 }
 @keyframes live-celebrate {
   0% {
@@ -433,6 +442,7 @@ html[data-theme-switching]::view-transition-new(root) {
   .live-slide-in,
   .live-bump,
   .live-dot-land,
+  .live-field-in,
   .live-celebrate > span {
     animation: none;
   }

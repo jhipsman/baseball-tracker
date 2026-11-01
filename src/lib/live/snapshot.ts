@@ -4,10 +4,11 @@
  * with big moments tagged, and every ball put in play with a location.
  * Pure (no data access) so it can be unit tested; see loadLiveSnapshot.
  */
-import { opponentLabel, opponentOrder } from "./defense";
+import { FIELD_POSITIONS, opponentLabel, opponentOrder, type FieldPos } from "./defense";
 import {
   describePlay,
   halfLabel,
+  NOT_AB,
   pitchCount,
   situation,
   type Half,
@@ -29,6 +30,10 @@ export type FeedItem = {
   weBat: boolean;
 };
 export type PitchChip = { n: number; label: "Ball" | "Strike" | "Foul"; count: string };
+/** A runner who crossed the plate on the latest play, and the base they ran from (0 = batter). */
+export type ScoredRunner = RunnerDot & { from: 0 | Base };
+/** A fielder's spot on the viewer's field: our players' initials, or a dim dot for theirs. */
+export type FielderDot = { pos: FieldPos; initials: string | null; ours: boolean };
 export type BattedBall = { seq: number; x: number; y: number; hit: boolean; weBat: boolean };
 
 export type LiveSnapshot = {
@@ -46,11 +51,18 @@ export type LiveSnapshot = {
   weBat: boolean;
   bases: Partial<Record<1 | 2 | 3, RunnerDot>>;
   batter: string | null;
+  /** Our batter's line in this game so far ("1 for 2 today"). */
+  batterToday: string | null;
+  /** Our next batter after this one. */
+  onDeck: string | null;
   pitcher: string | null;
   pitcherPitches: number;
   atBat: PitchChip[];
   feed: FeedItem[];
   spray: BattedBall[];
+  /** Who scored on the latest play, so the field can run them home. */
+  crossed: ScoredRunner[];
+  fielders: FielderDot[];
   lastSeq: number;
 };
 
@@ -155,6 +167,44 @@ export function buildSnapshot(input: {
   const pitcherId = sit && !sit.weBat ? sit.pitcherId : null;
   const pitcherPitches = pitcherId && setup ? pitchCount(setup, plays, pitcherId) : 0;
   const batterId = sit?.weBat && sit.lineup.length ? sit.lineup[sit.batterIdx] : null;
+  const onDeckId =
+    sit?.weBat && sit.lineup.length > 1
+      ? sit.lineup[(sit.batterIdx + 1) % sit.lineup.length]
+      : null;
+
+  let ab = 0;
+  let h = 0;
+  for (const p of plays) {
+    if (!batterId || p.kind !== "pa" || !p.weBat || p.batterId !== batterId || !p.result) continue;
+    if (!NOT_AB.has(p.result)) ab += 1;
+    if (HITS.has(p.result)) h += 1;
+  }
+  const batterToday = batterId ? (ab ? `${h} for ${ab} today` : "First at-bat today") : null;
+
+  const last = plays.at(-1);
+  const crossed: ScoredRunner[] =
+    last?.details && last.runs > 0
+      ? last.details.moves
+          .filter((m) => m.to === "home")
+          .map((m) => {
+            const ours = !m.id.startsWith("opponent:");
+            return {
+              id: m.id,
+              initials: ours ? initials(full(m.id)) : "OP",
+              name: first(m.id),
+              ours,
+              from: m.from,
+            };
+          })
+      : [];
+
+  const weField = !!sit && !sit.weBat;
+  const fielders: FielderDot[] = setup
+    ? FIELD_POSITIONS.map((pos) => {
+        const id = weField ? (pos === "P" ? sit.pitcherId : setup.defense?.[pos]) : null;
+        return { pos, initials: id ? initials(full(id)) : null, ours: weField };
+      })
+    : [];
 
   return {
     status: input.status,
@@ -176,11 +226,15 @@ export function buildSnapshot(input: {
           : null
         : opponentLabel(setup, opp.next)
       : null,
+    batterToday,
+    onDeck: onDeckId ? full(onDeckId) : null,
     pitcher: pitcherId ? full(pitcherId) : null,
     pitcherPitches,
     atBat: pitchChips(setup?.pitchHistory),
     feed,
     spray,
+    crossed,
+    fielders,
     lastSeq: plays.at(-1)?.seq ?? 0,
   };
 }

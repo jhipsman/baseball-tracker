@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import type { FieldPos } from "@/lib/live/defense";
 import type { FeedItem, LiveSnapshot, RunnerDot } from "@/lib/live/snapshot";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +10,20 @@ import { cn } from "@/lib/utils";
 const HOME = { x: 320, y: 444 };
 const BASE_XY = { 1: { x: 444, y: 314 }, 2: { x: 320, y: 190 }, 3: { x: 196, y: 314 } } as const;
 const PATH = [HOME, BASE_XY[1], BASE_XY[2], BASE_XY[3], HOME];
+/** Where each fielder stands on the viewer's field. */
+const FIELD_XY: Record<FieldPos, { x: number; y: number }> = {
+  LF: { x: 165, y: 165 },
+  CF: { x: 320, y: 112 },
+  RF: { x: 475, y: 165 },
+  SS: { x: 262, y: 252 },
+  "2B": { x: 384, y: 252 },
+  "3B": { x: 182, y: 346 },
+  "1B": { x: 458, y: 346 },
+  P: { x: 320, y: 329 },
+  C: { x: 320, y: 478 },
+};
+/** Runners leave a beat after contact, as the ball is in the air. */
+const RUN_DELAY = 200;
 
 type Celebration = { key: number; title: string; tone: "run" | "hr" | "k" };
 
@@ -109,7 +124,8 @@ export function LiveGame({
     const tone = big.tag === "hr" ? "hr" : big.tag === "run" ? "run" : "k";
     const key = big.seq;
     setCelebration({ key, title, tone });
-    const t = setTimeout(() => setCelebration((c) => (c?.key === key ? null : c)), 1900);
+    // Starts once the ball lands (see .live-celebrate's delay), then clears.
+    const t = setTimeout(() => setCelebration((c) => (c?.key === key ? null : c)), 2600);
     return () => clearTimeout(t);
   }, [snap, firstSeq]);
 
@@ -121,7 +137,11 @@ export function LiveGame({
       <ScoreBar snap={snap} teamName={teamName} opponent={opponent} />
       <div className="grid gap-3 md:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
         <div className="relative overflow-hidden rounded-2xl bg-[#112a1d] ring-1 ring-zinc-200">
-          <Field snap={snap} newBallSeq={newBall?.seq ?? null} />
+          <Field
+            snap={snap}
+            newBallSeq={newBall?.seq ?? null}
+            crossedSeq={snap.lastSeq > firstSeq && snap.crossed?.length ? snap.lastSeq : null}
+          />
           {celebration ? (
             <div
               key={celebration.key}
@@ -263,9 +283,56 @@ function Team({ name, score, ours = false }: { name: string; score: number; ours
 }
 
 /** The field: runners slide base to base, the last ball's flight is drawn, every ball in play stays as a dot. */
-function Field({ snap, newBallSeq }: { snap: LiveSnapshot; newBallSeq: number | null }) {
+function Field({
+  snap,
+  newBallSeq,
+  crossedSeq,
+}: {
+  snap: LiveSnapshot;
+  newBallSeq: number | null;
+  crossedSeq: number | null;
+}) {
   const runnerEls = useRef(new Map<string, SVGGElement>());
   const placed = useRef(new Map<string, number>()); // runner id → base (1..3)
+  const scorerEls = useRef(new Map<string, SVGGElement>());
+  const ranHome = useRef(0); // last play whose scorers already ran home
+  const flight = useRef<SVGAnimateMotionElement>(null);
+
+  // The ball leaves the bat and flies to where it was fielded.
+  useLayoutEffect(() => {
+    // With reduced motion it stays parked off the field; the landing dot shows where it went.
+    if (newBallSeq && !prefersReducedMotion()) flight.current?.beginElement();
+  }, [newBallSeq]);
+
+  // Whoever scored runs the rest of the way home, then steps off the field.
+  useLayoutEffect(() => {
+    if (!crossedSeq || crossedSeq <= ranHome.current) return;
+    ranHome.current = crossedSeq;
+    for (const r of snap.crossed) {
+      const el = scorerEls.current.get(r.id);
+      if (!el) continue;
+      if (prefersReducedMotion()) {
+        el.style.opacity = "0";
+        continue;
+      }
+      const stops = PATH.slice(r.from);
+      el.animate(
+        [
+          ...stops.map((p) => ({
+            transform: `translate(${p.x}px, ${p.y}px) scale(1)`,
+            opacity: 1,
+          })),
+          { transform: `translate(${HOME.x}px, ${HOME.y}px) scale(1.6)`, opacity: 0 },
+        ],
+        {
+          duration: 380 * (stops.length - 1) + 450,
+          delay: RUN_DELAY,
+          easing: "cubic-bezier(0.45, 0, 0.2, 1)",
+          fill: "both",
+        },
+      );
+    }
+  }, [crossedSeq, snap.crossed]);
 
   useLayoutEffect(() => {
     const reduce = prefersReducedMotion();
@@ -287,8 +354,9 @@ function Field({ snap, newBallSeq }: { snap: LiveSnapshot; newBallSeq: number | 
         stops.map((p) => ({ transform: `translate(${p.x}px, ${p.y}px)` })),
         {
           duration: 380 * (stops.length - 1),
+          delay: RUN_DELAY,
           easing: "cubic-bezier(0.45, 0, 0.2, 1)",
-          fill: "forwards",
+          fill: "both",
         },
       );
     }
@@ -299,11 +367,14 @@ function Field({ snap, newBallSeq }: { snap: LiveSnapshot; newBallSeq: number | 
     snap.bases[b] ? [[b, snap.bases[b]!] as const] : [],
   );
   const lastBall = newBallSeq ? snap.spray.find((s) => s.seq === newBallSeq) : null;
+  const arc = lastBall
+    ? `M${HOME.x} ${HOME.y - 6} Q ${(HOME.x + lastBall.x * 640) / 2} ${Math.min(HOME.y, lastBall.y * 500) - 120} ${lastBall.x * 640} ${lastBall.y * 500}`
+    : null;
 
   return (
     <svg
-      viewBox="0 120 640 380"
-      className="block w-full"
+      viewBox="0 30 640 470"
+      className="live-field-in block w-full"
       role="img"
       aria-label="Field with runners and balls in play"
     >
@@ -323,6 +394,26 @@ function Field({ snap, newBallSeq }: { snap: LiveSnapshot; newBallSeq: number | 
       <path d="m320 408-112-112 112-111 112 111Z" fill="#2f7049" />
       <circle cx="320" cy="329" r="18" fill="#a57c55" />
       <path d="M320 444 30 180M320 444 610 180" stroke="rgb(255 255 255 / 0.65)" strokeWidth="2" />
+      {(snap.fielders ?? []).map((f) => {
+        const p = FIELD_XY[f.pos];
+        return f.initials ? (
+          <g key={f.pos} transform={`translate(${p.x} ${p.y})`} data-testid={`fielder-${f.pos}`}>
+            <circle r={15} fill="#12b76a" opacity={0.85} stroke="#fff" strokeWidth={1.5} />
+            <text textAnchor="middle" dy={4} fontSize={11} fontWeight={800} fill="#04140b">
+              {f.initials}
+            </text>
+          </g>
+        ) : (
+          <circle
+            key={f.pos}
+            cx={p.x}
+            cy={p.y}
+            r={7}
+            fill={f.ours ? "#5ee89c" : "#f5b83c"}
+            opacity={0.55}
+          />
+        );
+      })}
       {snap.spray.map((b) => (
         <circle
           key={b.seq}
@@ -334,10 +425,10 @@ function Field({ snap, newBallSeq }: { snap: LiveSnapshot; newBallSeq: number | 
           className={b.seq === newBallSeq ? "live-dot-land" : undefined}
         />
       ))}
-      {lastBall ? (
+      {lastBall && arc ? (
         <path
           key={`arc-${lastBall.seq}`}
-          d={`M${HOME.x} ${HOME.y - 6} Q ${(HOME.x + lastBall.x * 640) / 2} ${Math.min(HOME.y, lastBall.y * 500) - 120} ${lastBall.x * 640} ${lastBall.y * 500}`}
+          d={arc}
           fill="none"
           stroke="#f5b83c"
           strokeWidth="5"
@@ -358,6 +449,53 @@ function Field({ snap, newBallSeq }: { snap: LiveSnapshot; newBallSeq: number | 
           fill="#fff"
         />
       ))}
+      {lastBall && arc ? (
+        <circle
+          key={`ball-${lastBall.seq}`}
+          r={8}
+          cx={0}
+          cy={0}
+          fill="#fff"
+          style={{ filter: "drop-shadow(0 0 6px #f5b83c)" }}
+          data-testid="live-ball"
+        >
+          <animateMotion
+            ref={flight}
+            path={arc}
+            dur="0.65s"
+            begin="indefinite"
+            fill="freeze"
+            calcMode="spline"
+            keyTimes="0;1"
+            keySplines="0.3 0 0.2 1"
+          />
+        </circle>
+      ) : null}
+      {crossedSeq
+        ? snap.crossed.map((r) => (
+            <g
+              key={`${crossedSeq}-${r.id}`}
+              ref={(el) => {
+                if (el) scorerEls.current.set(r.id, el);
+                else scorerEls.current.delete(r.id);
+              }}
+              transform={`translate(${HOME.x} ${HOME.y})`}
+              opacity={0}
+              data-testid="runner-scoring"
+            >
+              <circle r={22} fill={r.ours ? "#12b76a" : "#3b3f45"} stroke="#fff" strokeWidth={3} />
+              <text
+                textAnchor="middle"
+                dy={6}
+                fontSize={16}
+                fontWeight={800}
+                fill={r.ours ? "#04140b" : "#fff"}
+              >
+                {r.initials}
+              </text>
+            </g>
+          ))
+        : null}
       {runners.map(([b, r]) => (
         <Runner
           key={r.id}
@@ -408,7 +546,15 @@ function AtBat({ snap }: { snap: LiveSnapshot }) {
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <p className="min-w-0 truncate text-sm">
           <span className="text-zinc-500">{snap.weBat ? "At bat" : "Pitching"} </span>
-          <strong>{snap.weBat ? snap.batter : snap.pitcher}</strong>
+          <strong
+            key={snap.weBat ? snap.batter : snap.pitcher}
+            className="live-slide-in inline-block"
+          >
+            {snap.weBat ? snap.batter : snap.pitcher}
+          </strong>
+          {snap.weBat && snap.batterToday ? (
+            <span className="text-zinc-500"> · {snap.batterToday}</span>
+          ) : null}
         </p>
         {!snap.weBat && snap.pitcherPitches ? (
           <span className="text-xs font-semibold text-zinc-500 tabular-nums">
@@ -437,6 +583,11 @@ function AtBat({ snap }: { snap: LiveSnapshot }) {
       ) : (
         <p className="mt-2 text-xs text-zinc-500">First pitch coming up.</p>
       )}
+      {snap.weBat && snap.onDeck ? (
+        <p className="mt-3 border-t border-zinc-200 pt-2 text-xs text-zinc-500">
+          On deck <span className="font-semibold text-zinc-700">{snap.onDeck}</span>
+        </p>
+      ) : null}
     </div>
   );
 }

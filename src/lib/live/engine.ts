@@ -113,7 +113,7 @@ const OUTS: Partial<Record<Result, number>> = {
   CS: 1,
 };
 const HITS = new Set<Result>(["1B", "2B", "3B", "HR"]);
-const NOT_AB = new Set<Result>(["BB", "IBB", "HBP", "SAC", "SF"]);
+export const NOT_AB = new Set<Result>(["BB", "IBB", "HBP", "SAC", "SF"]);
 
 /** Outs a result records on its own (extra outs on the bases are added by the scorer). */
 export const outsFor = (r: Result | null) => (r ? (OUTS[r] ?? 0) : 0);
