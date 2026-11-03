@@ -1,4 +1,4 @@
-import { FormsCard } from "@/components/documents/family";
+import { FamilyTodo } from "@/components/family/todo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { loadChildEntries, loadChildPractices, pickChild, requireParent } from "@/lib/parent";
@@ -120,27 +120,33 @@ export default async function ParentHomePage({ searchParams }: PageProps<"/paren
         />
       ) : null}
 
-      <FormsCard base="/parent" />
+      <FamilyTodo
+        base="/parent"
+        playerId={child.id}
+        firstName={name}
+        today={today}
+        medicalHref={href("/parent/medical")}
+      />
 
-      <div className="flex flex-wrap gap-3">
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
         <Link
           href="/events"
-          className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+          className="inline-flex h-11 shrink-0 items-center rounded-full bg-surface px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 hover:ring-brand-500"
         >
-          Team activities & RSVPs →
+          Activities & RSVPs
         </Link>
         <Link
           href="/payments"
-          className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+          className="inline-flex h-11 shrink-0 items-center rounded-full bg-surface px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 hover:ring-brand-500"
         >
-          Team payments →
+          Payments
         </Link>
         {has("health") ? (
           <Link
             href={href("/parent/medical")}
-            className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-700"
+            className="inline-flex h-11 shrink-0 items-center rounded-full bg-surface px-4 text-sm font-semibold text-zinc-800 ring-1 ring-zinc-200 hover:ring-brand-500"
           >
-            Medical card →
+            Medical card
           </Link>
         ) : null}
       </div>

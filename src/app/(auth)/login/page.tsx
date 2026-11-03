@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BRAND } from "@/constants/brand";
 import Link from "next/link";
 import { LoginForm } from "./login-form";
+import { inviteLine, invitePreview } from "@/lib/invite-preview";
 
 export const metadata: Metadata = { title: "Sign in" };
 
@@ -12,6 +13,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   // Opening an invite link while signed out lands here. Most invitees are new,
   // so lead with creating an account instead of "Welcome back".
   const fromInvite = nextPath?.startsWith("/invite/") ?? false;
+  const invite = fromInvite ? await invitePreview(nextPath) : null;
 
   return (
     <>
@@ -19,8 +21,17 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         <>
           <h1 className="text-xl font-semibold">You&apos;re invited</h1>
           <p className="mt-1 text-sm text-zinc-600">
-            Your team uses {BRAND.name}. Create a free account to accept the invitation, using the
-            email address it was sent to.
+            {invite ? (
+              <>
+                <strong className="text-zinc-900">{inviteLine(invite)}</strong> Create a free
+                account with <strong className="break-all">{invite.email}</strong> to accept.
+              </>
+            ) : (
+              <>
+                Your team uses {BRAND.name}. Create a free account to accept the invitation, using
+                the email address it was sent to.
+              </>
+            )}
           </p>
           <Link
             href={signupHref}

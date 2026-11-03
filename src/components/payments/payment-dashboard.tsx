@@ -72,33 +72,53 @@ export async function PaymentDashboard({ admin }: { admin: boolean }) {
     console.error("Team payments not configured; missing:", teamPaymentsMissing().join(", "));
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {[
-          ["Outstanding", due],
-          ["Overdue", overdue],
-          ["Received before fees", paid],
-          ["Refunded", refunded],
-        ].map(([label, value]) => (
-          <section key={label} className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
-            <h2 className="text-sm text-zinc-600">{label}</h2>
-            <p className="mt-2 text-2xl font-medium tabular-nums">{money(Number(value))}</p>
-          </section>
-        ))}
-      </div>
-      <section className="space-y-3 rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
-        <h2 className="font-semibold">{online ? "Secure online payments" : "Payment setup"}</h2>
+      {!admin && !plans?.length ? null : (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {(admin
+            ? [
+                ["Outstanding", due],
+                ["Overdue", overdue],
+                ["Received before fees", paid],
+                ["Refunded", refunded],
+              ]
+            : [
+                ["Still owed", due],
+                ...(overdue > 0 ? [["Overdue", overdue]] : []),
+                ["Paid so far", paid - refunded],
+              ]
+          ).map(([label, value]) => (
+            <section key={label} className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
+              <h2 className="text-sm text-zinc-600">{label}</h2>
+              <p className="mt-2 text-2xl font-medium tabular-nums">{money(Number(value))}</p>
+            </section>
+          ))}
+        </div>
+      )}
+      {admin ? (
+        <section className="space-y-3 rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
+          <h2 className="font-semibold">{online ? "Secure online payments" : "Payment setup"}</h2>
+          <p className="text-sm text-zinc-600">
+            {online
+              ? "Pay securely through Stripe using the payment methods available for your team. The installment amount is the amount charged; this app adds no transaction markup. Stripe processing fees are deducted from your organization’s payout."
+              : "Online checkout and autopay are not available until your team completes payment setup. Installment schedules and offline payment records still work."}
+          </p>
+          {admin && <ConnectPaymentsButton ready={ready} />}
+          <p className="text-xs text-zinc-500">
+            Monthly installments are team dues, separate from any subscription for using this app.
+            Payment confirmations come from the processor; a return from checkout alone does not
+            mark an invoice paid.
+          </p>
+        </section>
+      ) : online ? (
         <p className="text-sm text-zinc-600">
-          {online
-            ? "Pay securely through Stripe using the payment methods available for your team. The installment amount is the amount charged; this app adds no transaction markup. Stripe processing fees are deducted from your organization’s payout."
-            : "Online checkout and autopay are not available until your team completes payment setup. Installment schedules and offline payment records still work."}
+          Pay by card or bank account below, or turn on autopay. Payments go straight to your team.
         </p>
-        {admin && <ConnectPaymentsButton ready={ready} />}
-        <p className="text-xs text-zinc-500">
-          Monthly installments are team dues, separate from any subscription for using this app.
-          Payment confirmations come from the processor; a return from checkout alone does not mark
-          an invoice paid.
+      ) : plans?.length ? (
+        <p className="text-sm text-zinc-600">
+          Pay your coach the way your team usually does (cash, check or a payment app). They mark it
+          paid here.
         </p>
-      </section>
+      ) : null}
       {admin && (
         <details className="rounded-xl bg-surface p-5 ring-1 ring-zinc-200">
           <summary className="cursor-pointer font-semibold">Create installment plan</summary>
@@ -119,7 +139,7 @@ export async function PaymentDashboard({ admin }: { admin: boolean }) {
         <p className="rounded-xl bg-surface p-6 text-sm text-zinc-600 ring-1 ring-zinc-200">
           {admin
             ? "No payment plans yet. Create one to preview monthly due dates and assign a payer."
-            : "No team payments are assigned to your account. Your coach will let you know when dues are ready."}
+            : "Nothing to pay right now. When your team sets up dues, they'll show up here."}
         </p>
       )}
       {(plans ?? []).map((plan) => {
@@ -161,16 +181,23 @@ export async function PaymentDashboard({ admin }: { admin: boolean }) {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-semibold">
-                      Installment {i.installment_number} · due {i.due_date}
+                      {admin
+                        ? `Installment ${i.installment_number}`
+                        : `Payment ${i.installment_number}`}{" "}
+                      · due {shortDate(i.due_date)}
                     </h3>
                     <p className="mt-1 text-xs text-zinc-600">
-                      Invoice {i.id.slice(0, 8)} · {i.status}
-                      {i.status === "open" && i.due_date < today ? " · Overdue" : ""}
+                      {admin ? `Invoice ${i.id.slice(0, 8)} · ${i.status}` : familyStatus(i, today)}
+                      {admin && i.status === "open" && i.due_date < today ? " · Overdue" : ""}
                       {i.refunded_cents ? ` · ${money(i.refunded_cents)} refunded` : ""}
                     </p>
                   </div>
                   <strong className="text-lg font-medium tabular-nums">
-                    {money(invoiceBalance(i))} due
+                    {invoiceBalance(i) > 0
+                      ? `${money(invoiceBalance(i))} due`
+                      : i.status === "paid" || i.status === "open"
+                        ? "Paid ✓"
+                        : money(0)}
                   </strong>
                 </div>
                 <InvoiceControls
@@ -213,4 +240,24 @@ export async function PaymentDashboard({ admin }: { admin: boolean }) {
       )}
     </div>
   );
+}
+
+const shortDate = (d: string) =>
+  new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+
+/** Plain words for families: Paid, Overdue, Partly paid, Upcoming, Refunded, Cancelled. */
+function familyStatus(
+  i: { status: string; due_date: string; amount_cents: number; paid_cents: number },
+  today: string,
+) {
+  if (i.status !== "open")
+    return i.status === "paid" ? "Paid" : i.status === "refunded" ? "Refunded" : "Cancelled";
+  if (invoiceBalance(i) <= 0) return "Paid";
+  if (i.due_date < today) return "Overdue";
+  return i.paid_cents > 0 ? "Partly paid" : "Upcoming";
 }

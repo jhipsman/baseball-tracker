@@ -1,24 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SignupForm } from "./signup-form";
+import { inviteLine, invitePreview } from "@/lib/invite-preview";
 
 export const metadata: Metadata = { title: "Create account" };
 
 export default async function SignupPage({ searchParams }: PageProps<"/signup">) {
   const { next } = await searchParams;
   const nextPath = typeof next === "string" ? next : undefined;
+  const invite = await invitePreview(nextPath);
 
   return (
     <>
       <h1 className="text-xl font-semibold">Create your account</h1>
       <p className="mt-1 mb-6 text-sm text-zinc-600">
-        {nextPath?.startsWith("/invite/")
-          ? "Use the email address your invitation was sent to. You'll accept it on the next screen."
-          : nextPath?.startsWith("/join/")
-            ? "Make your parent account. You'll fill in the registration on the next screen."
-            : "Coaches, players, and parents all start here."}
+        {invite
+          ? `${inviteLine(invite)} Use the email your invite was sent to; you'll accept it on the next screen.`
+          : nextPath?.startsWith("/invite/")
+            ? "Use the email address your invitation was sent to. You'll accept it on the next screen."
+            : nextPath?.startsWith("/join/")
+              ? "Make your parent account. You'll fill in the registration on the next screen."
+              : "Coaches, players, and parents all start here."}
       </p>
-      <SignupForm next={nextPath} />
+      <SignupForm next={nextPath} email={invite?.email} />
       <p className="mt-6 text-center text-sm text-zinc-600">
         Already have an account?{" "}
         <Link

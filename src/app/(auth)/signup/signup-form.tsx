@@ -6,7 +6,7 @@ import { Field } from "@/components/ui/field";
 import { FormMessage } from "@/components/ui/form-message";
 import { SubmitButton } from "@/components/ui/submit-button";
 
-export function SignupForm({ next }: { next?: string }) {
+export function SignupForm({ next, email }: { next?: string; email?: string }) {
   const [state, action] = useActionState<FormState, FormData>(signup, {});
 
   return (
@@ -24,7 +24,7 @@ export function SignupForm({ next }: { next?: string }) {
         name="email"
         type="email"
         autoComplete="email"
-        defaultValue={state.values?.email}
+        defaultValue={state.values?.email ?? email}
         required
       />
       <Field
