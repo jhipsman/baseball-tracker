@@ -1,6 +1,14 @@
 import Link from "next/link";
 import { playerToday } from "@/lib/player";
-import { newestTeams, scoreboard, searchTeams, type ScoreGame } from "@/lib/leagues-data";
+import {
+  newestLeagues,
+  newestTeams,
+  scoreboard,
+  searchLeagues,
+  searchTeams,
+  type ScoreGame,
+} from "@/lib/leagues-data";
+import { LeagueLine } from "@/components/leagues/league-view";
 import { GameRow, TeamLine } from "@/components/leagues/game-row";
 import { buttonClass } from "@/components/ui/button";
 
@@ -38,10 +46,12 @@ export default async function LeaguesHome({
 }) {
   const { q = "" } = await searchParams;
   const { today } = await playerToday();
-  const [games, found, newest] = await Promise.all([
+  const [games, found, foundLeagues, newest, leagues] = await Promise.all([
     scoreboard(shift(today, -3), shift(today, 7)),
     q ? searchTeams(q) : Promise.resolve(null),
+    q ? searchLeagues(q) : Promise.resolve([]),
     newestTeams(),
+    newestLeagues(),
   ]);
   const live = games.filter((g) => g.status === "live");
   const todays = games.filter((g) => g.date === today && g.status !== "live");
@@ -69,20 +79,41 @@ export default async function LeaguesHome({
             id="q"
             name="q"
             defaultValue={q}
-            placeholder="Find a team or city"
+            placeholder="Find a team, league or city"
             className="h-12 min-w-0 flex-1 rounded-full bg-neutral-50 px-5 text-base text-neutral-900 placeholder:text-neutral-500"
           />
           <button type="submit" className={buttonClass("primary", "h-12")}>
             Search
           </button>
         </form>
-        <Link
-          href="/leagues/new"
-          className="mt-4 inline-flex min-h-11 items-center font-semibold text-brand-400 hover:underline"
-        >
-          Coach a team? Add it free →
-        </Link>
+        <div className="mt-4 flex flex-wrap gap-x-6">
+          <Link
+            href="/leagues/new"
+            className="inline-flex min-h-11 items-center font-semibold text-brand-400 hover:underline"
+          >
+            Coach a team? Add it free →
+          </Link>
+          <Link
+            href="/leagues/l/new"
+            className="inline-flex min-h-11 items-center font-semibold text-brand-400 hover:underline"
+          >
+            Run a league? Start one →
+          </Link>
+        </div>
       </section>
+
+      {foundLeagues.length ? (
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold">Leagues matching “{q}”</h2>
+          <ul className="divide-y divide-zinc-200 overflow-hidden rounded-2xl bg-surface ring-1 ring-zinc-200">
+            {foundLeagues.map((l) => (
+              <li key={l.id}>
+                <LeagueLine l={l} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {found ? (
         <section className="space-y-2">
@@ -126,12 +157,30 @@ export default async function LeaguesHome({
         </section>
       ) : null}
 
-      <section className="rounded-3xl bg-surface p-6 ring-1 ring-zinc-200 sm:p-8">
-        <h2 className="text-xl font-semibold">Coming next: leagues and standings</h2>
-        <p className="mt-2 max-w-2xl text-zinc-600">
-          Start a league, add its teams, and standings update themselves as scores come in. Teams
-          already on 9D report their scores automatically.
-        </p>
+      {leagues.length ? (
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold">Leagues</h2>
+          <ul className="grid gap-px overflow-hidden rounded-2xl bg-zinc-200 ring-1 ring-zinc-200 md:grid-cols-2">
+            {leagues.map((l) => (
+              <li key={l.id} className="bg-surface">
+                <LeagueLine l={l} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-surface p-6 ring-1 ring-zinc-200 sm:p-8">
+        <div className="max-w-2xl">
+          <h2 className="text-xl font-semibold">Run a league?</h2>
+          <p className="mt-2 text-zinc-600">
+            Add your teams and schedule, and standings update themselves as scores come in. Teams on
+            9D report their scores automatically.
+          </p>
+        </div>
+        <Link href="/leagues/l/new" className={buttonClass("primary")}>
+          Start a league
+        </Link>
       </section>
     </div>
   );

@@ -107,7 +107,10 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 - Other teams enter games and scores on their manage page, one at a time or the whole season at once (CSV, Excel, .ics file, pasted cells or a calendar link; reuses the 9D import parser, skips duplicates and other teams' games)
 - Team logos: owners upload PNG/JPG/WebP, cropped to a 512px square WebP in the browser; public `team-logos` bucket, owner-only writes
 - 9D Leagues home: live now, today, recent results, coming up, team search, new teams
-- Next: leagues (divisions, standings, league schedule and scoreboard, matching the same game entered by both teams), then recruiting profiles (videos, verified stats, share link; parents always copied on messages with minors; NCAA contact dates), then verified college coach accounts and paid "9D Recruit"
+- **Leagues** (`/leagues/l/...`, `src/lib/league-standings.ts`, `league-admin-actions.ts`): anyone starts a league; divisions; add existing team pages or create new ones; schedule by file/paste (Home/Away team columns) or one game at a time
+- League scores: the admin's score always wins; otherwise each game is matched to the two teams' own games (date + loose name match, doubleheaders by start time). One final report counts, two that agree count, two that disagree are "disputed" and left out of standings until the admin settles it. Teams on 9D report from live scoring
+- Standings per division: W, L, T, PCT, GB, RF, RA, DIFF, STRK. A team's owner can leave a league (its league games go with it)
+- Next: recruiting profiles (videos, verified stats, share link; parents always copied on messages with minors; NCAA contact dates), then verified college coach accounts and paid "9D Recruit"
 
 **9D business**
 - Marketing site: home, For coaches / players / parents, six feature pages, pricing

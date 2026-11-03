@@ -132,7 +132,49 @@ export type PublicTeamGame = {
   inning: number | null;
 };
 
+export type LeagueRow = {
+  id: string;
+  slug: string;
+  name: string;
+  season: string | null;
+  level: PublicTeamRow["level"];
+  city: string | null;
+  state: string | null;
+  owner_id: string | null;
+  created_at: string;
+};
+export type LeagueDivisionRow = {
+  id: string;
+  league_id: string;
+  name: string;
+  sort: number;
+  created_at: string;
+};
+export type LeagueTeamRow = {
+  league_id: string;
+  team_id: string;
+  division_id: string | null;
+  created_at: string;
+};
+export type LeagueGameRow = {
+  id: string;
+  league_id: string;
+  date: string;
+  start_time: string | null;
+  home_team_id: string;
+  away_team_id: string;
+  location: string | null;
+  status: "scheduled" | "final" | "postponed" | "canceled";
+  home_score: number | null;
+  away_score: number | null;
+  created_at: string;
+};
+
 export type TeamOperationsTables = {
+  leagues: Table<LeagueRow>;
+  league_divisions: Table<LeagueDivisionRow>;
+  league_teams: Table<LeagueTeamRow>;
+  league_games: Table<LeagueGameRow>;
   public_teams: Table<PublicTeamRow>;
   public_games: Table<PublicGameRow>;
   staff_pay_rates: Table<StaffPayRateRow>;
@@ -323,6 +365,10 @@ export type TeamOperationsViews = {
   };
 };
 export type TeamOperationsFunctions = {
+  public_teams_games: {
+    Args: { p_teams: string[]; p_from: string; p_to: string };
+    Returns: PublicTeamGame[];
+  };
   public_team_games: {
     Args: { p_team?: string | null; p_from?: string | null; p_to?: string | null };
     Returns: PublicTeamGame[];

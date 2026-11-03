@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { playerToday } from "@/lib/player";
-import { leaguesClient, teamBySlug, teamGames } from "@/lib/leagues-data";
+import { leaguesClient, leaguesForTeam, teamBySlug, teamGames } from "@/lib/leagues-data";
 import { levelLabel, logoUrl, record } from "@/lib/leagues";
 import { TeamLogo } from "@/components/leagues/team-logo";
 import { GameRow, VerifiedBadge } from "@/components/leagues/game-row";
@@ -29,10 +29,11 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const team = await teamBySlug(slug);
   if (!team) notFound();
-  const [{ userId }, games, { today }] = await Promise.all([
+  const [{ userId }, games, { today }, leagues] = await Promise.all([
     leaguesClient(),
     teamGames(team.id),
     playerToday(),
+    leaguesForTeam(team.id),
   ]);
   const rec = record(games);
   const live = games.filter((g) => g.status === "live");
@@ -68,6 +69,20 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
             </h1>
           </div>
         </div>
+        {leagues.length ? (
+          <p className="mt-4 flex flex-wrap gap-2 text-sm">
+            {leagues.map((l) => (
+              <Link
+                key={l.id}
+                href={`/leagues/l/${l.slug}`}
+                className="rounded-full bg-white/10 px-3 py-1 font-semibold text-neutral-50 ring-1 ring-white/20 hover:bg-white/20"
+              >
+                🏆 {l.name}
+                {l.season ? ` · ${l.season}` : ""}
+              </Link>
+            ))}
+          </p>
+        ) : null}
         <dl className="mt-6 grid max-w-md grid-cols-3 gap-3">
           {[
             ["Record", rec.text],

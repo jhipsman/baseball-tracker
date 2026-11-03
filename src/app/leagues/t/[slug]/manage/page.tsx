@@ -2,7 +2,14 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { playerToday } from "@/lib/player";
 import { updateTeam } from "@/lib/league-actions";
-import { leaguesClient, linkableTeams, teamBySlug, teamGames } from "@/lib/leagues-data";
+import {
+  leaguesClient,
+  leaguesForTeam,
+  linkableTeams,
+  teamBySlug,
+  teamGames,
+} from "@/lib/leagues-data";
+import { LeaveLeagueButton } from "@/components/leagues/league-admin";
 import { matchup, clock } from "@/lib/leagues";
 import { day } from "@/lib/staff-pay";
 import { siteOrigin } from "@/lib/site";
@@ -27,10 +34,11 @@ export default async function ManageTeam({
   const { userId } = await leaguesClient();
   if (!userId) redirect(`/login?next=/leagues/t/${slug}/manage`);
   if (team.owner_id !== userId) redirect(`/leagues/t/${slug}`);
-  const [games, links, { today }] = await Promise.all([
+  const [games, links, { today }, leagues] = await Promise.all([
     teamGames(team.id),
     linkableTeams(),
     playerToday(),
+    leaguesForTeam(team.id),
   ]);
   const url = `${await siteOrigin()}/leagues/t/${team.slug}`;
   const sorted = [...games].sort((a, b) => b.date.localeCompare(a.date));
@@ -119,6 +127,26 @@ export default async function ManageTeam({
           </section>
         </>
       )}
+
+      {leagues.length ? (
+        <section className="space-y-2 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
+          <h2 className="font-semibold">Leagues</h2>
+          <p className="text-sm text-zinc-600">
+            Your scores count in these leagues&apos; standings automatically.
+          </p>
+          <ul className="divide-y divide-zinc-200">
+            {leagues.map((l) => (
+              <li key={l.id} className="flex items-center justify-between gap-3 py-2">
+                <Link href={`/leagues/l/${l.slug}`} className="font-medium hover:underline">
+                  {l.name}
+                  {l.season ? ` · ${l.season}` : ""}
+                </Link>
+                <LeaveLeagueButton leagueId={l.id} teamId={team.id} leagueName={l.name} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <section className="space-y-2 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
         <Disclosure label="Edit team details" openLabel="Close">
