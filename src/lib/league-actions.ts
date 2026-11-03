@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { LEVELS, teamSlug } from "@/lib/leagues";
+import { gameKey, LEVELS, teamSlug } from "@/lib/leagues";
 import type { PublicTeamRow } from "@/types/team-operations";
 
 type R = { error?: string; ok?: string };
@@ -198,4 +198,98 @@ export async function deleteGame(id: string): Promise<R> {
   if (error || !data.length) return { error: TRY_AGAIN };
   refresh(await slugOf(ctx.supabase, data[0].team_id));
   return {};
+}
+
+/** After the browser uploads a logo to team-logos/<team id>/..., point the team at it. */
+export async function setLogo(teamId: string, path: string | null): Promise<R> {
+  const ctx = await signedIn();
+  if (!ctx || !UUID.test(teamId)) return { error: TRY_AGAIN };
+  if (
+    path !== null &&
+    !new RegExp(`^${teamId}/[a-z0-9-]{8,60}\\.(png|jpe?g|webp)$`, "i").test(path)
+  )
+    return { error: TRY_AGAIN };
+  const { data: team } = await ctx.supabase
+    .from("public_teams")
+    .select("slug, logo_path, owner_id")
+    .eq("id", teamId)
+    .maybeSingle();
+  if (!team || team.owner_id !== ctx.userId) return { error: TRY_AGAIN };
+  const { error } = await ctx.supabase
+    .from("public_teams")
+    .update({ logo_path: path })
+    .eq("id", teamId);
+  if (error) return { error: TRY_AGAIN };
+  if (team.logo_path && team.logo_path !== path)
+    await ctx.supabase.storage.from("team-logos").remove([team.logo_path]);
+  refresh(team.slug);
+  return { ok: path ? "Logo saved." : "Logo removed." };
+}
+
+export type ImportGame = {
+  date: string;
+  time?: string;
+  opponent: string;
+  home_away?: "home" | "away" | "neutral";
+  location?: string;
+};
+
+/** Add many games at once (from a file, pasted cells or a calendar link), skipping ones already there. */
+export async function importGames(
+  teamId: string,
+  games: ImportGame[],
+): Promise<R & { added?: number; skipped?: number }> {
+  const ctx = await signedIn();
+  if (!ctx || !UUID.test(teamId)) return { error: TRY_AGAIN };
+  if (!Array.isArray(games) || !games.length) return { error: "No games to add." };
+  if (games.length > 300) return { error: "Add up to 300 games at a time." };
+  const { data: existing } = await ctx.supabase
+    .from("public_games")
+    .select("date, opponent")
+    .eq("team_id", teamId)
+    .limit(2000);
+  const seen = new Set((existing ?? []).map((g) => gameKey(g.date, g.opponent)));
+  const rows = [];
+  for (const g of games) {
+    const opponent = String(g.opponent ?? "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 80);
+    const time = String(g.time ?? "").slice(0, 5);
+    if (!DATE.test(String(g.date)) || !opponent) continue;
+    const key = gameKey(g.date, opponent);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push({
+      team_id: teamId,
+      date: g.date,
+      start_time: TIME.test(time) ? time : null,
+      opponent,
+      home_away: (["home", "away", "neutral"].includes(g.home_away ?? "")
+        ? g.home_away
+        : "home") as "home" | "away" | "neutral",
+      location:
+        String(g.location ?? "")
+          .trim()
+          .slice(0, 120) || null,
+    });
+  }
+  const skipped = games.length - rows.length;
+  if (!rows.length) return { ok: "Those games are already on your schedule.", added: 0, skipped };
+  const { error } = await ctx.supabase.from("public_games").insert(rows);
+  if (error) return { error: TRY_AGAIN };
+  refresh(await slugOf(ctx.supabase, teamId));
+  return {
+    ok: `Added ${rows.length} game${rows.length === 1 ? "" : "s"}${skipped ? ` (${skipped} already there or unreadable)` : ""}.`,
+    added: rows.length,
+    skipped,
+  };
+}
+
+/** Read a public calendar link for the schedule import. */
+export async function fetchTeamCalendar(link: string): Promise<{ error?: string; text?: string }> {
+  const ctx = await signedIn();
+  if (!ctx) return { error: "Sign in again." };
+  const { downloadCalendar } = await import("@/lib/imports/fetch-calendar");
+  return downloadCalendar(link);
 }

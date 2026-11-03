@@ -8,6 +8,7 @@ import { day } from "@/lib/staff-pay";
 import { siteOrigin } from "@/lib/site";
 import { AddGameForm, DeleteTeamButton, GameEditor, TeamForm } from "@/components/leagues/forms";
 import { CopyButton } from "@/components/ui/copy-button";
+import { LogoUpload, ScheduleImport } from "@/components/leagues/uploads";
 import { Disclosure } from "@/components/ui/disclosure";
 
 export const metadata = { title: "Manage team" };
@@ -61,6 +62,11 @@ export default async function ManageTeam({
         </div>
       </section>
 
+      <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
+        <h2 className="font-semibold">Logo</h2>
+        <LogoUpload teamId={team.id} name={team.name} logoPath={team.logo_path} />
+      </section>
+
       {team.org_id ? (
         <p className="rounded-2xl bg-surface p-4 text-sm text-zinc-700 ring-1 ring-zinc-200">
           <b>Linked to your 9D team.</b> Games and scores come from your 9D schedule and live
@@ -69,7 +75,16 @@ export default async function ManageTeam({
       ) : (
         <>
           <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
-            <h2 className="font-semibold">Add a game</h2>
+            <div>
+              <h2 className="font-semibold">Bring in your schedule</h2>
+              <p className="text-sm text-zinc-600">
+                Add the whole season at once. Games already here are skipped.
+              </p>
+            </div>
+            <ScheduleImport teamId={team.id} teamName={team.name} />
+          </section>
+          <section className="space-y-3 rounded-2xl bg-surface p-4 ring-1 ring-zinc-200 sm:p-5">
+            <h2 className="font-semibold">Add one game</h2>
             <AddGameForm teamId={team.id} today={today} />
           </section>
           <section className="space-y-2">

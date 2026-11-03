@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { clock, matchup, result } from "@/lib/leagues";
+import { clock, logoUrl, matchup, result } from "@/lib/leagues";
+import { TeamLogo } from "./team-logo";
 import { day } from "@/lib/staff-pay";
 import type { PublicTeamGame } from "@/types/team-operations";
 import type { TeamCard } from "@/lib/leagues-data";
@@ -26,6 +27,9 @@ export function GameRow({
   const off = g.status === "postponed" || g.status === "canceled";
   return (
     <div className="flex items-center gap-3 px-4 py-3">
+      {team ? (
+        <TeamLogo name={team.name} src={logoUrl(team.logo_path)} className="size-9 text-xs" />
+      ) : null}
       <div className="min-w-0 flex-1">
         {team ? (
           <Link
@@ -84,17 +88,7 @@ export function TeamLine({ t }: { t: TeamCard }) {
       href={`/leagues/t/${t.slug}`}
       className="flex items-center gap-3 px-4 py-3 hover:bg-zinc-50"
     >
-      <span
-        aria-hidden
-        className="grid size-10 shrink-0 place-items-center rounded-xl bg-zinc-900 text-sm font-bold text-zinc-50"
-      >
-        {t.name
-          .split(/\s+/)
-          .slice(0, 2)
-          .map((w) => w[0])
-          .join("")
-          .toUpperCase()}
-      </span>
+      <TeamLogo name={t.name} src={logoUrl(t.logo_path)} className="size-10 text-sm" />
       <span className="min-w-0 flex-1">
         <b className="flex items-center gap-1.5 truncate">
           {t.name}

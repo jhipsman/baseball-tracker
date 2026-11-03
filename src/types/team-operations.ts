@@ -100,6 +100,7 @@ export type PublicTeamRow = {
   group_id: string | null;
   owner_id: string | null;
   verified: boolean;
+  logo_path: string | null;
   created_at: string;
   updated_at: string;
 };

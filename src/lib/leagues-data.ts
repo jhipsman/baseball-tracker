@@ -6,9 +6,9 @@ import type { PublicTeamGame, PublicTeamRow } from "@/types/team-operations";
 
 export type TeamCard = Pick<
   PublicTeamRow,
-  "id" | "slug" | "name" | "level" | "age_group" | "city" | "state" | "verified"
+  "id" | "slug" | "name" | "level" | "age_group" | "city" | "state" | "verified" | "logo_path"
 >;
-const TEAM_COLUMNS = "id, slug, name, level, age_group, city, state, verified";
+const TEAM_COLUMNS = "id, slug, name, level, age_group, city, state, verified, logo_path";
 
 export const leaguesClient = cache(async () => {
   const supabase = await createClient();

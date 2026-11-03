@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { playerToday } from "@/lib/player";
 import { leaguesClient, teamBySlug, teamGames } from "@/lib/leagues-data";
-import { levelLabel, record } from "@/lib/leagues";
+import { levelLabel, logoUrl, record } from "@/lib/leagues";
+import { TeamLogo } from "@/components/leagues/team-logo";
 import { GameRow, VerifiedBadge } from "@/components/leagues/game-row";
 import { CopyButton } from "@/components/ui/copy-button";
 import { buttonClass } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export async function generateMetadata({
   return {
     title: team.name,
     description: `${team.name}${where ? ` (${where})` : ""}: schedule, scores and record on 9D Leagues.`,
+    openGraph: team.logo_path ? { images: [logoUrl(team.logo_path)!] } : undefined,
   };
 }
 
@@ -50,13 +52,22 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
       <header className="hero rounded-3xl px-6 py-8 text-neutral-50 sm:px-8">
-        <p className="text-sm text-neutral-300">
-          {[levelLabel(team.level), team.age_group, where].filter(Boolean).join(" · ")}
-        </p>
-        <h1 className="mt-1 flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-          {team.name}
-          {team.verified ? <VerifiedBadge /> : null}
-        </h1>
+        <div className="flex items-center gap-4">
+          <TeamLogo
+            name={team.name}
+            src={logoUrl(team.logo_path)}
+            className="size-16 rounded-2xl text-xl ring-white/20 sm:size-20 sm:text-2xl"
+          />
+          <div className="min-w-0">
+            <p className="text-sm text-neutral-300">
+              {[levelLabel(team.level), team.age_group, where].filter(Boolean).join(" · ")}
+            </p>
+            <h1 className="mt-1 flex flex-wrap items-center gap-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+              {team.name}
+              {team.verified ? <VerifiedBadge /> : null}
+            </h1>
+          </div>
+        </div>
         <dl className="mt-6 grid max-w-md grid-cols-3 gap-3">
           {[
             ["Record", rec.text],

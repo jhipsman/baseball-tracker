@@ -104,7 +104,8 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 **9D Leagues, step 1** (public, `/leagues`; `src/lib/league*.ts`, `src/app/leagues`)
 - Anyone with an account can add a free public team page: schedule, results, record, runs, streak, share link
 - Pages linked to a 9D team are "On 9D" (verified) and show its games and live scores automatically, via `public_team_games` (schedule/score columns only; nothing about players)
-- Other teams enter games and scores on their manage page
+- Other teams enter games and scores on their manage page, one at a time or the whole season at once (CSV, Excel, .ics file, pasted cells or a calendar link; reuses the 9D import parser, skips duplicates and other teams' games)
+- Team logos: owners upload PNG/JPG/WebP, cropped to a 512px square WebP in the browser; public `team-logos` bucket, owner-only writes
 - 9D Leagues home: live now, today, recent results, coming up, team search, new teams
 - Next: leagues (divisions, standings, league schedule and scoreboard, matching the same game entered by both teams), then recruiting profiles (videos, verified stats, share link; parents always copied on messages with minors; NCAA contact dates), then verified college coach accounts and paid "9D Recruit"
 

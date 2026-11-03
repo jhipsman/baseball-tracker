@@ -76,3 +76,23 @@ export function clock(t: string | null) {
   const [h, m] = t.split(":").map(Number);
   return `${((h + 11) % 12) + 1}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
 }
+
+/** Public URL of a team logo in storage. */
+export const logoUrl = (path: string | null | undefined) =>
+  path
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/team-logos/${path}`
+    : null;
+
+/** "Riverside Rays" → "RR" for teams without a logo. */
+export const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .filter((w) => /[a-z0-9]/i.test(w))
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+/** Same game? (date plus opponent, ignoring case, spaces and punctuation). */
+export const gameKey = (date: string, opponent: string) =>
+  `${date}|${opponent.toLowerCase().replace(/[^a-z0-9]+/g, "")}`;
