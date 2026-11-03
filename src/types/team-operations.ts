@@ -88,7 +88,52 @@ export type StaffPaymentRow = {
   paid_at: string;
   created_by: string | null;
 };
+export type PublicTeamRow = {
+  id: string;
+  slug: string;
+  name: string;
+  level: "youth" | "middle_school" | "high_school" | "travel" | "college" | "adult";
+  age_group: string | null;
+  city: string | null;
+  state: string | null;
+  org_id: string | null;
+  group_id: string | null;
+  owner_id: string | null;
+  verified: boolean;
+  created_at: string;
+  updated_at: string;
+};
+export type PublicGameRow = {
+  id: string;
+  team_id: string;
+  date: string;
+  start_time: string | null;
+  opponent: string;
+  home_away: "home" | "away" | "neutral";
+  location: string | null;
+  status: "scheduled" | "final" | "postponed" | "canceled";
+  team_score: number | null;
+  opponent_score: number | null;
+  created_at: string;
+};
+/** A game as public pages see it (9D games may also be "live"). */
+export type PublicTeamGame = {
+  id: string;
+  team_id: string;
+  date: string;
+  start_time: string | null;
+  opponent: string;
+  home_away: string;
+  location: string | null;
+  status: string;
+  team_score: number | null;
+  opponent_score: number | null;
+  inning: number | null;
+};
+
 export type TeamOperationsTables = {
+  public_teams: Table<PublicTeamRow>;
+  public_games: Table<PublicGameRow>;
   staff_pay_rates: Table<StaffPayRateRow>;
   staff_time_entries: Table<StaffTimeEntryRow>;
   staff_pay_periods: Table<StaffPayPeriodRow>;
@@ -277,6 +322,10 @@ export type TeamOperationsViews = {
   };
 };
 export type TeamOperationsFunctions = {
+  public_team_games: {
+    Args: { p_team?: string | null; p_from?: string | null; p_to?: string | null };
+    Returns: PublicTeamGame[];
+  };
   review_staff_time: {
     Args: { p_ids: string[]; p_approve: boolean; p_note?: string | null };
     Returns: number;

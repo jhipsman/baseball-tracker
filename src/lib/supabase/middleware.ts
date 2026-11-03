@@ -18,6 +18,8 @@ const PUBLIC_PATHS = [
   "/pricing",
   "/privacy",
   "/terms",
+  // 9D Leagues: public team pages and scores (creating a team needs an account).
+  "/leagues",
   // Season registration links: the offer is public, the form needs an account.
   "/join",
   // Stripe calls this with its own signature, not a user session.

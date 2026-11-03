@@ -101,6 +101,13 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 - Pay (admin): pick a period, see what each coach is owed, export CSV, mark paid (payroll, check, cash, app…)
 - 9D tracks and totals only; it doesn't move money or run payroll. Later: direct payouts or a payroll integration (Gusto/Check)
 
+**9D Leagues, step 1** (public, `/leagues`; `src/lib/league*.ts`, `src/app/leagues`)
+- Anyone with an account can add a free public team page: schedule, results, record, runs, streak, share link
+- Pages linked to a 9D team are "On 9D" (verified) and show its games and live scores automatically, via `public_team_games` (schedule/score columns only; nothing about players)
+- Other teams enter games and scores on their manage page
+- 9D Leagues home: live now, today, recent results, coming up, team search, new teams
+- Next: leagues (divisions, standings, league schedule and scoreboard, matching the same game entered by both teams), then recruiting profiles (videos, verified stats, share link; parents always copied on messages with minors; NCAA contact dates), then verified college coach accounts and paid "9D Recruit"
+
 **9D business**
 - Marketing site: home, For coaches / players / parents, six feature pages, pricing
 - Privacy and Terms pages; demo team; branded loading animation

@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/for/players", label: "Players" },
   { href: "/for/parents", label: "Parents" },
   { href: "/pricing", label: "Pricing" },
+  { href: "/leagues", label: "9D Leagues" },
 ];
 
 /** Public site header: Features menu, audience pages, pricing, and a separate Log in. */
