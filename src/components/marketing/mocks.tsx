@@ -324,3 +324,78 @@ export function ClubMock() {
     </Frame>
   );
 }
+
+export function AdminMock() {
+  return (
+    <Frame className="space-y-3">
+      <div className="flex items-baseline justify-between px-1">
+        <p className="text-lg font-semibold">Timesheets</p>
+        <p className="text-xs text-zinc-500">Nov 2 – Nov 8</p>
+      </div>
+      {[
+        ["Coach Rivera", "Hourly · 9h 30m", "$190.00"],
+        ["Coach Patel", "Per session · 4 sessions", "$200.00"],
+        ["Coach Kim", "Season stipend · 2 of 6", "$250.00"],
+      ].map(([n, d, a]) => (
+        <div key={n} className="flex items-center gap-3 rounded-2xl p-2.5 ring-1 ring-zinc-200">
+          <span className="min-w-0 flex-1">
+            <b className="block text-sm">{n}</b>
+            <span className="block text-xs text-zinc-600">{d}</span>
+          </span>
+          <b className="text-sm tabular-nums">{a}</b>
+        </div>
+      ))}
+      <div className="grid grid-cols-2 gap-2 text-sm">
+        <span className="rounded-xl bg-zinc-50 px-3 py-2">
+          <b className="block">Forms</b>
+          <span className="text-zinc-600">17 of 18 signed</span>
+        </span>
+        <span className="rounded-xl bg-zinc-50 px-3 py-2">
+          <b className="block">Coach certs</b>
+          <span className="text-amber-900">1 expires soon</span>
+        </span>
+      </div>
+      <div className="rounded-xl bg-zinc-900 px-3 py-2.5 text-center text-sm font-semibold text-zinc-50">
+        Export CSV · Mark $640.00 paid
+      </div>
+    </Frame>
+  );
+}
+
+export function ImportMock() {
+  return (
+    <Frame className="space-y-3">
+      <div className="px-1">
+        <p className="text-xs font-semibold text-zinc-500">IMPORT</p>
+        <p className="text-lg font-semibold">Bring your team over</p>
+      </div>
+      <div className="flex flex-wrap gap-1.5 text-xs font-semibold">
+        {["GameChanger", "TeamSnap", "LeagueApps", "SportsEngine", "Spreadsheet"].map((s, i) => (
+          <span
+            key={s}
+            className={cn(
+              "rounded-full px-2.5 py-1 ring-1",
+              i === 0 ? "bg-brand-50 text-brand-900 ring-brand-300" : "ring-zinc-200",
+            )}
+          >
+            {s}
+          </span>
+        ))}
+      </div>
+      {[
+        ["Roster", "18 players · 22 parents invited"],
+        ["Schedule", "14 games · 9 practices"],
+        ["Stats", "Batting and pitching, matched"],
+      ].map(([t, d]) => (
+        <div key={t} className="flex items-center gap-3 rounded-2xl p-2.5 ring-1 ring-zinc-200">
+          <span className="font-bold text-brand-700">✓</span>
+          <span className="min-w-0 flex-1">
+            <b className="block text-sm">{t}</b>
+            <span className="block text-xs text-zinc-600">{d}</span>
+          </span>
+        </div>
+      ))}
+      <p className="px-1 text-xs text-zinc-500">Changed your mind? Undo any import.</p>
+    </Frame>
+  );
+}

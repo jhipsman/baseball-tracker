@@ -2,7 +2,9 @@
 import { BRAND } from "@/constants/brand";
 import { PRICING } from "@/constants/pricing";
 import {
+  AdminMock,
   HealthMock,
+  ImportMock,
   LiveMock,
   PaymentsMock,
   ScheduleMock,
@@ -57,12 +59,13 @@ export const FEATURES: Feature[] = [
     slug: "player-health",
     icon: "💪",
     name: "Player health",
-    line: "Pitch Smart, rest days and arm check-ins.",
+    line: "Pitch Smart, check-ins, injuries and medical cards.",
     title: "Know every arm before the first pitch.",
-    body: "Pitch Smart limits, rest days and one-tap arm check-ins on one board. Set a player out with a return-to-throw plan.",
+    body: "Pitch Smart limits, rest days and one-tap check-ins on one board. Log injuries, follow a return-to-play plan and keep each player's medical card handy on game day.",
     points: [
       "Alerts for pain, soreness and workload spikes",
-      "The pitcher picker warns you before you choose",
+      "Injuries and suspected concussions held out until cleared",
+      "Allergies and emergency contacts one tap away",
     ],
     details: [
       {
@@ -74,8 +77,8 @@ export const FEATURES: Feature[] = [
         text: "Players check in on their arm from their home screen. Coaches see who has and who hasn't.",
       },
       {
-        title: "Back on the mound safely",
-        text: "A return-to-throw checklist the player can see, ticked off step by step.",
+        title: "Back on the field safely",
+        text: "Injuries, concussion steps and return-to-throw plans the player and parents can follow, step by step. Only coaches and the family see it.",
       },
     ],
     Mock: HealthMock,
@@ -138,6 +141,7 @@ export const FEATURES: Feature[] = [
     points: [
       "Automatic reminders, never for autopay",
       "No 9D fee on dues; money goes to your account",
+      "Every family's to-do in one place: forms, payments, medical info",
     ],
     details: [
       {
@@ -179,6 +183,62 @@ export const FEATURES: Feature[] = [
     ],
     Mock: VideoMock,
   },
+  {
+    slug: "team-admin",
+    icon: "🗂️",
+    name: "Team admin",
+    line: "Forms, coach certifications, staff hours and pay.",
+    title: "The office work, handled.",
+    body: "Send forms families sign on their phone, keep coach certifications current, and track coach hours and pay without a spreadsheet.",
+    points: [
+      "Coaches clock in or log a practice; you approve",
+      "Hourly, per session, stipend or volunteer, set per team",
+      "Export for payroll and mark it paid",
+    ],
+    details: [
+      {
+        title: "Forms that come back",
+        text: "Waivers, medical releases and team policies signed on any phone. See who's done and nudge who isn't.",
+      },
+      {
+        title: "Staff, covered",
+        text: "Background checks, safety training and coaching certifications, with a heads-up before they expire.",
+      },
+      {
+        title: "Staff time and pay",
+        text: "Each coach's pay is set per team. Approve timesheets, see what everyone's owed, export a CSV for payroll and record how you paid.",
+      },
+    ],
+    Mock: AdminMock,
+  },
+  {
+    slug: "switching",
+    icon: "🔁",
+    name: "Easy switching",
+    line: "Import from GameChanger, TeamSnap and more.",
+    title: "Bring your whole team over in minutes.",
+    body: "Upload the export from the app you use now, or a spreadsheet or calendar link. 9D sets up players, parents, schedule and stats for you.",
+    points: [
+      "GameChanger, TeamSnap, LeagueApps, SportsEngine, Excel and calendars",
+      "Parents invited automatically, brothers and sisters in one invite",
+      "Undo any import",
+    ],
+    details: [
+      {
+        title: "Step-by-step guides",
+        text: "Pick the app you're leaving and we show you exactly where its export button is.",
+      },
+      {
+        title: "Your roster, ready",
+        text: "Players without an email still join the roster, and parents get one invite for all their kids.",
+      },
+      {
+        title: "Your season, too",
+        text: "Games and practices from a schedule file or calendar link, and last season's batting and pitching stats.",
+      },
+    ],
+    Mock: ImportMock,
+  },
 ];
 
 export const featureBySlug = (slug: string) => FEATURES.find((f) => f.slug === slug);
@@ -200,7 +260,7 @@ export const AUDIENCES: Audience[] = [
     slug: "coaches",
     label: "Coaches & clubs",
     title: "Run your program, not a group chat.",
-    lead: "Registration, practice, game day and arm care in one place, for one team or a whole club.",
+    lead: "Registration, practice, game day, arm care and the office work in one place, for one team or a whole club.",
     jobs: [
       {
         title: "Before the season",
@@ -243,7 +303,11 @@ export const AUDIENCES: Audience[] = [
       ],
       [
         "Can I bring my roster and schedule?",
-        "Yes. Import from a spreadsheet, GameChanger or LeagueApps exports.",
+        "Yes. Upload the export from GameChanger, TeamSnap, LeagueApps or SportsEngine, a spreadsheet, or a calendar link. Players, parents, games and stats come across, and you can undo any import.",
+      ],
+      [
+        "Can I track coach hours and pay?",
+        "Yes. Turn on Staff time & pay and set how each coach is paid: hourly, per session, a season stipend, or volunteer. Coaches log time, you approve it, then export it for payroll and mark it paid.",
       ],
       [
         "Do my players need to download an app?",
@@ -348,4 +412,5 @@ export const WHY = [
   ["Scores built in", "No second app for game day. Parents follow live, stats fill in."],
   ["Lower fees on dues", "No 9D fee on payments, and bank transfers cost far less than cards."],
   ["Arms come first", "Pitch Smart, rest days and check-ins on every player."],
+  ["Switch in an afternoon", "Import your roster, schedule and stats from the app you use now."],
 ];

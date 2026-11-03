@@ -90,8 +90,8 @@ export function HeroFilm({ cta }: { cta: React.ReactNode }) {
             Your whole season. <span className="block text-brand-400">One app.</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg text-pretty text-neutral-200">
-            Schedule, training, arm care, live scoring, registration and payments. For coaches,
-            clubs, players and parents.
+            Schedule, training, arm care, live scoring, registration, payments, forms and staff pay.
+            For coaches, clubs, players and parents. Switching from another app takes minutes.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             {cta}

@@ -229,7 +229,7 @@ export function Faq({ items, title = "Questions" }: { items: [string, string][];
 export function WhyStrip() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-12">
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {WHY.map(([t, d]) => (
           <div key={t} className="rounded-3xl bg-surface p-6 ring-1 ring-zinc-200">
             <h2 className="text-lg font-semibold">{t}</h2>
