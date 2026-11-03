@@ -94,6 +94,13 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 - Every import can be undone. Roster → Manage also adds players by name, and a player's page has "Give them a login".
 - Formats were built from typical exports; real files from each platform are the best test. Send any file that doesn't import cleanly.
 
+**Staff time & pay** (opt-in feature switch in Settings; `src/lib/staff-*.ts`, `/staff`)
+- Pay setup per coach, per team: hourly, per session, season stipend (split into N payments) or volunteer
+- My time: clock in/out, add hours by hand or tap "I worked this" on a recent practice/game, send for approval
+- Timesheets (admin): approve or send back with a reason; the amount is fixed at approval
+- Pay (admin): pick a period, see what each coach is owed, export CSV, mark paid (payroll, check, cash, app…)
+- 9D tracks and totals only; it doesn't move money or run payroll. Later: direct payouts or a payroll integration (Gusto/Check)
+
 **9D business**
 - Marketing site: home, For coaches / players / parents, six feature pages, pricing
 - Privacy and Terms pages; demo team; branded loading animation

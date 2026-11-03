@@ -65,6 +65,17 @@ export const COACH_SECTIONS: Section[] = [
     module: "messages",
     tabs: [{ href: "/messages", label: "Messages" }],
   },
+  {
+    key: "staff",
+    label: "Staff time & pay",
+    module: "staff",
+    tabs: [
+      { href: "/staff", label: "My time" },
+      { href: "/staff/timesheets", label: "Timesheets", adminOnly: true },
+      { href: "/staff/pay", label: "Pay", adminOnly: true },
+      { href: "/staff/setup", label: "Pay setup", adminOnly: true },
+    ],
+  },
 ];
 
 export function visibleTabs(

@@ -17,10 +17,11 @@ const ICON_FOR: Record<string, string> = {
   training: ICONS.training,
   videos: ICONS.videos,
   settings: ICONS.me,
+  staff: ICONS.clock,
 };
 /** Which sections earn a spot in the phone bar, in order; the rest go under More. */
 const PRIMARY = ["dashboard", "schedule", "team", "health", "messages", "training", "videos"];
-const SHORT: Record<string, string> = { dashboard: "Home", health: "Health" };
+const SHORT: Record<string, string> = { dashboard: "Home", health: "Health", staff: "Time & pay" };
 
 /** Phone navigation for coaches: four tabs plus More (the sidebar covers larger screens). */
 export function CoachNav({ items, extras }: { items: CoachNavItem[]; extras: React.ReactNode }) {

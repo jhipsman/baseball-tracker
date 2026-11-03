@@ -34,7 +34,65 @@ export type InvoiceRow = {
   created_at: string;
   updated_at: string;
 };
+export type StaffPayRateRow = {
+  org_id: string;
+  profile_id: string;
+  pay_type: "hourly" | "per_session" | "stipend" | "volunteer";
+  rate_cents: number;
+  stipend_cents: number;
+  stipend_payments: number;
+  title: string | null;
+  updated_at: string;
+  updated_by: string | null;
+};
+export type StaffTimeEntryRow = {
+  id: string;
+  org_id: string;
+  profile_id: string;
+  work_date: string;
+  kind: "shift" | "session";
+  started_at: string | null;
+  ended_at: string | null;
+  minutes: number | null;
+  activity: string | null;
+  practice_id: string | null;
+  game_id: string | null;
+  note: string | null;
+  status: "open" | "submitted" | "approved" | "rejected" | "paid";
+  amount_cents: number | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  review_note: string | null;
+  period_id: string | null;
+  created_at: string;
+  created_by: string | null;
+};
+export type StaffPayPeriodRow = {
+  id: string;
+  org_id: string;
+  starts_on: string;
+  ends_on: string;
+  status: "open" | "paid";
+  paid_at: string | null;
+  created_at: string;
+  created_by: string | null;
+};
+export type StaffPaymentRow = {
+  id: string;
+  org_id: string;
+  period_id: string;
+  profile_id: string;
+  amount_cents: number;
+  method: "payroll" | "check" | "cash" | "app" | "bank" | "other";
+  reference: string | null;
+  paid_at: string;
+  created_by: string | null;
+};
 export type TeamOperationsTables = {
+  staff_pay_rates: Table<StaffPayRateRow>;
+  staff_time_entries: Table<StaffTimeEntryRow>;
+  staff_pay_periods: Table<StaffPayPeriodRow>;
+  staff_payments: Table<StaffPaymentRow>;
   message_templates: Table<{
     id: string;
     org_id: string;
@@ -219,6 +277,11 @@ export type TeamOperationsViews = {
   };
 };
 export type TeamOperationsFunctions = {
+  review_staff_time: {
+    Args: { p_ids: string[]; p_approve: boolean; p_note?: string | null };
+    Returns: number;
+  };
+  pay_staff_period: { Args: { p_period: string; p_payments: Json }; Returns: number };
   edit_team_event: {
     Args: {
       p_org: string;

@@ -32,6 +32,7 @@ export const ICONS = {
   team: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8",
   training: "M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11",
   more: "M4 7h16M4 12h16M4 17h16",
+  clock: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2",
 } as const;
 
 /** The last tab: opens a sheet with everything that doesn't fit in the bar. */
