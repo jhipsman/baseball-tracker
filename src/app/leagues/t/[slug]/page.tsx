@@ -162,7 +162,8 @@ export default async function TeamPage({ params }: { params: Promise<{ slug: str
 
       {!team.verified ? (
         <p className="text-sm text-zinc-500">
-          Scores on this page are entered by the team.{" "}
+          Scores on this page are entered by the teams that played. If they disagree, the game shows
+          as disputed.{" "}
           <Link href="/home" className="font-semibold text-brand-700">
             Teams on 9D update automatically →
           </Link>

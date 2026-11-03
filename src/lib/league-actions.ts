@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { gameKey, LEVELS, teamSlug } from "@/lib/leagues";
+import { nameMatches } from "@/lib/league-standings";
 import type { PublicTeamRow } from "@/types/team-operations";
 
 type R = { error?: string; ok?: string };
@@ -137,10 +138,39 @@ export async function addGame(_: R, fd: FormData): Promise<R> {
   const score = (s: string) => (/^\d{1,2}$/.test(s) ? Number(s) : null);
   if (scored && (score(us) == null || score(them) == null))
     return { error: "Enter both scores (0 to 99), or leave both empty." };
+  // The opponent's team page, when picked from the list.
+  let opponentTeamId: string | null = null;
+  const picked = String(fd.get("opponent_team_id") ?? "");
+  if (picked) {
+    if (!UUID.test(picked) || picked === teamId) return { error: TRY_AGAIN };
+    const { data: opp } = await ctx.supabase
+      .from("public_teams")
+      .select("id, name")
+      .eq("id", picked)
+      .maybeSingle();
+    if (!opp) return { error: "That team page is gone. Pick the opponent again." };
+    opponentTeamId = opp.id;
+    // They may have added this game already; then it's on our schedule.
+    const { data: theirs } = await ctx.supabase
+      .from("public_games")
+      .select("id, start_time")
+      .eq("team_id", opp.id)
+      .eq("opponent_team_id", teamId)
+      .eq("date", date);
+    if (
+      (theirs ?? []).some(
+        (g) => !time || !g.start_time || g.start_time.slice(0, 5) === time.slice(0, 5),
+      )
+    )
+      return {
+        error: `${opp.name} already added this game, so it's on your schedule. Enter the score there.`,
+      };
+  }
   const { data, error } = await ctx.supabase
     .from("public_games")
     .insert({
       team_id: teamId,
+      opponent_team_id: opponentTeamId,
       date,
       start_time: time || null,
       opponent,
@@ -154,10 +184,14 @@ export async function addGame(_: R, fd: FormData): Promise<R> {
     .single();
   if (error) return { error: TRY_AGAIN };
   refresh(await slugOf(ctx.supabase, data.team_id));
-  return { ok: "Game added." };
+  if (opponentTeamId) refresh(await slugOf(ctx.supabase, opponentTeamId));
+  return { ok: opponentTeamId ? "Game added to both teams' schedules." : "Game added." };
 }
 
-/** Enter or fix a score, or mark the game postponed/canceled. */
+/**
+ * Enter or fix a score, or mark the game postponed/canceled. Either team in a
+ * shared game can report; a different score from the other team disputes it.
+ */
 export async function saveGame(input: {
   id: string;
   status: "scheduled" | "final" | "postponed" | "canceled";
@@ -169,22 +203,54 @@ export async function saveGame(input: {
   if (!["scheduled", "final", "postponed", "canceled"].includes(input.status))
     return { error: TRY_AGAIN };
   const ok = (n: unknown) => Number.isInteger(n) && (n as number) >= 0 && (n as number) <= 99;
-  if (input.status === "final" && !(ok(input.us) && ok(input.them)))
-    return { error: "Enter both scores (0 to 99)." };
   const final = input.status === "final";
-  const { data, error } = await ctx.supabase
+  if (final && !(ok(input.us) && ok(input.them))) return { error: "Enter both scores (0 to 99)." };
+  const { data: game } = await ctx.supabase
     .from("public_games")
-    .update({
-      status: input.status,
-      team_score: final ? input.us! : null,
-      opponent_score: final ? input.them! : null,
-    })
+    .select("team_id, opponent_team_id")
     .eq("id", input.id)
-    .select("team_id")
     .maybeSingle();
-  if (error || !data) return { error: TRY_AGAIN };
-  refresh(await slugOf(ctx.supabase, data.team_id));
+  if (!game) return { error: TRY_AGAIN };
+  const { data, error } = await ctx.supabase.rpc("report_public_game", {
+    p_game: input.id,
+    p_status: input.status,
+    p_us: final ? input.us! : null,
+    p_them: final ? input.them! : null,
+  });
+  if (error) return { error: error.code === "42501" ? error.message : TRY_AGAIN };
+  refresh(await slugOf(ctx.supabase, game.team_id));
+  if (game.opponent_team_id) refresh(await slugOf(ctx.supabase, game.opponent_team_id));
+  if (data === "disputed")
+    return {
+      ok: "Saved. The other team has a different score, so the game shows as disputed until you agree.",
+    };
   return { ok: "Saved." };
+}
+
+/** Team pages to link as an opponent (not this team). */
+export async function findOpponents(
+  teamId: string,
+  q: string,
+): Promise<{ id: string; name: string; place: string }[]> {
+  const ctx = await signedIn();
+  const term = q
+    .replace(/[%_,()*\\]/g, " ")
+    .trim()
+    .slice(0, 60);
+  if (!ctx || !UUID.test(teamId) || term.length < 2) return [];
+  const { data } = await ctx.supabase
+    .from("public_teams")
+    .select("id, name, age_group, city, state")
+    .ilike("name", `%${term}%`)
+    .neq("id", teamId)
+    .order("verified", { ascending: false })
+    .order("name")
+    .limit(8);
+  return (data ?? []).map((t) => ({
+    id: t.id,
+    name: t.name,
+    place: [t.age_group, [t.city, t.state].filter(Boolean).join(", ")].filter(Boolean).join(" · "),
+  }));
 }
 
 export async function deleteGame(id: string): Promise<R> {
@@ -249,6 +315,24 @@ export async function importGames(
     .eq("team_id", teamId)
     .limit(2000);
   const seen = new Set((existing ?? []).map((g) => gameKey(g.date, g.opponent)));
+  // Games other teams already added against this one are on its schedule.
+  const { data: shared } = await ctx.supabase
+    .from("public_games")
+    .select("date, team_id")
+    .eq("opponent_team_id", teamId)
+    .limit(2000);
+  const sharedTeams = shared?.length
+    ? ((
+        await ctx.supabase
+          .from("public_teams")
+          .select("id, name")
+          .in("id", [...new Set(shared.map((g) => g.team_id))])
+      ).data ?? [])
+    : [];
+  const sharedNames = (shared ?? []).map((g) => ({
+    date: g.date,
+    name: sharedTeams.find((t) => t.id === g.team_id)?.name ?? "",
+  }));
   const rows = [];
   for (const g of games) {
     const opponent = String(g.opponent ?? "")
@@ -259,6 +343,7 @@ export async function importGames(
     if (!DATE.test(String(g.date)) || !opponent) continue;
     const key = gameKey(g.date, opponent);
     if (seen.has(key)) continue;
+    if (sharedNames.some((x) => x.date === g.date && nameMatches(opponent, x.name))) continue;
     seen.add(key);
     rows.push({
       team_id: teamId,

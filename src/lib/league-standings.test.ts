@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { gbText, nameMatches, pctText, resolveGames, standings } from "./league-standings";
+import {
+  dedupeMirrors,
+  disputeScores,
+  gbText,
+  nameMatches,
+  pctText,
+  resolveGames,
+  standings,
+} from "./league-standings";
 import type { LeagueGameRow, PublicTeamGame } from "@/types/team-operations";
 
 const teams = [
@@ -34,7 +42,50 @@ const rep = (p: Partial<PublicTeamGame>): PublicTeamGame => ({
   team_score: 5,
   opponent_score: 2,
   inning: null,
+  opponent_team_id: null,
+  mirror: false,
+  alt_team_score: null,
+  alt_opponent_score: null,
+  alt_is_ours: null,
   ...p,
+});
+
+describe("shared games", () => {
+  it("drops another team's copy of a game this team already has", () => {
+    const own = rep({ opponent: "Eagles" });
+    const copy = rep({ mirror: true, opponent: "Eagles", opponent_team_id: "eagles" });
+    const other = rep({ mirror: true, opponent: "Lakeside Hawks", opponent_team_id: "hawks" });
+    expect(dedupeMirrors([own, copy, other])).toEqual([own, other]);
+    // A doubleheader at different times keeps both.
+    const late = rep({ mirror: true, start_time: "18:00:00", opponent_team_id: "eagles" });
+    expect(dedupeMirrors([rep({ start_time: "13:00" }), late])).toHaveLength(2);
+  });
+  it("reads a dispute from either side", () => {
+    const g = rep({ status: "disputed", alt_team_score: 4, alt_opponent_score: 2 });
+    expect(disputeScores({ ...g, alt_is_ours: false })).toEqual({ ours: [5, 2], theirs: [4, 2] });
+    expect(disputeScores({ ...g, alt_is_ours: true })).toEqual({ ours: [4, 2], theirs: [5, 2] });
+  });
+  it("shows a disputed shared game with each team's report, home first", () => {
+    // Rays (home) say 5-2; Eagles say Eagles 3, Rays 5. Seen from the Eagles' copy.
+    const [g] = resolveGames([lg({})], teams, [
+      rep({
+        id: "x",
+        team_id: "eagles",
+        mirror: true,
+        opponent: "Riverside Rays 14U",
+        home_away: "away",
+        status: "disputed",
+        team_score: 2,
+        opponent_score: 5,
+        alt_team_score: 3,
+        alt_opponent_score: 5,
+        alt_is_ours: true,
+      }),
+    ]);
+    expect(g).toMatchObject({ shown: "disputed", reported: { home: [5, 2], away: [5, 3] } });
+    const [rows] = [standings(["rays", "eagles"], [g])];
+    expect(rows.every((r) => r.gp === 0)).toBe(true);
+  });
 });
 
 describe("league scores", () => {

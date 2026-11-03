@@ -110,7 +110,9 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 - **Leagues** (`/leagues/l/...`, `src/lib/league-standings.ts`, `league-admin-actions.ts`): anyone starts a league; divisions; add existing team pages or create new ones; schedule by file/paste (Home/Away team columns) or one game at a time
 - League scores: the admin's score always wins; otherwise each game is matched to the two teams' own games (date + loose name match, doubleheaders by start time). One final report counts, two that agree count, two that disagree are "disputed" and left out of standings until the admin settles it. Teams on 9D report from live scoring
 - Standings per division: W, L, T, PCT, GB, RF, RA, DIFF, STRK. A team's owner can leave a league (its league games go with it)
-- Next: recruiting profiles (videos, verified stats, share link; parents always copied on messages with minors; NCAA contact dates), then verified college coach accounts and paid "9D Recruit"
+- **Shared games** (`report_public_game`): when adding a game, pick the opponent's team page and it shows on both schedules (flipped), linked to each other. Either team enters the score: the second team's same score confirms it, a different one marks it "disputed" on both pages (out of records and standings) until one side agrees. Once the other team has a say, nobody can wipe the score; no double entries (a team can't re-add a game the opponent already added, imports skip it, and copies are hidden when a team has its own entry)
+- Next: claiming team pages, then brackets, then opt-in rosters and stat leaders
+- Later: recruiting profiles (videos, verified stats, share link; parents always copied on messages with minors; NCAA contact dates), then verified college coach accounts and paid "9D Recruit"
 
 **9D business**
 - Marketing site: home, For coaches / players / parents, six feature pages, pricing

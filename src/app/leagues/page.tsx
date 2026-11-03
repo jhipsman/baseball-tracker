@@ -56,7 +56,7 @@ export default async function LeaguesHome({
   const live = games.filter((g) => g.status === "live");
   const todays = games.filter((g) => g.date === today && g.status !== "live");
   const recent = games
-    .filter((g) => g.date < today && g.status === "final")
+    .filter((g) => g.date < today && (g.status === "final" || g.status === "disputed"))
     .sort((a, b) => b.date.localeCompare(a.date));
   const upcoming = games.filter((g) => g.date > today && g.status === "scheduled");
 

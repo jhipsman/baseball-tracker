@@ -3,6 +3,7 @@ import { clock, logoUrl, matchup, result } from "@/lib/leagues";
 import { TeamLogo } from "./team-logo";
 import { day } from "@/lib/staff-pay";
 import type { PublicTeamGame } from "@/types/team-operations";
+import { disputeScores } from "@/lib/league-standings";
 import type { TeamCard } from "@/lib/leagues-data";
 import { cn } from "@/lib/utils";
 
@@ -18,13 +19,14 @@ export function GameRow({
   team,
   showDate = true,
 }: {
-  g: PublicTeamGame;
+  g: PublicTeamGame & { opponent_slug?: string };
   team?: TeamCard;
   showDate?: boolean;
 }) {
   const r = result(g);
   const live = g.status === "live";
   const off = g.status === "postponed" || g.status === "canceled";
+  const split = g.status === "disputed" ? disputeScores(g) : null;
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       {team ? (
@@ -40,7 +42,16 @@ export function GameRow({
           </Link>
         ) : null}
         <p className={cn("truncate", team ? "text-sm text-zinc-600" : "font-medium")}>
-          {matchup(g)}
+          {g.opponent_slug ? (
+            <>
+              {g.home_away === "away" ? "@ " : "vs "}
+              <Link href={`/leagues/t/${g.opponent_slug}`} className="hover:underline">
+                {g.opponent}
+              </Link>
+            </>
+          ) : (
+            matchup(g)
+          )}
         </p>
         <p className="truncate text-xs text-zinc-500">
           {[
@@ -70,6 +81,15 @@ export function GameRow({
           <b className="text-lg tabular-nums">
             {g.team_score}–{g.opponent_score}
           </b>
+        </span>
+      ) : split ? (
+        <span className="shrink-0 text-right" title="The two teams reported different scores">
+          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">
+            Disputed
+          </span>
+          <span className="mt-1 block text-xs text-zinc-500 tabular-nums">
+            {split.ours.join("–")} or {split.theirs.join("–")}
+          </span>
         </span>
       ) : off ? (
         <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-900">

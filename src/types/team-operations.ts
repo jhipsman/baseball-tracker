@@ -115,6 +115,11 @@ export type PublicGameRow = {
   status: "scheduled" | "final" | "postponed" | "canceled";
   team_score: number | null;
   opponent_score: number | null;
+  /** The opponent's team page, when the game is shared with it. */
+  opponent_team_id: string | null;
+  reported_by: string | null;
+  dispute: { team_id: string; team_score: number; opponent_score: number } | null;
+  confirmed: boolean;
   created_at: string;
 };
 /** A game as public pages see it (9D games may also be "live"). */
@@ -130,6 +135,15 @@ export type PublicTeamGame = {
   team_score: number | null;
   opponent_score: number | null;
   inning: number | null;
+  /** The other team's page when the game is shared. */
+  opponent_team_id: string | null;
+  /** Added by the opponent (shown flipped to this team's side). */
+  mirror: boolean;
+  /** When "disputed": the other team's reported score, from this team's side. */
+  alt_team_score: number | null;
+  alt_opponent_score: number | null;
+  /** Whether the alt score is this team's report (so the main score is the other team's). */
+  alt_is_ours: boolean | null;
 };
 
 export type LeagueRow = {
@@ -368,6 +382,10 @@ export type TeamOperationsFunctions = {
   public_teams_games: {
     Args: { p_teams: string[]; p_from: string; p_to: string };
     Returns: PublicTeamGame[];
+  };
+  report_public_game: {
+    Args: { p_game: string; p_status: string; p_us?: number | null; p_them?: number | null };
+    Returns: string;
   };
   public_team_games: {
     Args: { p_team?: string | null; p_from?: string | null; p_to?: string | null };

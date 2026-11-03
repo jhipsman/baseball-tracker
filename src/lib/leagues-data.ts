@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { LeagueRow, PublicTeamGame, PublicTeamRow } from "@/types/team-operations";
-import { resolveGames } from "@/lib/league-standings";
+import { dedupeMirrors, resolveGames } from "@/lib/league-standings";
 
 export type TeamCard = Pick<
   PublicTeamRow,
@@ -23,10 +23,22 @@ export const teamBySlug = cache(async (slug: string) => {
   return data;
 });
 
-export async function teamGames(teamId: string) {
+export type TeamGame = PublicTeamGame & { opponent_slug?: string };
+
+/** A team's games, each shared game once, with links to opponents' pages. */
+export async function teamGames(teamId: string): Promise<TeamGame[]> {
   const { supabase } = await leaguesClient();
   const { data } = await supabase.rpc("public_team_games", { p_team: teamId });
-  return (data ?? []) as PublicTeamGame[];
+  const games = dedupeMirrors((data ?? []) as PublicTeamGame[]);
+  const ids = [...new Set(games.flatMap((g) => (g.opponent_team_id ? [g.opponent_team_id] : [])))];
+  if (!ids.length) return games;
+  const { data: opps } = await supabase.from("public_teams").select("id, slug").in("id", ids);
+  const slug = new Map((opps ?? []).map((t) => [t.id, t.slug]));
+  return games.map((g) =>
+    g.opponent_team_id && slug.has(g.opponent_team_id)
+      ? { ...g, opponent_slug: slug.get(g.opponent_team_id) }
+      : g,
+  );
 }
 
 export type ScoreGame = PublicTeamGame & { team: TeamCard };
@@ -35,7 +47,8 @@ export type ScoreGame = PublicTeamGame & { team: TeamCard };
 export async function scoreboard(from: string, to: string): Promise<ScoreGame[]> {
   const { supabase } = await leaguesClient();
   const { data } = await supabase.rpc("public_team_games", { p_from: from, p_to: to });
-  const games = (data ?? []) as PublicTeamGame[];
+  // A shared game is listed once, under the team that added it.
+  const games = ((data ?? []) as PublicTeamGame[]).filter((g) => !g.mirror);
   const ids = [...new Set(games.map((g) => g.team_id))];
   if (!ids.length) return [];
   const { data: teams } = await supabase.from("public_teams").select(TEAM_COLUMNS).in("id", ids);
@@ -151,7 +164,7 @@ export async function loadLeague(league: LeagueRow) {
       p_from: list[0].date,
       p_to: list[list.length - 1].date,
     });
-    reports = (data ?? []) as PublicTeamGame[];
+    reports = dedupeMirrors((data ?? []) as PublicTeamGame[]);
   }
   const everyone = (teams ?? []).sort((a, b) => a.name.localeCompare(b.name));
   const resolved = resolveGames(list, everyone, reports);

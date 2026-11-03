@@ -11,7 +11,7 @@ const norm = (s: string) =>
   s
     .toLowerCase()
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]/g, "");
 
 /** Does an opponent name on a team's page refer to this league team? */
@@ -22,6 +22,51 @@ export function nameMatches(opponent: string, teamName: string) {
   if (a === b) return true;
   const [short, long] = a.length < b.length ? [a, b] : [b, a];
   return short.length >= 4 && long.includes(short);
+}
+
+/**
+ * A team's games without double entries: a game another team added against
+ * this one ("mirror") is dropped when this team has its own entry for it.
+ */
+export function dedupeMirrors<
+  G extends Pick<
+    PublicTeamGame,
+    "team_id" | "date" | "opponent" | "opponent_team_id" | "mirror" | "start_time"
+  >,
+>(games: G[]): G[] {
+  const own = games.filter((g) => !g.mirror);
+  return games.filter(
+    (g) =>
+      !g.mirror ||
+      !own.some(
+        (o) =>
+          o.team_id === g.team_id &&
+          o.date === g.date &&
+          (!o.start_time ||
+            !g.start_time ||
+            o.start_time.slice(0, 5) === g.start_time.slice(0, 5)) &&
+          (o.opponent_team_id === g.opponent_team_id || nameMatches(o.opponent, g.opponent)),
+      ),
+  );
+}
+
+/** A disputed game's two reports, [this team's, the other team's], each [us, them]. */
+export function disputeScores(
+  g: Pick<
+    PublicTeamGame,
+    "team_score" | "opponent_score" | "alt_team_score" | "alt_opponent_score" | "alt_is_ours"
+  >,
+): { ours: [number, number]; theirs: [number, number] } | null {
+  if (
+    g.team_score == null ||
+    g.opponent_score == null ||
+    g.alt_team_score == null ||
+    g.alt_opponent_score == null
+  )
+    return null;
+  const main: [number, number] = [g.team_score, g.opponent_score];
+  const alt: [number, number] = [g.alt_team_score, g.alt_opponent_score];
+  return g.alt_is_ours ? { ours: alt, theirs: main } : { ours: main, theirs: alt };
 }
 
 export type ScoreSource = "league" | "both" | "home" | "away" | null;
@@ -85,6 +130,23 @@ export function resolveGames(
         a && a.team_score != null && a.opponent_score != null
           ? ([a.opponent_score, a.team_score] as [number, number])
           : null;
+      // A shared game the two teams disagree on.
+      const split = [h, a].find((r) => r?.status === "disputed");
+      const both = split && disputeScores(split);
+      if (both) {
+        // Flip each [us, them] report to [home, away].
+        const flip = (s: [number, number]): [number, number] => (split === h ? s : [s[1], s[0]]);
+        const [homeSays, awaySays] =
+          split === h ? [both.ours, both.theirs] : [both.theirs, both.ours];
+        return {
+          ...base,
+          shown: "disputed",
+          home: null,
+          away: null,
+          source: null,
+          reported: { home: flip(homeSays), away: flip(awaySays) },
+        } satisfies ResolvedGame;
+      }
       const hFinal = h?.status === "final" && hs;
       const aFinal = a?.status === "final" && as;
       if (hFinal && aFinal) {

@@ -11,6 +11,7 @@ import {
 } from "@/lib/leagues-data";
 import { LeaveLeagueButton } from "@/components/leagues/league-admin";
 import { matchup, clock } from "@/lib/leagues";
+import { disputeScores } from "@/lib/league-standings";
 import { day } from "@/lib/staff-pay";
 import { siteOrigin } from "@/lib/site";
 import { AddGameForm, DeleteTeamButton, GameEditor, TeamForm } from "@/components/leagues/forms";
@@ -99,25 +100,44 @@ export default async function ManageTeam({
             <h2 className="font-semibold">Games</h2>
             {sorted.length ? (
               <ul className="divide-y divide-zinc-200 rounded-2xl bg-surface ring-1 ring-zinc-200">
-                {sorted.map((g) => (
-                  <li key={g.id} className="space-y-2 px-4 py-3">
-                    <p className="font-medium">
-                      {day(g.date)} · {matchup(g)}
-                      <span className="text-sm font-normal text-zinc-500">
-                        {[clock(g.start_time), g.location].filter(Boolean).map((x) => ` · ${x}`)}
-                        {g.status === "postponed" || g.status === "canceled"
-                          ? ` · ${g.status === "postponed" ? "Postponed" : "Canceled"}`
-                          : ""}
-                      </span>
-                    </p>
-                    <GameEditor
-                      id={g.id}
-                      status={g.status}
-                      us={g.team_score}
-                      them={g.opponent_score}
-                    />
-                  </li>
-                ))}
+                {sorted.map((g) => {
+                  const split = g.status === "disputed" ? disputeScores(g) : null;
+                  const mine = split?.ours ?? [g.team_score, g.opponent_score];
+                  return (
+                    <li key={`${g.id}-${g.mirror}`} className="space-y-2 px-4 py-3">
+                      <p className="font-medium">
+                        {day(g.date)} · {matchup(g)}
+                        <span className="text-sm font-normal text-zinc-500">
+                          {[clock(g.start_time), g.location].filter(Boolean).map((x) => ` · ${x}`)}
+                          {g.status === "postponed" || g.status === "canceled"
+                            ? ` · ${g.status === "postponed" ? "Postponed" : "Canceled"}`
+                            : ""}
+                        </span>
+                      </p>
+                      {g.opponent_team_id ? (
+                        <p className="text-xs text-zinc-500">
+                          {g.mirror
+                            ? `Added by ${g.opponent}. Either team can enter the score.`
+                            : `Shared with ${g.opponent}'s page. Either team can enter the score.`}
+                        </p>
+                      ) : null}
+                      {split ? (
+                        <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                          <b>Score disputed.</b> You have {split.ours.join("–")}, {g.opponent} has{" "}
+                          {split.theirs.join("–")} (your runs first). Enter the score you agree
+                          with, or ask them to fix theirs.
+                        </p>
+                      ) : null}
+                      <GameEditor
+                        id={g.id}
+                        status={g.status}
+                        us={mine[0]}
+                        them={mine[1]}
+                        canDelete={!g.mirror}
+                      />
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="rounded-2xl bg-surface p-4 text-sm text-zinc-600 ring-1 ring-zinc-200">

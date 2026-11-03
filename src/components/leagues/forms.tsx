@@ -1,12 +1,12 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { SelectField } from "@/components/ui/select";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { useFormAction } from "@/components/ui/use-form-action";
-import { addGame, deleteGame, deleteTeam, saveGame } from "@/lib/league-actions";
+import { addGame, deleteGame, deleteTeam, findOpponents, saveGame } from "@/lib/league-actions";
 import { LEVELS } from "@/lib/leagues";
 import type { PublicTeamRow } from "@/types/team-operations";
 
@@ -127,11 +127,121 @@ export function TeamForm({
   );
 }
 
+type Opponent = { id: string; name: string; place: string };
+
+/**
+ * The opponent's name, with matching 9D Leagues team pages to pick from.
+ * Picking one shares the game with that team's page.
+ */
+function OpponentPicker({ teamId, resetKey }: { teamId: string; resetKey: number }) {
+  const [name, setName] = useState("");
+  const [linked, setLinked] = useState<Opponent | null>(null);
+  const [options, setOptions] = useState<Opponent[]>([]);
+  const [open, setOpen] = useState(false);
+  // Clear after the form is submitted and reset.
+  const [lastReset, setLastReset] = useState(resetKey);
+  if (lastReset !== resetKey) {
+    setLastReset(resetKey);
+    setName("");
+    setLinked(null);
+    setOptions([]);
+  }
+  useEffect(() => {
+    const q = name.trim();
+    if (linked || q.length < 2) return;
+    let stale = false;
+    const t = setTimeout(async () => {
+      const found = await findOpponents(teamId, q).catch(() => []);
+      if (!stale) setOptions(found);
+    }, 250);
+    return () => {
+      stale = true;
+      clearTimeout(t);
+    };
+  }, [name, linked, teamId]);
+  const shown = !linked && name.trim().length >= 2 ? options : [];
+  return (
+    <div className="relative space-y-1.5">
+      <label htmlFor="opponent" className="block text-sm font-medium text-zinc-800">
+        Opponent
+      </label>
+      <input
+        id="opponent"
+        name="opponent"
+        required
+        maxLength={80}
+        autoComplete="off"
+        placeholder="Start typing a team"
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+          setLinked(null);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="block h-11 w-full rounded-lg border-0 bg-surface px-3 text-base text-zinc-900 ring-1 ring-zinc-300 ring-inset placeholder:text-zinc-400 focus:ring-2 focus:ring-brand-600 focus:ring-inset sm:text-sm"
+        aria-describedby="opponent-hint"
+      />
+      <input type="hidden" name="opponent_team_id" value={linked?.id ?? ""} />
+      {open && shown.length ? (
+        <ul
+          role="listbox"
+          aria-label="Team pages"
+          className="absolute inset-x-0 top-full z-20 mt-1 max-h-64 overflow-auto rounded-xl bg-surface py-1 shadow-lg ring-1 ring-zinc-200"
+        >
+          {shown.map((o) => (
+            <li key={o.id} role="option" aria-selected={false}>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setLinked(o);
+                  setName(o.name);
+                  setOpen(false);
+                }}
+                className="block w-full px-3 py-2 text-left hover:bg-zinc-50"
+              >
+                <span className="block truncate font-medium">{o.name}</span>
+                {o.place ? (
+                  <span className="block truncate text-xs text-zinc-500">{o.place}</span>
+                ) : null}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {linked ? (
+        <p id="opponent-hint" className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="rounded-full bg-brand-50 px-2.5 py-0.5 font-semibold text-brand-800">
+            ✓ Shared with their page
+          </span>
+          <button
+            type="button"
+            onClick={() => setLinked(null)}
+            className="text-zinc-600 underline underline-offset-2"
+          >
+            Don&apos;t share
+          </button>
+        </p>
+      ) : (
+        <p id="opponent-hint" className="text-sm text-zinc-500">
+          Pick their team page to put the game on their schedule too.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export function AddGameForm({ teamId, today }: { teamId: string; today: string }) {
   const form = useRef<HTMLFormElement>(null);
+  const [resets, setResets] = useState(0);
   const { state, onSubmit, pending } = useFormAction<R>(async (_prev, fd) => {
     const r = await safe(() => addGame({}, fd));
-    if (!r.error) form.current?.reset();
+    if (!r.error) {
+      form.current?.reset();
+      setResets((n) => n + 1);
+    }
     return r;
   }, {});
   return (
@@ -140,7 +250,7 @@ export function AddGameForm({ teamId, today }: { teamId: string; today: string }
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Date" name="date" type="date" required defaultValue={today} />
         <Field label="Start time (optional)" name="start_time" type="time" />
-        <Field label="Opponent" name="opponent" required maxLength={80} placeholder="Eagles" />
+        <OpponentPicker teamId={teamId} resetKey={resets} />
         <SelectField label="Home or away" name="home_away" defaultValue="home">
           <option value="home">Home</option>
           <option value="away">Away</option>
@@ -191,11 +301,14 @@ export function GameEditor({
   status,
   us,
   them,
+  canDelete = true,
 }: {
   id: string;
   status: string;
   us: number | null;
   them: number | null;
+  /** The other team added a shared game; only they can delete it. */
+  canDelete?: boolean;
 }) {
   const [a, setA] = useState(us?.toString() ?? "");
   const [b, setB] = useState(them?.toString() ?? "");
@@ -232,7 +345,7 @@ export function GameEditor({
           disabled={pending}
           onClick={() => run(() => saveGame({ id, status: "final", us: num(a), them: num(b) }))}
         >
-          {status === "final" ? "Update" : "Save final"}
+          {status === "final" || status === "disputed" ? "Update" : "Save final"}
         </Button>
         <select
           aria-label="More"
@@ -250,10 +363,10 @@ export function GameEditor({
           {status !== "scheduled" ? <option value="scheduled">Not played yet</option> : null}
           {status !== "postponed" ? <option value="postponed">Postponed</option> : null}
           {status !== "canceled" ? <option value="canceled">Canceled</option> : null}
-          <option value="delete">Delete game</option>
+          {canDelete ? <option value="delete">Delete game</option> : null}
         </select>
       </div>
-      {r.error ? <Msg r={r} /> : null}
+      {r.ok === "Saved." ? null : <Msg r={r} />}
     </div>
   );
 }
