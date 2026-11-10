@@ -129,24 +129,7 @@ In Supabase:
 1. **Authentication → URL Configuration**
    - **Site URL:** your Vercel URL, e.g. `https://baseball-tracker-xyz.vercel.app`
    - **Redirect URLs → Add URL:** `https://baseball-tracker-xyz.vercel.app/**`
-2. **Authentication → Emails → Templates → Confirm signup.** Replace the template body with the following, so the confirmation link works even when it's opened on a different phone or browser than the one used to sign up:
-
-   ```html
-   <h2>Confirm your email</h2>
-   <p>Welcome to 9D. Tap below to confirm your email and get started.</p>
-   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Confirm my email</a></p>
-   ```
-
-   Click **Save**.
-3. Still under **Templates**, open **Reset password** and replace its body the same way, so "Forgot password?" links work on any device:
-
-   ```html
-   <h2>Reset your password</h2>
-   <p>Tap below to choose a new password for 9D.</p>
-   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset-password">Choose a new password</a></p>
-   ```
-
-   Click **Save**.
+2. **Authentication → Emails → Templates.** Paste the 9D-branded templates from `supabase/templates/` into **Confirm signup**, **Reset password** and **Change email address**, with the subjects listed in [`docs/EMAILS.md`](EMAILS.md). They use a token link that works even when it's opened on a different phone or browser than the one used to sign up. Click **Save** on each.
 
 Leave **Confirm email** turned on. Invitations only work for a verified email address, so turning it off would let someone sign up with a coach's or player's address and claim their invite.
 
