@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { paymentAdmin, teamStripe } from "@/lib/stripe-team";
 import { planFromSubscription } from "@/lib/stripe-billing";
+import { emailTeamAdmins } from "@/lib/billing-email";
 
 export const runtime = "nodejs";
 
@@ -56,6 +57,11 @@ export async function POST(request: Request) {
       if (error) throw error;
     }
     await db.from("billing_events").insert({ event_id: event.id });
+    // Tell the team's admins, once the change is saved. Never fails the webhook.
+    if (sub && orgId && event.type === "checkout.session.completed")
+      await emailTeamAdmins(db, orgId, "subscribed", planFromSubscription(sub).plan_renews_at);
+    else if (sub && orgId && event.type === "customer.subscription.deleted")
+      await emailTeamAdmins(db, orgId, "canceled");
     return NextResponse.json({ received: true });
   } catch (e) {
     console.error("billing webhook failed", e);

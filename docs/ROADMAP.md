@@ -121,6 +121,7 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 - Account page (`/account`): anyone can delete their own account (`delete_my_account`); linked from the coach menu, the player Me page and the parent pages
 - Subscriptions (trial, Checkout, customer portal, webhook)
 - **Email (Resend):** invites, reminders and notifications, with per-kind opt-out
+- **Email templates:** one branded layout with the 9D mark; login emails for Supabase in `supabase/templates/`; "subscribed" and "subscription ended" emails to team admins; a product-update template for Resend Broadcasts. Guide: `docs/EMAILS.md`
 
 **Deploy notes:** `docs/DEPLOY.md`.
 

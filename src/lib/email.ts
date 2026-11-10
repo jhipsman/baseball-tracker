@@ -5,6 +5,7 @@ import type { Database } from "@/types/database";
 import { BRAND } from "@/constants/brand";
 import { ROLE_LABELS } from "@/constants";
 import { hrefForRole } from "@/lib/notifications";
+import { emailHtml } from "@/lib/email-layout";
 
 /** Notifications older than this are never emailed (seen in the app, or stale). */
 const WINDOW_MS = 15 * 60 * 1000;
@@ -36,33 +37,7 @@ function emailConfig(): EmailConfig | null {
 
 export const emailEnabled = () => emailConfig() !== null;
 
-const esc = (s: string) =>
-  s.replace(
-    /[&<>"']/g,
-    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
-  );
-
-/** One plain, phone-friendly layout for every email. */
-export function emailHtml(o: {
-  heading: string;
-  lines: string[];
-  button?: { label: string; href: string };
-  footer?: string;
-}) {
-  const btn = o.button
-    ? `<p style="margin:28px 0"><a href="${esc(o.button.href)}" style="background:#027a48;color:#ffffff;text-decoration:none;font-weight:600;padding:14px 22px;border-radius:999px;display:inline-block">${esc(o.button.label)}</a></p>`
-    : "";
-  return `<!doctype html><html><body style="margin:0;background:#f4f4f5;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#18181b">
-<div style="max-width:520px;margin:0 auto;padding:28px 20px">
-<p style="font-size:22px;font-weight:800;font-style:italic;margin:0 0 20px;color:#027a48">${esc(BRAND.name)}</p>
-<div style="background:#ffffff;border-radius:16px;padding:24px">
-<h1 style="font-size:20px;line-height:1.3;margin:0 0 12px">${esc(o.heading)}</h1>
-${o.lines.map((l) => `<p style="font-size:15px;line-height:1.5;margin:0 0 10px;color:#3f3f46">${esc(l)}</p>`).join("")}
-${btn}
-</div>
-<p style="font-size:12px;color:#71717a;margin:16px 4px">${esc(o.footer ?? `${BRAND.legalName} · You get this because you're on a team in ${BRAND.name}. Choose which emails you get under Notifications.`)}</p>
-</div></body></html>`;
-}
+export { emailHtml } from "@/lib/email-layout";
 
 export async function sendEmail(
   cfg: EmailConfig,
@@ -165,6 +140,7 @@ async function notificationEmails(admin: Admin, cfg: EmailConfig) {
       to: p.email,
       subject,
       html: emailHtml({
+        site: cfg.site,
         heading: one ? one.title : subject,
         lines,
         button: { label: "Open in 9D", href: one ? link(one) : `${cfg.site}/notifications` },
@@ -245,6 +221,7 @@ async function inviteEmails(admin: Admin, cfg: EmailConfig) {
       to: c.email,
       subject: heading,
       html: emailHtml({
+        site: cfg.site,
         heading,
         lines,
         button: { label: claim ? "Set up my account" : "Accept invitation", href },
@@ -276,7 +253,7 @@ export async function sendOneEmail(
   return sendEmail(cfg, {
     to,
     subject: o.subject,
-    html: emailHtml({ heading: o.heading, lines: o.lines, button }),
+    html: emailHtml({ site: cfg.site, heading: o.heading, lines: o.lines, button }),
     text: `${o.heading}\n\n${o.lines.join("\n")}${button ? `\n\n${button.href}` : ""}`,
   });
 }
