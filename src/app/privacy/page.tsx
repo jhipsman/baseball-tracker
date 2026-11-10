@@ -59,9 +59,9 @@ export default function PrivacyPage() {
 
       <h2>Keeping and deleting</h2>
       <p>
-        We keep information while the team uses {n}. You can delete your account from your profile;
-        we remove your personal information, keeping only what we must for payment and legal
-        records.
+        We keep information while the team uses {n}. You can delete your account any time from the
+        Account page; we remove your personal information, keeping only what we must for payment and
+        legal records.
       </p>
 
       <h2>Security</h2>

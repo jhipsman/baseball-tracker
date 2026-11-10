@@ -11,7 +11,7 @@ import { AudienceSwitch, FeatureTabs } from "@/components/marketing/switchers";
 import { HeroFilm } from "@/components/marketing/hero-film";
 
 export const metadata: Metadata = {
-  title: `${BRAND.name} · Built for baseball`,
+  title: { absolute: `${BRAND.name} · Built for baseball` },
   description:
     "Schedules, training, arm care, live scoring, registration, payments, forms and staff pay for baseball teams: one app for coaches, clubs, players and parents. Import from GameChanger, TeamSnap and more.",
 };

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { NavLinks, type NavItem } from "@/components/layout/nav-links";
 import { CoachNav, type CoachNavItem } from "@/components/layout/coach-nav";
 import { Suspense } from "react";
@@ -76,6 +77,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <NavLinks items={nav} />
           <div className="mt-auto border-t border-zinc-200 pt-4">
             <p className="truncate text-xs text-zinc-500">{user.email}</p>
+            <Link
+              href="/account"
+              className="block text-sm font-medium text-zinc-700 hover:text-zinc-900"
+            >
+              Account
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"
@@ -133,6 +140,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 </form>
               </div>
               <p className="truncate text-xs text-zinc-500">{user.email}</p>
+              <Link
+                href="/account"
+                className="inline-flex min-h-11 items-center text-sm font-medium text-zinc-700"
+              >
+                Account
+              </Link>
             </div>
           }
         />

@@ -65,6 +65,27 @@ export async function signOut() {
   redirect("/login");
 }
 
+/**
+ * Permanently deletes the signed-in person's login and profile. The database
+ * refuses while they still own a team, and says so in plain words.
+ */
+export async function deleteMyAccount(_prev: FormState, formData: FormData): Promise<FormState> {
+  if (String(formData.get("confirm") ?? "").trim() !== "DELETE")
+    return { error: "Type DELETE to confirm." };
+
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  if (!data?.claims) redirect("/login");
+
+  const { error } = await supabase.rpc("delete_my_account");
+  if (error) return { error: error.message };
+
+  // The login is gone; clear what this browser still holds.
+  await supabase.auth.signOut({ scope: "local" });
+  (await cookies()).delete(ACTIVE_ORG_COOKIE);
+  redirect("/login?deleted=1");
+}
+
 export async function requestPasswordReset(
   _prev: FormState,
   formData: FormData,

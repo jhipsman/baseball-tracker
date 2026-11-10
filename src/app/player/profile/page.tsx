@@ -141,6 +141,14 @@ export default async function ProfilePage({ searchParams }: PageProps<"/player/p
           Sign out
         </button>
       </form>
+      <p className="text-center">
+        <Link
+          href="/account"
+          className="inline-flex min-h-11 items-center text-xs text-zinc-500 underline"
+        >
+          Account and deleting it
+        </Link>
+      </p>
     </div>
   );
 }
