@@ -13,7 +13,7 @@ import {
 } from "@/components/marketing/blocks";
 
 export const metadata: Metadata = {
-  title: `Pricing · ${BRAND.name}`,
+  title: "Pricing",
   description: `${PRICING.trialDays}-day free trial, no card needed. Players and parents are always free. No ${BRAND.name} fee on team dues.`,
 };
 

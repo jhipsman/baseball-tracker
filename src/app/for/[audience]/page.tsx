@@ -22,7 +22,9 @@ export async function generateMetadata({
   params,
 }: PageProps<"/for/[audience]">): Promise<Metadata> {
   const a = audienceBySlug((await params).audience);
-  return a ? { title: `${BRAND.name} for ${a.label.toLowerCase()}`, description: a.lead } : {};
+  return a
+    ? { title: { absolute: `${BRAND.name} for ${a.label.toLowerCase()}` }, description: a.lead }
+    : {};
 }
 
 export default async function AudiencePage({ params }: PageProps<"/for/[audience]">) {

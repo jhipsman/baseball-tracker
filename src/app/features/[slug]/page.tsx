@@ -13,7 +13,7 @@ export async function generateMetadata({
   params,
 }: PageProps<"/features/[slug]">): Promise<Metadata> {
   const f = featureBySlug((await params).slug);
-  return f ? { title: `${f.name} · ${BRAND.name}`, description: f.body } : {};
+  return f ? { title: f.name, description: f.body } : {};
 }
 
 export default async function FeaturePage({ params }: PageProps<"/features/[slug]">) {

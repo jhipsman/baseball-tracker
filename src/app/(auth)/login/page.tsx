@@ -7,7 +7,7 @@ import { inviteLine, invitePreview } from "@/lib/invite-preview";
 export const metadata: Metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
-  const { next, error } = await searchParams;
+  const { next, error, deleted } = await searchParams;
   const nextPath = typeof next === "string" ? next : undefined;
   const signupHref = nextPath ? `/signup?next=${encodeURIComponent(nextPath)}` : "/signup";
   // Opening an invite link while signed out lands here. Most invitees are new,
@@ -54,6 +54,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       {error ? (
         <p role="alert" className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
           That sign-in link is invalid or has expired. Please try again.
+        </p>
+      ) : null}
+      {deleted ? (
+        <p role="status" className="mb-4 rounded-lg bg-brand-50 px-3 py-2 text-sm text-brand-900">
+          Your account was deleted.
         </p>
       ) : null}
       <LoginForm next={nextPath} variant={fromInvite ? "secondary" : "primary"} />

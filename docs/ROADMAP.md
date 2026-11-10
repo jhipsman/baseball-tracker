@@ -24,6 +24,7 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 - **Database:**
   - Add a new file in `supabase/migrations/` (timestamped, after the latest one). The "Deploy database migrations" GitHub Action applies it to production on push.
   - Never edit a migration that has already shipped.
+  - Every new function in `public` needs `revoke execute on function ... from public, anon;` and then a grant to whoever may call it. `from public` alone leaves signed-out visitors able to call it.
   - Every table needs RLS. Use the `private.*` helpers: `is_org_staff`, `is_org_member`, `is_parent_of`, `is_player_in_org`, `has_org_role`.
   - Types are hand-maintained: update `src/types/database.ts` (tables) and `src/types/team-operations.ts` (RPCs and team-operations tables).
 - **New routes:** run `npx next typegen` so `PageProps<"/path">` exists.
@@ -117,6 +118,7 @@ A baseball team app for **coaches and clubs, players, and parents**, live at **h
 **9D business**
 - Marketing site: home, For coaches / players / parents, six feature pages, pricing
 - Privacy and Terms pages; demo team; branded loading animation
+- Account page (`/account`): anyone can delete their own account (`delete_my_account`); linked from the coach menu, the player Me page and the parent pages
 - Subscriptions (trial, Checkout, customer portal, webhook)
 - **Email (Resend):** invites, reminders and notifications, with per-kind opt-out
 

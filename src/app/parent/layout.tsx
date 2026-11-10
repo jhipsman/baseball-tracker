@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { LogoMark } from "@/components/brand/logo";
 import { redirect } from "next/navigation";
@@ -43,6 +44,16 @@ export default async function ParentLayout({ children }: { children: React.React
       </header>
       <main className="mx-auto w-full max-w-md flex-1 px-4 pt-4 pb-24">
         <ReadOnly on={!!preview}>{children}</ReadOnly>
+        {preview ? null : (
+          <p className="mt-6 text-center">
+            <Link
+              href="/account"
+              className="inline-flex min-h-11 items-center text-xs text-zinc-500 underline"
+            >
+              Account and deleting it
+            </Link>
+          </p>
+        )}
       </main>
       <Suspense>
         <ParentNav modules={org.modules} />
