@@ -159,7 +159,7 @@ function buildPitcherOffseasonWeek(week: number): StarterTemplate["weeks"][numbe
 const COLLEGE_PITCHER_OFFSEASON: StarterTemplate = {
   name: "College Pitcher Offseason Strength (12 weeks)",
   description:
-    "Three lifts per week: build a strength base, deload, then progress toward heavier strength and low-volume power. Use RPE, add load only while reps stay crisp, and cap work at RPE 8. Coordinate lifting around bullpens and starts with his college staff.",
+    "Three lifts per week: base, strength, then power. Deload weeks 4, 8, and 12. Use RPE 6–8 and coordinate lifting with his throwing schedule and college staff.",
   type: "strength",
   phase: "off_season",
   weeks: Array.from({ length: 12 }, (_, index) => buildPitcherOffseasonWeek(index + 1)),
